@@ -1,0 +1,10 @@
+{{define "body"}}
+    <div class="LoginBox">
+        <form action="/login" method="post">
+            Username: <input name="username"/><br>
+            Password: <input name="password" type="password"/><br>
+            <input name="Login" type="button" value="Login"/>
+        </form>
+    </div>
+{{end}}
+{{template "base" .}}
