@@ -1,5 +1,8 @@
 # First container - does the build
-FROM golang:1.16 AS builder
+FROM golang:1.16-alpine AS builder
+
+RUN apk update && apk upgrade && \
+    apk add --no-cache git
 
 WORKDIR /build/acnode-dashboard
 
@@ -10,7 +13,7 @@ COPY go.mod .
 COPY .git .
 
 RUN go build
-RUN 
+RUN git rev-list -1 HEAD > version
 
 # Second container - this one actually runs the code
 FROM alpine:latest
@@ -18,6 +21,7 @@ FROM alpine:latest
 WORKDIR /opt/acnode-dashboard
 
 COPY --from=builder /build/acnode-dashboard/acnode-dashboard acnode-dashboard
+COPY --from=builder /build/acnode-dashboard/version version
 COPY static .
 COPY templates .
 

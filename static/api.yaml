@@ -1,0 +1,85 @@
+openapi: 3.0.0
+info:
+  title: ACNode Dashboard API
+  version: 0.1.0
+servers:
+  - url: /api/
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+      description: API Key for machine use
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: ACNodeDashboardSession
+      description: When a human is logged in, this is what is used
+  schemas:
+    ACNode:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The Node Id
+        name:
+          type: string
+          description: The name of the node
+        mqttName:
+          type: string
+          description: The name of the node on MQTT. Used for not containing spaces
+        nodeType:
+          type: string
+          description: The type of the node
+        LastSeen:
+          type: integer
+          description: The number of seconds since the node was last seen sending messages
+        MemFree:
+          type: integer
+          description: Amount of RAM free on the device
+        MemUsed:
+          type: integer
+          description: Amount of RAM in use on the device
+        Status:
+          type: string
+          description: The last known status message of the device
+        Version:
+          type: string
+          description: The firmware version of the device
+
+security:
+  - ApiKeyAuth: []
+    CookieAuth: []
+paths:
+  /nodes:
+    get:
+      summary: Returns a list of ACNodes
+      responses:
+        200:
+          description: A list of known nodes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+  /nodes/{nodeName}:
+    get:
+      summary: Returns the details of a node
+      parameters:
+        - name: nodeName
+          in: path
+          description: MQTT name of the node
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Nodes details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ACNode'
+        404:
+          description: Unknown node

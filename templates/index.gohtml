@@ -1,4 +1,13 @@
+{{define "extrahead"}}
+    <title>ACNode Dashboard</title>
+{{end}}
 {{define "body"}}
-hey!
+<div class="header">
+    <h1>ACNode Dashboard</h1>
+</div>
+<div class="Container" id="nodecontainer"></div>
+
+<script type="text/javascript" src="{{ .StaticPath }}/dashboard.js"></script>
+<script type="text/javascript" src="{{ .StaticPath}}/chart-3.1.1.min.js"></script>
 {{end}}
 {{template "base" .}}
