@@ -11,6 +11,7 @@ func GetStaticPath() string {
 
 type BaseTemplateArgs struct {
 	StaticPath string
+	Version string
 }
 
 func GetBaseTemplateArgs() BaseTemplateArgs {
@@ -18,5 +19,6 @@ func GetBaseTemplateArgs() BaseTemplateArgs {
 
 	return BaseTemplateArgs{
 		StaticPath: GetStaticPath(),
+		Version: getVersion(),
 	}
 }

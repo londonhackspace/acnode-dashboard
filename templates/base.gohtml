@@ -8,6 +8,8 @@
 </head>
 <body>
 {{template "body" .}}
+<div class="footer">ACNode Dashboard version <a href="https://github.com/londonhackspace/acnode-dashboard/commit/{{ .Version }}">{{ .Version }}</a><br>
+Yes, it's ugly. Looking nice is a future feature.</div>
 </body>
 </html>
 {{end}}
