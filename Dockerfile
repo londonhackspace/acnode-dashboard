@@ -7,10 +7,16 @@ RUN apk update && apk upgrade && \
 WORKDIR /build/acnode-dashboard
 
 # copy sources into container build environment
-COPY auth .
-COPY *.go .
+COPY acnode acnode
+COPY api api
+COPY apitypes apitypes
+COPY auth auth
+COPY config config
+
+COPY *.go ./
 COPY go.mod .
-COPY .git .
+COPY go.sum .
+COPY .git .git
 
 RUN go build
 RUN git rev-list -1 HEAD > version
@@ -22,10 +28,10 @@ WORKDIR /opt/acnode-dashboard
 
 COPY --from=builder /build/acnode-dashboard/acnode-dashboard acnode-dashboard
 COPY --from=builder /build/acnode-dashboard/version version
-COPY static .
-COPY templates .
+COPY static static
+COPY templates templates
 
-RUN useradd acnodedashboard
+RUN adduser -S acnodedashboard
 
 USER acnodedashboard
 
