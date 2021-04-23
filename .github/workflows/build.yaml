@@ -17,6 +17,4 @@ jobs:
           registry: docker.pkg.github.com
           repository: londonhackspace/acnode-dashboard/acnode-dashboard
           tag_with_ref: true
-          tags:
-            - ${{ github.ref }}
-            - latest
+          tags: londonhackspace/acnode-dashboard:${{ github.ref }}
