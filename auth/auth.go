@@ -64,7 +64,7 @@ func CheckAuthUser(w http.ResponseWriter, r *http.Request) (bool, *User) {
 		}
 	}
 
-	return false,nil
+	return apiAuth(r),nil
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {

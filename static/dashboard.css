@@ -22,7 +22,7 @@
 
 #nodecontainer {
     display: grid;
-    grid-template-columns: 22% 22% 22% 22%;
+    grid-template-columns: 28% 28% 28%;
     grid-column-gap: 0.5em;
     grid-row-gap: 0.5em;
     grid-column-start: auto;

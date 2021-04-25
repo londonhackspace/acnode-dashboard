@@ -71,7 +71,7 @@ func (api *Api) handleNodeEntry(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(404)
 }
 
-type setStatus struct {
+type SetStatusBody struct {
 	Version string `json:"version",omitempty`
 	Timestamp int64 `json:"timestamp",omitempty`
 }
@@ -94,7 +94,7 @@ func (api *Api) handleSetStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var status setStatus
+	var status SetStatusBody
 
 	err = json.Unmarshal(body, &status)
 	if err != nil {

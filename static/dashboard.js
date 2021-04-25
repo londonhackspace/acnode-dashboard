@@ -70,7 +70,19 @@ function makeNodeHtml(node) {
 
     if(node.Version != "") {
         let version = document.createElement("div");
-        version.innerText = "Version: " + node.Version;
+        let link = document.createElement("a");
+        let ver = node.Version;
+        version.append(document.createTextNode("Version: "))
+        let vertext = "";
+        if(ver.includes("-")) {
+            let split = ver.split("-");
+            ver = split[0];
+            vertext = "-"+split[1];
+        }
+        link.href = "https://github.com/londonhackspace/acnode-cl/commits/" + ver;
+        link.innerText = ver;
+        version.append(link);
+        version.append(document.createTextNode(vertext))
         root.append(version);
     }
 
