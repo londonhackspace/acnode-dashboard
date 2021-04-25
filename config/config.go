@@ -12,6 +12,9 @@ type Config struct {
 	MqttServer string `json:"mqtt_server",omitempty`
 	MqttClientId string `json:"mqtt_clientid",omitempty`
 
+	AcserverUrl string `json:"acserver_url",omitempty`
+	AcserverApiKey string `json:"acserver_key",omitempty`
+
 	LdapEnable bool `json:"ldap_enable",omitempty`
 	LdapServer string `json:"ldap_server",omitempty`
 	LdapBindDN string `json:"ldap_binddn",omitempty`
@@ -26,6 +29,8 @@ func GetConfigurationFromEnvironment() Config {
 	return Config{
 		MqttServer: os.Getenv("MQTT_SERVER"),
 		MqttClientId: os.Getenv("MQTT_CLIENTID"),
+		AcserverUrl: os.Getenv("ACSERVER_URL"),
+		AcserverApiKey: os.Getenv("ACSERVER_APIKEY"),
 		LdapEnable: strings.ToLower(os.Getenv("LDAP_ENABLE")) == "true",
 		LdapServer: os.Getenv("LDAP_SERVER"),
 		LdapBindDN: os.Getenv("LDAP_BINDDN"),
@@ -77,6 +82,17 @@ func GetCombinedConfig(filename string) Config {
 		combined.MqttClientId = fileconf.MqttClientId
 	}
 
+	if len(envvar.AcserverUrl) != 0 {
+		combined.AcserverUrl = envvar.AcserverUrl
+	} else {
+		combined.AcserverUrl = fileconf.AcserverUrl
+	}
+
+	if len(envvar.AcserverApiKey) != 0 {
+		combined.AcserverApiKey = envvar.AcserverApiKey
+	} else {
+		combined.AcserverApiKey = fileconf.AcserverApiKey
+	}
 
 	if len(envvar.LdapServer) != 0 {
 		combined.LdapServer = envvar.LdapServer
@@ -129,6 +145,10 @@ func GetCombinedConfig(filename string) Config {
 	// set sensible defaults where we can
 	if combined.MqttClientId == "" {
 		combined.MqttClientId = "ACNodeDash"
+	}
+
+	if combined.AcserverUrl == "" {
+		combined.AcserverUrl = "https://acserver.london.hackspace.org.uk"
 	}
 
 	if combined.LdapUserOU == "" {

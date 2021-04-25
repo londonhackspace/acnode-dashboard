@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/londonhackspace/acnode-dashboard/acnode"
+	"github.com/londonhackspace/acnode-dashboard/acserver_api"
+	"github.com/londonhackspace/acnode-dashboard/acserverwatcher"
 	"github.com/londonhackspace/acnode-dashboard/api"
 	"github.com/londonhackspace/acnode-dashboard/auth"
 	"github.com/londonhackspace/acnode-dashboard/config"
@@ -87,6 +89,10 @@ func main() {
 	acnodehandler := acnode.CreateACNodeHandler()
 
 	apihandler := api.CreateApi(&conf, &acnodehandler)
+
+	acserverapi := acserver_api.CreateACServer(&conf)
+	acsw := acserverwatcher.Watcher{ acserverapi, &acnodehandler }
+	go acsw.Run()
 
 	mqttHandler := CreateMQTTHandler(&conf, &acnodehandler)
 	mqttHandler.Init()

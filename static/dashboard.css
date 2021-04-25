@@ -33,3 +33,15 @@
     background-color: aliceblue;
     border-radius: 0.5em;
 }
+
+.node-unknown {
+    background-color: grey;
+}
+
+.node-good {
+    background-color: lightgreen;
+}
+
+.node-bad {
+    background-color: palevioletred;
+}

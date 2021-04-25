@@ -121,6 +121,7 @@ func (handler *MqttHandler) handleMqtt() {
 				handler.conn.Disconnect(250)
 				continue
 			}
+			log.Info().Msg("MQTT Subscriptions set up")
 		}
 	}
 }

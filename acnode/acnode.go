@@ -41,6 +41,20 @@ type ACNode struct {
 	version string
 }
 
+func (node *ACNode) GetId() int {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
+	return node.id
+}
+
+func (node *ACNode) SetId(id int) {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
+	node.id = id
+}
+
 func (node *ACNode) GetType() int {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
@@ -53,6 +67,13 @@ func (node *ACNode) GetName() string {
 	defer node.mtx.Unlock()
 
 	return node.name
+}
+
+func (node *ACNode) SetName(name string) {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
+	node.name = name
 }
 
 func (node *ACNode) GetMqttName() string {
@@ -84,11 +105,20 @@ func (node *ACNode) SetVersion(ver string) {
 	node.version = ver
 }
 
+func (node *ACNode) GetLastSeen() time.Time {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
+	return node.lastSeen
+}
+
 func (node *ACNode) SetLastSeen(t time.Time) {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
-	node.lastSeen = t
+	if t.After(node.lastSeen) {
+		node.lastSeen = t
+	}
 }
 
 func (node *ACNode) SetStatusMessage(m string) {
@@ -102,12 +132,18 @@ func (node *ACNode) GetAPIRecord() apitypes.ACNode {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
+	// if we've never seen it, return -1 in this field
+	lastSeen := int(time.Now().Sub(node.lastSeen).Seconds())
+	if node.lastSeen.IsZero() {
+		lastSeen = -1
+	}
+
 	return apitypes.ACNode{
 		Id:            node.id,
 		Name:          node.name,
 		MqttName: 	   node.mqttName,
 		Type:          NodeTypeToString(node.nodeType),
-		LastSeen:      int(time.Now().Sub(node.lastSeen).Seconds()),
+		LastSeen:      lastSeen,
 		MemFree:       node.memFree,
 		MemUsed:       node.memUsed,
 		StatusMessage: node.statusMessage,

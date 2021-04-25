@@ -32,6 +32,17 @@ function getNode(name) {
     return getApiData("nodes/" + name);
 }
 
+function makeNodeClassName(node) {
+    if(node.LastSeen == -1) {
+        return "node, node-unknown";
+    }
+    if(node.LastSeen < 180) {
+        return "node node-good";
+    }
+
+    return "node node-bad";
+}
+
 function makeNodeHtml(node) {
     let root = document.createElement("div");
 
@@ -42,13 +53,27 @@ function makeNodeHtml(node) {
     root.append(document.createElement("br"));
 
     let lastSeen = document.createElement("div")
-    lastSeen.innerText = "Last seen " + node.LastSeen + " seconds ago";
+    if(node.LastSeen == -1) {
+        lastSeen.innerText = "Last seen: Never";
+    } else {
+        lastSeen.innerText = "Last seen: " + node.LastSeen + " seconds ago";
+    }
+
     root.append(lastSeen);
     root.append(document.createElement("br"));
 
-    let status = document.createElement("div")
-    status.innerText = "Status: " + node.Status;
-    root.append(status);
+    if(node.Status != "") {
+        let status = document.createElement("div");
+        status.innerText = "Status: " + node.Status;
+        root.append(status);
+    }
+
+    if(node.Version != "") {
+        let version = document.createElement("div");
+        version.innerText = "Version: " + node.Version;
+        root.append(version);
+    }
+
     root.append(document.createElement("br"));
 
     if((node.MemFree + node.MemUsed) > 0) {
@@ -82,7 +107,7 @@ function addNode(nodeName) {
     let nc = document.getElementById("nodecontainer");
     let el = document.createElement("div")
     el.id = "node-" + nodeName + "-container";
-    el.className = "node";
+    el.className = "node node-unknown";
 
     let titleLine = document.createElement("div");
     titleLine.className = "nodetitle";
@@ -110,6 +135,7 @@ function updateNodes() {
             let el = document.getElementById("node-" + node.mqttName + "-container");
             el.innerHTML = "";
             el.append(makeNodeHtml(node));
+            el.className = makeNodeClassName(node);
         }
     });
 }

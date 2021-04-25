@@ -18,6 +18,8 @@ It is possible for the dashboard to read configuration from a JSON file, however
 | -- | -- | -- |
 | MQTT_SERVER | MQTT Server to connect to | (None) |
 | MQTT_CLIENTID | MQTT Client Id | ACNodeDash |
+| ACSERVER_URL | ACServer URL | https://acserver.london.hackspace.org.uk |
+| ACSERVER_APIKEY | ACServer API Key | (None) |
 | LDAP_SERVER | LDAP Server to use for auth | (None) |
 | LDAP_ENABLE | Enable LDAP authentication| false |
 | LDAP_BASEDN | Base to search for users and groups in | (None) |

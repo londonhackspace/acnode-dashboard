@@ -83,3 +83,32 @@ paths:
                 $ref: '#/components/schemas/ACNode'
         404:
           description: Unknown node
+  /nodes/setStatus/{id}:
+    post:
+      summary: Set the status of a node, intended for log parser
+      parameters:
+        - name: id
+          in: path
+          description: ACServer ID of the node
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                version:
+                  type: string
+                  description: Firmware Version
+                  required: false
+                timestamp:
+                  type: integer
+                  description: Unix timestamp of last activity
+                  required: false
+      responses:
+        204:
+          description: Accepted
+        404:
+          description: Node not known
