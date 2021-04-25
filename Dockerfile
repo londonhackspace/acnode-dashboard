@@ -8,6 +8,8 @@ WORKDIR /build/acnode-dashboard
 
 # copy sources into container build environment
 COPY acnode acnode
+COPY acserver_api acserver_api
+COPY acserverwatcher acserverwatcher
 COPY api api
 COPY apitypes apitypes
 COPY auth auth
