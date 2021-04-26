@@ -25,128 +25,144 @@ func NodeTypeToString(t int) string {
 	return "Unknown"
 }
 
-type ACNode struct {
+type ACNodeRec struct {
 	mtx sync.Mutex
 
-	id       int
-	name     string
-	mqttName string
-	nodeType int
+	Id       int
+	Name     string
+	MqttName string
+	NodeType int
 
 	// last known status
-	lastSeen time.Time
-	memFree int
-	memUsed int
-	statusMessage string
-	version string
+	LastSeen time.Time
+	MemFree int
+	MemUsed int
+	StatusMessage string
+	Version string
 }
 
-func (node *ACNode) GetId() int {
+type ACNode interface {
+	GetId() int
+	SetId(id int)
+	GetType() int
+	GetName() string
+	SetName(name string)
+	GetMqttName() string
+	SetType(t int)
+	SetMemoryStats(free int, used int)
+	SetVersion(ver string)
+	GetLastSeen() time.Time
+	SetLastSeen(t time.Time)
+	SetStatusMessage(m string)
+	GetAPIRecord() apitypes.ACNode
+}
+
+func (node *ACNodeRec) GetId() int {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
-	return node.id
+	return node.Id
 }
 
-func (node *ACNode) SetId(id int) {
+func (node *ACNodeRec) SetId(id int) {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
-	node.id = id
+	node.Id = id
 }
 
-func (node *ACNode) GetType() int {
+func (node *ACNodeRec) GetType() int {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
-	return node.nodeType
+	return node.NodeType
 }
 
-func (node *ACNode) GetName() string {
+func (node *ACNodeRec) GetName() string {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
-	return node.name
+	return node.Name
 }
 
-func (node *ACNode) SetName(name string) {
+func (node *ACNodeRec) SetName(name string) {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
-	node.name = name
+	node.Name = name
 }
 
-func (node *ACNode) GetMqttName() string {
+func (node *ACNodeRec) GetMqttName() string {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
-	return node.mqttName
+	return node.MqttName
 }
 
-func (node *ACNode) SetType(t int) {
+func (node *ACNodeRec) SetType(t int) {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
-	node.nodeType = t
+	node.NodeType = t
 }
 
-func (node *ACNode) SetMemoryStats(free int, used int) {
+func (node *ACNodeRec) SetMemoryStats(free int, used int) {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
-	node.memFree = free
-	node.memUsed = used
+	node.MemFree = free
+	node.MemUsed = used
 }
 
-func (node *ACNode) SetVersion(ver string) {
+func (node *ACNodeRec) SetVersion(ver string) {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
-	node.version = ver
+	node.Version = ver
 }
 
-func (node *ACNode) GetLastSeen() time.Time {
+func (node *ACNodeRec) GetLastSeen() time.Time {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
-	return node.lastSeen
+	return node.LastSeen
 }
 
-func (node *ACNode) SetLastSeen(t time.Time) {
+func (node *ACNodeRec) SetLastSeen(t time.Time) {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
-	if t.After(node.lastSeen) {
-		node.lastSeen = t
+	if t.After(node.LastSeen) {
+		node.LastSeen = t
 	}
 }
 
-func (node *ACNode) SetStatusMessage(m string) {
+func (node *ACNodeRec) SetStatusMessage(m string) {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
-	node.statusMessage = m
+	node.StatusMessage = m
 }
 
-func (node *ACNode) GetAPIRecord() apitypes.ACNode {
+func (node *ACNodeRec) GetAPIRecord() apitypes.ACNode {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
 	// if we've never seen it, return -1 in this field
-	lastSeen := int(time.Now().Sub(node.lastSeen).Seconds())
-	if node.lastSeen.IsZero() {
+	lastSeen := int(time.Now().Sub(node.LastSeen).Seconds())
+	if node.LastSeen.IsZero() {
 		lastSeen = -1
 	}
 
 	return apitypes.ACNode{
-		Id:            node.id,
-		Name:          node.name,
-		MqttName: 	   node.mqttName,
-		Type:          NodeTypeToString(node.nodeType),
+		Id:            node.Id,
+		Name:          node.Name,
+		MqttName: 	   node.MqttName,
+		Type:          NodeTypeToString(node.NodeType),
 		LastSeen:      lastSeen,
-		MemFree:       node.memFree,
-		MemUsed:       node.memUsed,
-		StatusMessage: node.statusMessage,
-		Version:       node.version,
+		MemFree:       node.MemFree,
+		MemUsed:       node.MemUsed,
+		StatusMessage: node.StatusMessage,
+		Version:       node.Version,
 	}
 }

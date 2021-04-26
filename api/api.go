@@ -104,7 +104,7 @@ func (api *Api) handleSetStatus(w http.ResponseWriter, r *http.Request) {
 	nodes := api.acnodeHandler.GetNodes()
 
 	for i, _ := range nodes {
-		n := &nodes[i]
+		n := nodes[i]
 		if id != n.GetId() {
 			continue
 		}

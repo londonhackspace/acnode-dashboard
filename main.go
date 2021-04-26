@@ -82,6 +82,8 @@ func main() {
 		return
 	}
 
+	acnodehandler := acnode.CreateACNodeHandler()
+
 	if conf.LdapEnable {
 		ldapauth := auth.GetLDAPAuthenticator(&conf)
 		auth.AddProvider(&ldapauth)
@@ -98,9 +100,9 @@ func main() {
 		auth.SetSessionStore(sessStore)
 		userStore := auth.CreateRedisProvider(redisConn)
 		auth.AddProvider(userStore)
-	}
 
-	acnodehandler := acnode.CreateACNodeHandler()
+		acnodehandler.SetRedis(redisConn)
+	}
 
 	apihandler := api.CreateApi(&conf, &acnodehandler)
 

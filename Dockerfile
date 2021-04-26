@@ -14,6 +14,7 @@ COPY api api
 COPY apitypes apitypes
 COPY auth auth
 COPY config config
+COPY bootstrapper bootstrapper
 
 COPY *.go ./
 COPY go.mod .
