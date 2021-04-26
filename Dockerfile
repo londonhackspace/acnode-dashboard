@@ -21,6 +21,8 @@ COPY go.sum .
 COPY .git .git
 
 RUN go build
+RUN cd bootstrapper && go build
+RUN cd logwatcher && go build
 RUN git rev-list -1 HEAD > version
 
 # Second container - this one actually runs the code
@@ -29,6 +31,7 @@ FROM alpine:latest
 WORKDIR /opt/acnode-dashboard
 
 COPY --from=builder /build/acnode-dashboard/acnode-dashboard acnode-dashboard
+COPY --from=builder /build/acnode-dashboard/bootstrapper/bootstrapper bootstrapper
 COPY --from=builder /build/acnode-dashboard/version version
 COPY static static
 COPY templates templates
