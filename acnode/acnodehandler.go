@@ -31,9 +31,7 @@ func (h *ACNodeHandler) syncer(stopper chan bool) {
 			for i,_ := range h.nodes {
 				node := &h.nodes[i]
 				data, _ := json.Marshal(node)
-				// Cache for 6 hours to ride out shortish outages.
-				// Any longer and the data would be too stale to be useful
-				h.redis.Set(context.Background(), "node:" + node.MqttName, string(data), 6*time.Hour)
+				h.redis.Set(context.Background(), "node:" + node.MqttName, string(data), 0)
 			}
 			log.Info().Msg("Dumped nodes to Redis")
 		}
@@ -102,7 +100,7 @@ func (h *ACNodeHandler) GetNodeByMqttName(name string) ACNode {
 }
 
 func (h *ACNodeHandler) GetNodes() []ACNode {
-	ret := []ACNode{}
+	var ret []ACNode
 	for i,_ := range h.nodes {
 		ret = append(ret, &h.nodes[i])
 	}

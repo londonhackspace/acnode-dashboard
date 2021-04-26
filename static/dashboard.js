@@ -58,14 +58,33 @@ function makeNodeHtml(node) {
     } else {
         lastSeen.innerText = "Last seen: " + node.LastSeen + " seconds ago";
     }
-
     root.append(lastSeen);
-    root.append(document.createElement("br"));
+
+    if(node.LastStarted != -1) {
+        let lastStarted = document.createElement("div")
+        lastStarted.innerText = "Last started: " + node.LastStarted + " seconds ago";
+        root.append(lastStarted);
+    }
+
+    if(node.ResetCause != null && node.ResetCause != "") {
+        let resetCause = document.createElement("div")
+        resetCause.innerText = "Reset Cause: " + node.ResetCause;
+        root.append(resetCause);
+    }
 
     if(node.Status != "") {
         let status = document.createElement("div");
         status.innerText = "Status: " + node.Status;
         root.append(status);
+    }
+
+    if(node.SettingsVersion != null) {
+        let settingsVer = document.createElement("div");
+        settingsVer.innerText = "Settings Version: " + node.SettingsVersion;
+        if(node.EEPROMSettingsVersion != null) {
+            settingsVer.innerText += " (EEPROM: "+node.EEPROMSettingsVersion+")";
+        }
+        root.append(settingsVer)
     }
 
     if(node.Version != "") {

@@ -35,6 +35,9 @@ components:
         LastSeen:
           type: integer
           description: The number of seconds since the node was last seen sending messages
+        LastStarted:
+          type: integer
+          description: The number of seconds since the node last sent a START message, or -1 if it has not been seen to send one
         MemFree:
           type: integer
           description: Amount of RAM free on the device
@@ -47,6 +50,18 @@ components:
         Version:
           type: string
           description: The firmware version of the device
+        SettingsVersion:
+          type: integer
+          required: false
+          description: Settings struct version
+        EEPROMSettingsVersion:
+          type: integer
+          required: false
+          description: Settings struct version contained in EEPROM
+        ResetCause:
+          type: string
+          required: false
+          description: The cause of the last reset
 
 security:
   - ApiKeyAuth: []

@@ -68,11 +68,26 @@ func (handler *MqttHandler) cbMessage(client mqtt.Client, msg mqtt.Message) {
 		status := acnode.Status{}
 		json.Unmarshal(msg.Payload(), &status)
 
-		node.SetStatusMessage(status.Message)
-		// We know the nodes have more than zero memory total,
-		// so use that to sanity check the results
-		if (status.Mem.HeapUsed + status.Mem.HeapFree) > 0 {
-			node.SetMemoryStats(status.Mem.HeapFree, status.Mem.HeapUsed)
+		if status.Type == "START" {
+			node.SetLastStarted(time.Now())
+			if status.SettingsVersion != 0 {
+				node.SetSettingsVersion(status.SettingsVersion)
+			}
+
+			if status.EEPROMSettingsVersion != 0 {
+				node.SetEepromSettingsVersion(status.EEPROMSettingsVersion)
+			}
+
+			if status.ResetCause != "" {
+				node.SetResetCause(status.ResetCause)
+			}
+		} else if status.Type == "ALIVE" {
+			node.SetStatusMessage(status.Message)
+			// We know the nodes have more than zero memory total,
+			// so use that to sanity check the results
+			if (status.Mem.HeapUsed + status.Mem.HeapFree) > 0 {
+				node.SetMemoryStats(status.Mem.HeapFree, status.Mem.HeapUsed)
+			}
 		}
 
 		log.Info().
@@ -81,7 +96,7 @@ func (handler *MqttHandler) cbMessage(client mqtt.Client, msg mqtt.Message) {
 	}
 
 	// this check prevents Octoprint from marking nodes as recently alive
-	if topicParts[3] == "announcements" || topicParts[3] == "status" {
+	if topicParts[3] == "announcements" || topicParts[3] == "status" || topicParts[3] == "bell" {
 		node.SetLastSeen(time.Now())
 	}
 

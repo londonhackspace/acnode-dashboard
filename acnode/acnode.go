@@ -35,10 +35,15 @@ type ACNodeRec struct {
 
 	// last known status
 	LastSeen time.Time
+	LastStarted time.Time
 	MemFree int
 	MemUsed int
 	StatusMessage string
 	Version string
+
+	SettingsVersion int
+	EEPROMSettingsVersion int
+	ResetCause string
 }
 
 type ACNode interface {
@@ -53,8 +58,13 @@ type ACNode interface {
 	SetVersion(ver string)
 	GetLastSeen() time.Time
 	SetLastSeen(t time.Time)
+	GetLastStarted() time.Time
+	SetLastStarted(t time.Time)
 	SetStatusMessage(m string)
 	GetAPIRecord() apitypes.ACNode
+	SetSettingsVersion(ver int)
+	SetEepromSettingsVersion(ver int)
+	SetResetCause(rstc string)
 }
 
 func (node *ACNodeRec) GetId() int {
@@ -137,11 +147,47 @@ func (node *ACNodeRec) SetLastSeen(t time.Time) {
 	}
 }
 
+func (node *ACNodeRec) GetLastStarted() time.Time {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
+	return node.LastStarted
+}
+
+func (node *ACNodeRec) SetLastStarted(t time.Time) {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
+	if t.After(node.LastStarted) {
+		node.LastStarted = t
+	}
+}
+
 func (node *ACNodeRec) SetStatusMessage(m string) {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
 	node.StatusMessage = m
+}
+
+func (node *ACNodeRec) SetSettingsVersion(ver int) {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
+	node.SettingsVersion = ver
+}
+func (node *ACNodeRec) SetEepromSettingsVersion(ver int) {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
+	node.EEPROMSettingsVersion = ver
+}
+
+func (node *ACNodeRec) SetResetCause(rstc string) {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
+	node.ResetCause = rstc
 }
 
 func (node *ACNodeRec) GetAPIRecord() apitypes.ACNode {
@@ -154,15 +200,24 @@ func (node *ACNodeRec) GetAPIRecord() apitypes.ACNode {
 		lastSeen = -1
 	}
 
+	lastStarted := int(time.Now().Sub(node.LastStarted).Seconds())
+	if node.LastStarted.IsZero() {
+		lastStarted = -1
+	}
+
 	return apitypes.ACNode{
 		Id:            node.Id,
 		Name:          node.Name,
 		MqttName: 	   node.MqttName,
 		Type:          NodeTypeToString(node.NodeType),
 		LastSeen:      lastSeen,
+		LastStarted:   lastStarted,
 		MemFree:       node.MemFree,
 		MemUsed:       node.MemUsed,
 		StatusMessage: node.StatusMessage,
 		Version:       node.Version,
+		SettingsVersion: node.SettingsVersion,
+		EEPROMSettingsVersion: node.EEPROMSettingsVersion,
+		ResetCause: node.ResetCause,
 	}
 }
