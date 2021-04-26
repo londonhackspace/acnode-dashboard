@@ -28,6 +28,8 @@ It is possible for the dashboard to read configuration from a JSON file, however
 | LDAP_USEROU | OU to search for users | ou=Users |
 | LDAP_GROUPOU | OU to search for users | ou=Groups |
 | LDAP_SKIPTLSVERIFY | Ignore certificate errors on LDAP connection (for testing only!) | false |
+| REDIS_ENABLE | Enable Redis persistence | false |
+| REDIS_SERVER | Redis server to connect to | (None) |
 
 LDAP
 ===
@@ -36,6 +38,27 @@ that doesn't use the same structure as LHS's:
 * Users are in an OU
 * Groups are in a (separate) OU
 * users are linked to groups via the memberUid attribute on the group
+
+Redis
+====
+Redis serves as a caching layer and persistence store. It is an in-memory cache, but periodically saves
+state to disk, so can also be used for longer term persistence. 
+
+If enabled, it is used as a session store, user store, and general
+data persistence store for node data.
+
+Users
+====
+The code supports multiple authentication providers. It is envisaged that LDAP will be the
+main one in use, however there are a few cases when another source of users may be preferred:
+* development
+* Use somewhere other than LHS
+* Storing machine accounts for API use
+
+There is a utility in [bootstrapper](bootstrapper) which creates a
+default "admin" user, for bootstrapping new systems. It uses the same configuration environment variables and/or file as 
+the main dashboard process. It will create a user in the Redis provider, though
+it could easily be extended to support other writable providers.
 
 API
 ===

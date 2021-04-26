@@ -1,6 +1,9 @@
 package auth
 
-import "math/rand"
+import (
+	"crypto/rand"
+	"math/big"
+)
 
 type SessionStore interface {
 	AddUser(u *User) string
@@ -15,7 +18,13 @@ func makeSessionCookieString() string {
 	ret := make([]byte, length)
 
 	for i := range ret {
-		ret[i] = charBytes[rand.Intn(len(charBytes))]
+		rn, err := rand.Int(rand.Reader, big.NewInt(int64(len(charBytes))))
+		if err != nil {
+			// We rarely panic but this is an awkward case to recover from
+			panic(err)
+		}
+		ret[i] = charBytes[rn.Int64()]
+
 	}
 
 	return string(ret)

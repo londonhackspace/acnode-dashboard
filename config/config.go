@@ -23,6 +23,9 @@ type Config struct {
 	LdapUserOU string `json:"ldap_userou",omitempty`
 	LdapGroupOU string `json:"ldap_groupou",omitempty`
 	LdapSkipTLSVerify bool `json:"ldap_skipverify",omitempty`
+
+	RedisEnable bool `json:"redis_enable",omitempty`
+	RedisServer string `json:"redis_server",omitempty`
 }
 
 func GetConfigurationFromEnvironment() Config {
@@ -39,6 +42,8 @@ func GetConfigurationFromEnvironment() Config {
 		LdapUserOU: os.Getenv("LDAP_USEROU"),
 		LdapGroupOU: os.Getenv("LDAP_GROUPOU"),
 		LdapSkipTLSVerify: strings.ToLower(os.Getenv("LDAP_SKIPTLSVERIFY")) == "true",
+		RedisEnable: strings.ToLower(os.Getenv("REDIS_ENABLE")) == "true",
+		RedisServer: os.Getenv("REDIS_SERVER"),
 	}
 }
 
@@ -142,6 +147,18 @@ func GetCombinedConfig(filename string) Config {
 		combined.LdapGroupOU = fileconf.LdapGroupOU
 	}
 
+	if os.Getenv("REDIS_ENABLE") != "" {
+		combined.RedisEnable = envvar.RedisEnable
+	} else {
+		combined.RedisEnable = fileconf.RedisEnable
+	}
+
+	if envvar.RedisServer != "" {
+		combined.RedisServer = envvar.RedisServer
+	} else {
+		combined.RedisServer = fileconf.RedisServer
+	}
+
 	// set sensible defaults where we can
 	if combined.MqttClientId == "" {
 		combined.MqttClientId = "ACNodeDash"
@@ -185,6 +202,13 @@ func (c *Config) Validate()  bool {
 
 		if c.LdapBindPW == "" {
 			log.Error().Msg("Empty LDAP BindPW")
+			return false
+		}
+	}
+
+	if c.RedisEnable {
+		if c.RedisServer == "" {
+			log.Error().Msg("Empty Redis Server")
 			return false
 		}
 	}

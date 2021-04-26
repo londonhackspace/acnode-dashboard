@@ -19,7 +19,9 @@ func UserTypeName(ut int) string {
 type User struct {
 	UserType int
 
-	Name string
+	Name string `json:"name"`
+
+	source string `json:"source"`
 }
 
 func CreateUser(usertype int, name string) User {

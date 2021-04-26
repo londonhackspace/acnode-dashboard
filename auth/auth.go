@@ -85,6 +85,7 @@ func AuthenticateUser(w http.ResponseWriter, username string, password string) b
 	for _, a := range authenticator.providers {
 		u, err := a.LoginUser(username, password)
 		if err == nil {
+			u.source = a.GetName()
 			cookieString := authenticator.sessionstore.AddUser(&u)
 			cookie := http.Cookie{
 				Name: "ACNodeDashboardSession",

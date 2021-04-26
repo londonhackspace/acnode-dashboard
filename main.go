@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/go-redis/redis/v8"
 	"github.com/londonhackspace/acnode-dashboard/acnode"
 	"github.com/londonhackspace/acnode-dashboard/acserver_api"
 	"github.com/londonhackspace/acnode-dashboard/acserverwatcher"
@@ -84,6 +85,19 @@ func main() {
 	if conf.LdapEnable {
 		ldapauth := auth.GetLDAPAuthenticator(&conf)
 		auth.AddProvider(&ldapauth)
+	}
+
+	if conf.RedisEnable {
+		redisConn := redis.NewClient(&redis.Options{
+			Addr: conf.RedisServer,
+			Password: "",
+			DB: 0,
+		})
+
+		sessStore := auth.CreateRedisSessionStore(redisConn)
+		auth.SetSessionStore(sessStore)
+		userStore := auth.CreateRedisProvider(redisConn)
+		auth.AddProvider(userStore)
 	}
 
 	acnodehandler := acnode.CreateACNodeHandler()

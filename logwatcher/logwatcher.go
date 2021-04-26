@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const regexmatcher string = "[0-9\\.]+\\s-\\s(?:.*)\\s\\[([0-9\\/A-Za-z\\:\\+\\s]+)\\]\\s\\\"GET\\s\\/([0-9a-zA-Z]+)\\/[a-zA-Z\\/]+\\sHTTP\\/[0-9\\.]+\\\"\\s[0-9]{3}\\s[0-9]+\\s\"[0-9A-Za-z\\/\\:-]+\"\\s\"ACNode rev ([a-zA-Z0-9\\-]+)\""
+const regexmatcher string = "[0-9\\.]+\\s-\\s(?:.*)\\s\\[([0-9\\/A-Za-z\\:\\+\\s]+)\\]\\s\\\"GET\\s\\/([0-9a-zA-Z]+)\\/[a-zA-Z\\/]+\\sHTTP\\/[0-9\\.]+\\\"\\s[0-9]{3}\\s[0-9]+\\s\"[0-9A-Za-z\\/\\:-]+\"\\s\"ACNode rev\\s?([a-zA-Z0-9\\-]*)\""
 
 func main() {
 	cfg := GetConfig(os.Args[1])

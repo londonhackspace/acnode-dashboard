@@ -23,6 +23,14 @@ func (ldap *LDAPAuthenticator) GetName() string {
 	return "LDAP"
 }
 
+func (ldap *LDAPAuthenticator) GetWritable() bool {
+	return false
+}
+
+func (ldap *LDAPAuthenticator) AddUser(username string, password string, usertype int) error {
+	return errors.New("not implemented")
+}
+
 func (ldap *LDAPAuthenticator) LoginUser(username string, password string) (User,error) {
 	cfg := tls.Config{InsecureSkipVerify: ldap.conf.LdapSkipTLSVerify}
 	c, err := ldapv3.DialURL(ldap.conf.LdapServer,
