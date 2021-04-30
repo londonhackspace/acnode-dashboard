@@ -35,23 +35,6 @@ func checkAuth(w http.ResponseWriter, r *http.Request) bool {
 	return ok
 }
 
-var indexTemplate *template.Template = nil
-func handleIndex(w http.ResponseWriter, r *http.Request) {
-	if !checkAuth(w, r) {
-		return
-	}
-
-	if indexTemplate == nil {
-		indexTemplate = getTemplate("index.gohtml")
-	}
-	err := indexTemplate.ExecuteTemplate(w, "index.gohtml", GetBaseTemplateArgs())
-	if err != nil {
-		log.Err(err).
-			Str("Template", "index.gohtml").
-			Msg("Error rendering template")
-	}
-}
-
 var error404Template *template.Template = nil
 func handle404(w http.ResponseWriter, r *http.Request) {
 	if error404Template == nil {
@@ -121,9 +104,6 @@ func main() {
 	rtr := mux.NewRouter()
 	rtr.NotFoundHandler = http.HandlerFunc(handle404)
 
-	rtr.HandleFunc("/", handleIndex)
-	rtr.HandleFunc("/login", handleLogin)
-	rtr.HandleFunc("/logout", handleLogout)
 	rtr.PathPrefix("/api/").Handler(http.StripPrefix("/api", apihandler.GetRouter()))
 	
 	// Cache the assets, unless there's no version, in which case
@@ -132,10 +112,28 @@ func main() {
 	if getVersion() == "Unknown" {
 		staticCachePolicy = CachePolicyNever
 	}
-	fs := CreateCacheHeaderInserter(http.FileServer(http.Dir("./static/")), staticCachePolicy)
 
-	// Version the static directory so it can be cached
-	rtr.PathPrefix(GetStaticPath()+"/").Handler(http.StripPrefix(GetStaticPath(), fs))
+	var fs http.Handler
+	// if the frontend build exists, serve it from there, otherwise from /static
+	if _, err := os.Stat("frontend/dist/"); !os.IsNotExist(err) {
+		fs = http.FileServer(http.Dir("./frontend/dist"))
+	} else {
+		// serve our /static
+		fs = http.FileServer(http.Dir("./static/"))
+	}
+	// always serve swagger from /static but without cache
+	swaggerfs := CreateCacheHeaderInserter(
+		http.StripPrefix("/static", http.FileServer(http.Dir("./static/"))), CachePolicyNever)
+	rtr.PathPrefix("/static/swagger/").Handler(swaggerfs)
+	rtr.Handle("/static/api.yaml", swaggerfs)
+
+	// serve our /static via a cache
+	staticfs := CreateCacheHeaderInserter(fs, staticCachePolicy)
+	rtr.PathPrefix("/static/").Handler(staticfs)
+
+	//favicon and index don't get cache headers so we can change them
+	rtr.Handle("/favicon.png", fs)
+	rtr.Handle("/", fs)
 
 	// Add Swagger for API docs
 	rtr.HandleFunc("/swagger/", handleSwagger)

@@ -6,10 +6,6 @@ Deployment
 ===
 This is really intended to be deployed as a docker container. There's an included Dockerfile for building this. It uses a multipart build to keep the final container as small as possible.
 
-Static File Handling
-===
-Static files are served at /static/&lt;Version&gt;/ to ensure that a new deployment breaks caches
-
 Configuration
 ===
 It is possible for the dashboard to read configuration from a JSON file, however since it is intended for container deployment, it also reads from environment variables:
@@ -66,3 +62,17 @@ There's an API spec in /static/api.yaml - it's worth keeping this up to date sin
 
 The template /templates/swagger.gohtml is basically the standard swagger standalone html,
 however it has been tweaked to make it work with the cache breaking and general static file handling. 
+
+Frontend
+===
+The server will serve out of frontend/dist if it exists, otherwise it 
+serves out of static/ - this is so when you are developing, it will use
+a UI build if you have one. 
+
+The frontend is a React app in frontend/ - to work with it:
+* `npm run serve` - serves a development server, with live updates
+* `npm run build` - builds a production build to dist/
+* `npm run builddev` - builds a development build to dist/
+
+The development server runs on port 3000 and forwards /api requests
+to http://localhost:8080/api - this is assumed to be your local API server.

@@ -3,6 +3,10 @@
 /logwatcher/logwatcher
 /frontend/node_modules/
 
+# Exclude an API build that's been dropped in /static
+/static/index.html
+/static/static
+
 # these are generated
 *.css.d.ts
 

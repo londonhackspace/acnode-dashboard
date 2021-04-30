@@ -10,5 +10,11 @@ module.exports = merge(common, {
         port: 3000,
         publicPath: "http://localhost:3000/",
         hot: true,
+        proxy: {
+            '/api': 'http://localhost:8080',
+            '/swagger': 'http://localhost:8080',
+            '/static/swagger': 'http://localhost:8080',
+            '/static/api.yaml': 'http://localhost:8080',
+        },
     },
 });
