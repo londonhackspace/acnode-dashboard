@@ -8,6 +8,7 @@ import (
 	"github.com/londonhackspace/acnode-dashboard/api"
 	"github.com/londonhackspace/acnode-dashboard/auth"
 	"github.com/londonhackspace/acnode-dashboard/config"
+	"github.com/londonhackspace/acnode-dashboard/usagelogs"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
@@ -89,6 +90,8 @@ func main() {
 		auth.AddProvider(&ldapauth)
 	}
 
+	var usageLogger usagelogs.UsageLogger = nil
+
 	if conf.RedisEnable {
 		redisConn := redis.NewClient(&redis.Options{
 			Addr: conf.RedisServer,
@@ -102,6 +105,7 @@ func main() {
 		auth.AddProvider(userStore)
 
 		acnodehandler.SetRedis(redisConn)
+		usageLogger = usagelogs.CreateRedisUsageLogger(redisConn)
 	}
 
 	apihandler := api.CreateApi(&conf, &acnodehandler)
@@ -110,7 +114,7 @@ func main() {
 	acsw := acserverwatcher.Watcher{ acserverapi, &acnodehandler }
 	go acsw.Run()
 
-	mqttHandler := CreateMQTTHandler(&conf, &acnodehandler)
+	mqttHandler := CreateMQTTHandler(&conf, &acnodehandler, usageLogger)
 	mqttHandler.Init()
 
 	// create a URL router

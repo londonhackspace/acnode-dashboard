@@ -48,7 +48,7 @@ func (h *ACNodeHandler) SetRedis(r *redis.Client) {
 
 	// read from redis
 	ctx := context.Background()
-	iter := h.redis.Scan(ctx, 0, "node*", 0).Iterator()
+	iter := h.redis.Scan(ctx, 0, "node:*", 0).Iterator()
 
 	for iter.Next(ctx) {
 		data := h.redis.Get(ctx, iter.Val()).Val()

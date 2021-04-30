@@ -5,6 +5,7 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/londonhackspace/acnode-dashboard/acnode"
 	"github.com/londonhackspace/acnode-dashboard/config"
+	"github.com/londonhackspace/acnode-dashboard/usagelogs"
 	"github.com/rs/zerolog/log"
 	"strings"
 	"time"
@@ -13,15 +14,17 @@ import (
 type MqttHandler struct {
 	config *config.Config
 	acnodehandler *acnode.ACNodeHandler
+	usageLogger usagelogs.UsageLogger
 	running bool
 
 	conn mqtt.Client
 }
 
-func CreateMQTTHandler(config *config.Config, acnodehandler *acnode.ACNodeHandler) MqttHandler {
+func CreateMQTTHandler(config *config.Config, acnodehandler *acnode.ACNodeHandler, usageLogger usagelogs.UsageLogger) MqttHandler {
 	return MqttHandler{
 		config: config,
 		acnodehandler: acnodehandler,
+		usageLogger: usageLogger,
 		running: true,
 	}
 }
@@ -59,7 +62,11 @@ func (handler *MqttHandler) cbMessage(client mqtt.Client, msg mqtt.Message) {
 		announcement := acnode.Announcement{}
 		json.Unmarshal(msg.Payload(), &announcement)
 
-		// TODO: make more use of this!
+		if announcement.Type == "RFID" {
+			if handler.usageLogger != nil {
+				handler.usageLogger.AddUsageLog(&node, announcement)
+			}
+		}
 
 		log.Info().
 			Str("Node", node.GetName()).
@@ -117,6 +124,8 @@ func (handler *MqttHandler) handleMqtt() {
 				log.Err(tok.Error()).Msg("Error Connecting to MQTT Server")
 				continue
 			}
+
+			log.Info().Msg("Connected to MQTT server")
 
 			// ok we connected. Now try to set our subscriptions
 			tok = handler.conn.Subscribe("/tool/#", 0, handler.cbMessage)
