@@ -14,7 +14,7 @@ jobs:
       # Also replaces / with _ to make a valid tag name
       - name: Extract branch name
         shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${${GITHUB_REF#refs/heads/}/\//_})"
+        run: echo "##[set-output name=branch;]$(TMP=${GITHUB_REF#refs/heads/}; echo ${TMP/\//_})"
         id: extract_branch
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
