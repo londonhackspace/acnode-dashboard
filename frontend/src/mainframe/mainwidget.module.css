@@ -1,0 +1,18 @@
+
+.mainwidget {
+    display: grid;
+    grid-template-columns: 67% 33%;
+    grid-template-rows: 80% auto;
+    height: 100%;
+}
+
+.mainRow {
+    grid-row: 1;
+    overflow: scroll;
+}
+
+.wideRow {
+    grid-column-start: span 2;
+    background-color: #1f69c0;
+    overflow: scroll;
+}

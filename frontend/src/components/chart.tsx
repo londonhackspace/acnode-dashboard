@@ -3,10 +3,12 @@ import ReactDOM from "react-dom";
 import {Chart as ChartJS,
     DoughnutController,
     ArcElement,
+    Legend,
+    Tooltip,
     ChartTypeRegistry} from "chart.js"
-import {MainFrameProps} from "../mainframe/main";
 
-ChartJS.register(DoughnutController, ArcElement);
+
+ChartJS.register(DoughnutController, ArcElement, Legend, Tooltip);
 
 export interface ChartProps {
     type : keyof ChartTypeRegistry;
@@ -54,6 +56,9 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
         if(this.chart == null) {
             this.chart = new ChartJS(node.getContext('2d'), {
                 type: this.props.type,
+                options: {
+
+                },
                 data: {
                     labels: this.getDataKeys(),
                     datasets: [

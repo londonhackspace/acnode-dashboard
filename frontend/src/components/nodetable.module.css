@@ -1,0 +1,37 @@
+.NodeTable {
+    border-collapse: collapse;
+    border-width: 3px;
+    width: 100%;
+}
+
+.NodeTable thead {
+    background-color: #96ccff;
+}
+
+.NodeTable td, .NodeTable th {
+    border-bottom: 1px solid;
+}
+
+.ActiveRow {
+    background-color: #92a5ff;
+}
+
+.InactiveRow {
+    background-color: #eeeeee;
+}
+
+.NodeTable tr.InactiveRow:nth-child(even) {
+    background-color: #ffffff;
+}
+
+.NodeTable tr:hover {
+    background-color: #cccccc;
+}
+
+tr.ActiveRow:hover {
+    background-color: #bbbbff;
+}
+
+.NodeTable td:not(:first-child) {
+    border-left: 1px solid;
+}
