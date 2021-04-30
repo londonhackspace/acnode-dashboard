@@ -16,6 +16,7 @@ COPY auth auth
 COPY config config
 COPY bootstrapper bootstrapper
 COPY logwatcher logwatcher
+COPY usagelogs usagelogs
 
 COPY *.go ./
 COPY go.mod .
