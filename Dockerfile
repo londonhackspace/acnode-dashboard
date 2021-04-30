@@ -36,7 +36,7 @@ WORKDIR /build/acnode-dashboard/frontend
 COPY frontend /build/acnode-dashboard/frontend
 
 RUN npm install
-RUN npm build && cd dist && tar -cf ../bundle.tar static index.html
+RUN npm run build && cd dist && tar -cf ../bundle.tar static index.html
 
 # Third container - this one actually runs the code
 FROM alpine:latest
