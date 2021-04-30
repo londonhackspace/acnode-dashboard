@@ -28,7 +28,17 @@ RUN cd bootstrapper && go build
 RUN cd logwatcher && go build
 RUN git rev-list -1 HEAD > version
 
-# Second container - this one actually runs the code
+# Second container - build frontend
+FROM node:16.0-alpine as nodebuilder
+
+WORKDIR /build/acnode-dashboard/frontend
+
+COPY frontend /build/acnode-dashboard/frontend
+
+RUN npm install
+RUN npm build && cd dist && tar -cf ../bundle.tar static index.html
+
+# Third container - this one actually runs the code
 FROM alpine:latest
 
 WORKDIR /opt/acnode-dashboard
@@ -36,8 +46,11 @@ WORKDIR /opt/acnode-dashboard
 COPY --from=builder /build/acnode-dashboard/acnode-dashboard acnode-dashboard
 COPY --from=builder /build/acnode-dashboard/bootstrapper/bootstrapper bootstrapper
 COPY --from=builder /build/acnode-dashboard/version version
+COPY --from=nodebuilder /build/acnode-dashboard/frontend/bundle.tar frontend.tar
 COPY static static
 COPY templates templates
+
+RUN mkdir static/newfrontend && cd static/newfrontend && tar -xf ../../frontend.tar && rm -f ../../frontend.tar
 
 RUN adduser -S acnodedashboard
 
