@@ -1,3 +1,10 @@
+/frontend/dist/
 /acnode-dashboard
 /logwatcher/logwatcher
+/frontend/node_modules/
+
+# these are generated
+*.css.d.ts
+
 .DS_Store
+
