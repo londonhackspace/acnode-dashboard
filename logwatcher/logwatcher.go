@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/hpcloud/tail"
-	"github.com/londonhackspace/acnode-dashboard/api"
+	"github.com/londonhackspace/acnode-dashboard/apitypes"
 	"net/http"
 	"os"
 	"regexp"
@@ -28,7 +28,7 @@ func main() {
 			version := res[3]
 			nodeId := res[2]
 			date,_ := time.Parse("2/Jan/2006:15:04:05 -0700", res[1])
-			var b api.SetStatusBody
+			var b apitypes.SetStatusBody
 			b.Version = version
 			b.Timestamp = date.Unix()
 
