@@ -9,6 +9,7 @@ import (
 	"github.com/londonhackspace/acnode-dashboard/auth"
 	"github.com/londonhackspace/acnode-dashboard/config"
 	"github.com/londonhackspace/acnode-dashboard/usagelogs"
+	"sync"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
@@ -56,6 +57,8 @@ func main() {
 	// setup logging
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
+	startupWg := sync.WaitGroup{}
+
 	conf := config.GetCombinedConfig("acserverdash.json")
 
 	if !conf.Validate() {
@@ -84,7 +87,7 @@ func main() {
 		userStore := auth.CreateRedisProvider(redisConn)
 		auth.AddProvider(userStore)
 
-		acnodehandler.SetRedis(redisConn)
+		acnodehandler.SetRedis(redisConn, &startupWg)
 		usageLogger = usagelogs.CreateRedisUsageLogger(redisConn)
 	}
 
@@ -92,10 +95,16 @@ func main() {
 
 	acserverapi := acserver_api.CreateACServer(&conf)
 	acsw := acserverwatcher.Watcher{ acserverapi, &acnodehandler }
-	go acsw.Run()
 
 	mqttHandler := CreateMQTTHandler(&conf, &acnodehandler, usageLogger)
-	mqttHandler.Init()
+
+	// Don't initialise MQTT or ACServer watcher until everything else is running
+	go func() {
+		startupWg.Wait()
+		go acsw.Run()
+		mqttHandler.Init()
+	}()
+
 
 	// create a URL router
 	rtr := mux.NewRouter()

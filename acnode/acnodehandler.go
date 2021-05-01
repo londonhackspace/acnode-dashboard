@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/go-redis/redis/v8"
 	"github.com/rs/zerolog/log"
+	"sync"
 	"time"
 )
 
@@ -39,8 +40,9 @@ func (h *ACNodeHandler) syncer(stopper chan bool) {
 	}
 }
 
-func (h *ACNodeHandler) SetRedis(r *redis.Client) {
+func (h *ACNodeHandler) SetRedis(r *redis.Client, wg *sync.WaitGroup) {
 	h.redis = r
+	wg.Add(1)
 	// if we have a sync running already, stop it
 	if h.syncchannel != nil {
 		h.syncchannel <- true
@@ -74,6 +76,7 @@ func (h *ACNodeHandler) SetRedis(r *redis.Client) {
 	}
 
 	h.syncchannel = make(chan bool)
+	wg.Done()
 	go h.syncer(h.syncchannel)
 }
 
