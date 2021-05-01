@@ -1,6 +1,9 @@
 import APIClient, {NodeRecord} from "./apiclient/dashapi"
 
-import { SignalDispatcher, SimpleEventDispatcher, EventDispatcher } from "strongly-typed-events"
+import { SignalDispatcher, SimpleEventDispatcher } from "strongly-typed-events"
+import ExtendedNodeRecord from "./extendednoderecord";
+
+
 
 export default class NodeDataSource {
     private api : APIClient;
@@ -10,7 +13,7 @@ export default class NodeDataSource {
     private dataChangeSig = new SignalDispatcher();
     private refreshTimer : number;
     private started = false;
-    private nodeData = new Map<string, NodeRecord>();
+    private nodeData = new Map<string, ExtendedNodeRecord>();
 
     constructor(api: APIClient) {
         this.api = api;
@@ -38,7 +41,7 @@ export default class NodeDataSource {
             return Promise.all(nodes.map(n => this.api.getNode(n)));
         }).then((results) => {
             for(let res of results) {
-                this.nodeData.set(res.mqttName, res);
+                this.nodeData.set(res.mqttName, new ExtendedNodeRecord(res));
             }
             this.dataChangeSig.dispatch();
         });
@@ -48,7 +51,7 @@ export default class NodeDataSource {
         return Array.from(this.nodeData.keys());
     }
 
-    getNode(name : string) : NodeRecord | null {
+    getNode(name : string) : ExtendedNodeRecord | null {
         if(this.nodeData.has(name)) {
             return this.nodeData.get(name);
         }

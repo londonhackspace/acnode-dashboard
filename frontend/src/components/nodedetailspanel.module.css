@@ -1,0 +1,19 @@
+.nodetitle {
+    text-align: center;
+    width: 100%;
+    font-weight: bolder;
+    font-size: 14pt;
+}
+
+.nodepropsline {
+
+}
+
+.nodepropstitle {
+    font-weight: bold;
+    margin-right: 0.5em;
+}
+
+.nodepropsvalue {
+
+}

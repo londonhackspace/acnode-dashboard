@@ -127,3 +127,43 @@ paths:
           description: Accepted
         404:
           description: Node not known
+  /auth/login:
+    post:
+      summary: User login. Returns a cookie
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: user's username
+                  required: yes
+                password:
+                  type: string
+                  description: The user's password
+                  required: yes
+      responses:
+        204:
+          description: Login Successful
+        401:
+          description: Login Failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Description of Error
+        400:
+          description: Bad Request
+  /auth/logout:
+    get:
+      summary: Log the current user out
+      responses:
+        204:
+          description: Success
+

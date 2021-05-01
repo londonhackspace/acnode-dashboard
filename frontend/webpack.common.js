@@ -27,6 +27,14 @@ module.exports = {
                     },
                 ],
             },
+            {
+                test: /(?<!\.module)\.css$/,
+                use: [
+                    'style-loader',
+                    "@teamsupercell/typings-for-css-modules-loader",
+                    'css-loader',
+                ]
+            },
         ],
     },
     plugins: [

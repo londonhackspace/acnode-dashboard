@@ -5,14 +5,16 @@ import styles from "./nodetable.module.css";
 
 import NodeDataSource from "../NodeDataSource";
 import {NodeRecord} from "../apiclient/dashapi";
+import ExtendedNodeRecord, {NodeHealth} from "../extendednoderecord";
 import {isUndefined} from "webpack-merge/dist/utils";
+import StatusBall, {StyleMap as StatusBallStyleMap} from "./statusball"
 
 interface NodeTableProps {
     dataSource : NodeDataSource
 }
 
 interface NodeTableState {
-    nodes : NodeRecord[]
+    nodes : ExtendedNodeRecord[]
     activeRow : string
 }
 
@@ -23,6 +25,13 @@ interface NodeLastSeenProps {
 interface NodeLastSeenState {
     sinceLoad : number
 }
+
+const nodeHealthMapping = new Map<NodeHealth, keyof(typeof StatusBallStyleMap)>([
+    [NodeHealth.GOOD, "good"],
+    [NodeHealth.MEH, "meh"],
+    [NodeHealth.BAD, "bad"],
+    [NodeHealth.UNKNOWN, "unknown"],
+]);
 
 class NodeLastSeen extends React.Component<NodeLastSeenProps, NodeLastSeenState> {
     timer : number;
@@ -40,7 +49,15 @@ class NodeLastSeen extends React.Component<NodeLastSeenProps, NodeLastSeenState>
             return totalTime + " seconds ago";
         } else {
             let timestamp = new Date(Date.now()-(totalTime*1000));
-            return dateformat(timestamp, "ddd dd mmm yyyy hh:mm:ss o")
+            const today = new Date();
+            if(timestamp.getDate()==today.getDate() &&
+                timestamp.getMonth()==today.getMonth() &&
+                timestamp.getFullYear() == today.getFullYear()) {
+                return "Today " + dateformat(timestamp, "hh:mm:ss o");
+            } else {
+                return dateformat(timestamp, "ddd dd mmm yyyy hh:mm:ss o");
+            }
+
         }
     }
 
@@ -98,10 +115,12 @@ export default class NodeTable extends React.Component<NodeTableProps, NodeTable
                 <td><a href="#" onClick={setActive}>{node.name}</a></td>
                 <td>{node.SettingsVersion || ""}</td>
                 <td><NodeLastSeen lastseen={node.LastSeen}/></td>
+                <td><NodeLastSeen lastseen={node.LastStarted}/></td>
+                <td><StatusBall state={nodeHealthMapping.get(node.objectHealth)}/></td>
             </tr>;
         })
         return <table className={styles.NodeTable}>
-            <thead><tr><th>Id</th><th>Name</th><th>Settings Version</th><th>Last Seen</th></tr></thead>
+            <thead><tr><th>Id</th><th>Name</th><th>Settings Version</th><th>Last Seen</th><th>Last Started</th><th>Health</th></tr></thead>
             <tbody>{rows}</tbody>
         </table>
     }

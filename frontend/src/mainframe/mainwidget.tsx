@@ -1,15 +1,12 @@
 import React, {ReactElement} from "react";
-import Api from "../apiclient/dashapi";
+import Api, {NodeRecord} from "../apiclient/dashapi";
 import DataSource from "../NodeDataSource";
 import {MainFrameProps} from "./main";
 import Chart from "../components/chart";
 import styles from "./mainwidget.module.css";
 import NodeTable from "../components/nodetable";
-
-const chartColors : string[] = [
-    'rgb(255, 99, 132)',
-    'rgb(54, 162, 235)'
-];
+import NodeDetailPanel from "../components/nodedetailpanel"
+import Spinner from "../components/spinner"
 
 interface MainWidgetProps {
     api : Api;
@@ -48,20 +45,24 @@ export default class MainWidget extends React.Component<MainWidgetProps, MainWid
     }
 
     render() {
-        let nodePanel : ReactElement = null;
+        let activeNode : NodeRecord = null;
 
         if(this.state.activeRow && this.state.activeRow != "") {
-            let node = this.ds.getNode(this.state.activeRow);
-            let data = new Map<string,number>();
-            data.set("Used Memory", node.MemUsed);
-            data.set("Free Memory", node.MemFree);
-            nodePanel = <div>{node.name}<br/><Chart type="doughnut" data={data} colors={chartColors}></Chart></div>;
+            activeNode = this.ds.getNode(this.state.activeRow);
         }
 
+        let mainNode : ReactElement;
+        if(this.ds.nodes.length > 0)
+        {
+            mainNode = <NodeTable dataSource={this.ds}></NodeTable>;
+        } else {
+            mainNode = <Spinner></Spinner>;
+        }
+
+
         return <div className={styles.mainwidget}>
-            <div className={styles.mainRow}>Nodes:<br/><NodeTable dataSource={this.ds}></NodeTable></div>
-            <div className={styles.mainRow}>{nodePanel}</div>
-            <div className={styles.wideRow}>LogsHere?</div>
+            <div className={styles.mainRow}>Nodes:<br/>{mainNode}</div>
+            <div className={styles.mainRow}><NodeDetailPanel node={activeNode}></NodeDetailPanel></div>
         </div>
     }
 

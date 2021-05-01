@@ -1,12 +1,26 @@
 .header {
+    display: flex;
+    align-items: flex-start;
     background: black;
     color: white;
-    width: 100%;
     font-size: 16pt;
     margin-top: 0px;
     margin-left: 0px;
     margin-right: 0px;
-    padding: 0px 0px 0px 0px;
+    padding: 5px 5px 5px 5px;
+}
+
+.title {
+    width: max-content;
+}
+
+.authButtons {
+    width: max-content;
+    margin-left: auto;
+}
+
+.authButtons a {
+    color: white;
 }
 
 .container {

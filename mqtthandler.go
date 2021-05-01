@@ -118,34 +118,14 @@ func (handler *MqttHandler) handleMqtt() {
 		time.Sleep(1 * time.Second)
 
 		// do we need to try to connect?
+
 		if !handler.conn.IsConnected() {
 			tok := handler.conn.Connect()
 			if tok.Wait() && tok.Error() != nil {
 				log.Err(tok.Error()).Msg("Error Connecting to MQTT Server")
 				continue
 			}
-
 			log.Info().Msg("Connected to MQTT server")
-
-			// ok we connected. Now try to set our subscriptions
-			tok = handler.conn.Subscribe("/tool/#", 0, handler.cbMessage)
-			if tok.Wait() && tok.Error() != nil {
-				log.Err(tok.Error()).
-					Str("Topic", "/tool/#").
-					Msg("Error adding subscription")
-				handler.conn.Disconnect(250)
-				continue
-
-			}
-			tok = handler.conn.Subscribe("/door/#", 0, handler.cbMessage)
-			if tok.Wait() && tok.Error() != nil {
-				log.Err(tok.Error()).
-					Str("Topic", "/door/#").
-					Msg("Error adding subscription")
-				handler.conn.Disconnect(250)
-				continue
-			}
-			log.Info().Msg("MQTT Subscriptions set up")
 		}
 	}
 }
@@ -157,6 +137,22 @@ func (handler *MqttHandler) Init() {
 
 	opts := mqtt.NewClientOptions().SetClientID(handler.config.MqttClientId)
 	opts.AddBroker(handler.config.MqttServer)
+	opts.OnConnect = func(client mqtt.Client) {
+		// ok we connected. Now try to set our subscriptions
+		tok := handler.conn.Subscribe("/tool/#", 0, handler.cbMessage)
+		if tok.Wait() && tok.Error() != nil {
+			log.Err(tok.Error()).
+				Str("Topic", "/tool/#").
+				Msg("Error adding subscription")
+		}
+		tok = handler.conn.Subscribe("/door/#", 0, handler.cbMessage)
+		if tok.Wait() && tok.Error() != nil {
+			log.Err(tok.Error()).
+				Str("Topic", "/door/#").
+				Msg("Error adding subscription")
+		}
+		log.Info().Msg("MQTT Subscriptions set up")
+	}
 
 	handler.conn = mqtt.NewClient(opts)
 

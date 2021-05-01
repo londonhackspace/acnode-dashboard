@@ -131,12 +131,55 @@ func (api *Api) handleSetStatus(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(404)
 }
 
+type loginBody struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type loginError struct {
+	Error string `json:"error"`
+}
+
+func (api *Api) handleLogin(w http.ResponseWriter, r *http.Request) {
+	// first see if the user is already logged in
+	if ok,_ := auth.CheckAuthAPI(w, r); ok {
+		w.WriteHeader(204)
+		return
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(400)
+		return
+	}
+	payload := loginBody{}
+	err = json.Unmarshal(body, &payload)
+	if err != nil {
+		w.WriteHeader(400)
+	}
+	if auth.AuthenticateUser(w, payload.Username, payload.Password) {
+		w.WriteHeader(204)
+		return
+	}
+
+	resp := loginError{Error: "Bad Credentials"}
+	data,_ := json.Marshal(&resp)
+	w.WriteHeader(401)
+	w.Write(data)
+}
+
+func (api *Api) handleLogout(w http.ResponseWriter, r *http.Request) {
+	auth.Logout(w, r)
+	w.WriteHeader(204)
+}
+
 func (api *Api) GetRouter() http.Handler {
 	rtr := mux.NewRouter()
 
 	rtr.HandleFunc("/nodes", api.handleNodes)
 	rtr.HandleFunc("/nodes/{nodeName}", api.handleNodeEntry)
 	rtr.HandleFunc("/nodes/setStatus/{id}", api.handleSetStatus)
-
+	rtr.Methods("POST").Path("/auth/login").HandlerFunc(api.handleLogin)
+	rtr.HandleFunc("/auth/logout", api.handleLogout)
 	return rtr
 }

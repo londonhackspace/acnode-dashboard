@@ -1,11 +1,10 @@
 
-import * as ReactDOM from "react-dom";
+import ReactDOM from "react-dom";
 import React from "react";
 
-import {MainFrame, MainFrameProps} from "./mainframe/main";
+import {MainFrame} from "./mainframe/main";
 
 import APIClient from "./apiclient/dashapi"
-import NodeDataSource from "./NodeDataSource"
 
 let client = new APIClient("/api/");
 

@@ -1,7 +1,9 @@
 .NodeTable {
     border-collapse: collapse;
     border-width: 3px;
-    width: 100%;
+    width: 98%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .NodeTable thead {

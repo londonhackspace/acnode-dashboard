@@ -2,7 +2,8 @@
 .mainwidget {
     display: grid;
     grid-template-columns: 67% 33%;
-    grid-template-rows: 80% auto;
+    /* maybe we will reintroduce the second row some time*/
+    /*grid-template-rows: 80% auto;*/
     height: 100%;
 }
 

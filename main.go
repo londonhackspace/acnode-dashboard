@@ -45,9 +45,6 @@ func handle404(w http.ResponseWriter, r *http.Request) {
 
 var swaggerTemplate *template.Template = nil
 func handleSwagger(w http.ResponseWriter, r *http.Request) {
-	if !checkAuth(w, r) {
-		return
-	}
 
 	if swaggerTemplate == nil {
 		swaggerTemplate = getTemplate("swagger.gohtml")
