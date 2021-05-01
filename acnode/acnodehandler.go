@@ -9,15 +9,31 @@ import (
 	"time"
 )
 
+type acnodeUpdateTrigger interface {
+	OnNodeUpdate(node ACNode)
+}
+
 type ACNodeHandler struct {
 	nodes []ACNodeRec
 
 	redis *redis.Client
 	syncchannel chan bool
+
+	listeners map[*HandlerListener]bool
 }
 
 func CreateACNodeHandler() ACNodeHandler {
-	return ACNodeHandler{}
+	return ACNodeHandler{ listeners: make(map[*HandlerListener]bool) }
+}
+
+func (h *ACNodeHandler) AddListener(l *HandlerListener) {
+	h.listeners[l] = true
+}
+
+func (h *ACNodeHandler) RemoveListener(l *HandlerListener) {
+	delete(h.listeners, l)
+	close(l.nodeAdded)
+	close(l.nodeChanged)
 }
 
 // Every minute, this syncs to redis
@@ -81,7 +97,19 @@ func (h *ACNodeHandler) SetRedis(r *redis.Client, wg *sync.WaitGroup) {
 }
 
 func (h *ACNodeHandler) AddNode(node ACNodeRec) {
+	node.updateTrigger = h
 	h.nodes = append(h.nodes, node)
+	for l := range h.listeners {
+		l.nodeAdded <- &h.nodes[len(h.nodes)-1]
+	}
+}
+
+func (h *ACNodeHandler) OnNodeUpdate(node ACNode) {
+	for l := range h.listeners {
+		go func() {
+			l.nodeChanged <- node
+		}()
+	}
 }
 
 func (h *ACNodeHandler) GetNodeByMqttName(name string) ACNode {

@@ -11,9 +11,9 @@ export default class NodeDataSource {
 
     private rowChangeSig = new SimpleEventDispatcher<string>();
     private dataChangeSig = new SignalDispatcher();
-    private refreshTimer : number;
-    private started = false;
     private nodeData = new Map<string, ExtendedNodeRecord>();
+
+    private ws : WebSocket;
 
     constructor(api: APIClient) {
         this.api = api;
@@ -22,17 +22,38 @@ export default class NodeDataSource {
 
     start() {
         this.stop();
-        console.log("Setting up timer");
-        this.refreshTimer = window.setInterval(this.refresh.bind(this), 10000);
-        this.started = true;
-        this.refresh();
+
+        let wsurl : string;
+        if(window.location.protocol === 'https:') {
+            wsurl = "wss://"+window.location.host+"/ws";
+        } else {
+            wsurl = "ws://"+window.location.host+"/ws";
+        }
+        this.ws = new WebSocket(wsurl);
+        this.ws.onopen = (evt : Event) => {
+            console.log("Opened websocket connection");
+            // once we're connected, do a full refresh so we don't miss anything
+            this.refresh();
+        }
+        this.ws.onmessage = (evt: MessageEvent) => {
+            let node : NodeRecord =  JSON.parse(evt.data);
+            this.nodeData.set(node.mqttName, new ExtendedNodeRecord(node));
+            this.dataChangeSig.dispatch();
+            console.log("Got updated status for node " + node.mqttName);
+        }
+        this.ws.onerror = (evt: Event) => {
+            console.log("Websocket error")
+            // try to make a normal refresh anyway
+            // this might well fix the error if it was an auth error!
+            this.refresh()
+        }
     }
 
     stop() {
-        if(this.started) {
-            console.log("Stopping the timer");
-            window.clearInterval(this.refreshTimer);
-            this.started = false;
+        if(this.ws) {
+            console.log("Closing websocket connection");
+            this.ws.close()
+            this.ws = null;
         }
     }
 

@@ -28,6 +28,8 @@ func NodeTypeToString(t int) string {
 type ACNodeRec struct {
 	mtx sync.Mutex
 
+	updateTrigger acnodeUpdateTrigger
+
 	Id       int
 	Name     string
 	MqttName string
@@ -79,6 +81,7 @@ func (node *ACNodeRec) SetId(id int) {
 	defer node.mtx.Unlock()
 
 	node.Id = id
+	node.updateTrigger.OnNodeUpdate(node)
 }
 
 func (node *ACNodeRec) GetType() int {
@@ -100,6 +103,7 @@ func (node *ACNodeRec) SetName(name string) {
 	defer node.mtx.Unlock()
 
 	node.Name = name
+	node.updateTrigger.OnNodeUpdate(node)
 }
 
 func (node *ACNodeRec) GetMqttName() string {
@@ -114,6 +118,7 @@ func (node *ACNodeRec) SetType(t int) {
 	defer node.mtx.Unlock()
 
 	node.NodeType = t
+	node.updateTrigger.OnNodeUpdate(node)
 }
 
 func (node *ACNodeRec) SetMemoryStats(free int, used int) {
@@ -122,6 +127,7 @@ func (node *ACNodeRec) SetMemoryStats(free int, used int) {
 
 	node.MemFree = free
 	node.MemUsed = used
+	node.updateTrigger.OnNodeUpdate(node)
 }
 
 func (node *ACNodeRec) SetVersion(ver string) {
@@ -129,6 +135,7 @@ func (node *ACNodeRec) SetVersion(ver string) {
 	defer node.mtx.Unlock()
 
 	node.Version = ver
+	node.updateTrigger.OnNodeUpdate(node)
 }
 
 func (node *ACNodeRec) GetLastSeen() time.Time {
@@ -144,6 +151,7 @@ func (node *ACNodeRec) SetLastSeen(t time.Time) {
 
 	if t.After(node.LastSeen) {
 		node.LastSeen = t
+		node.updateTrigger.OnNodeUpdate(node)
 	}
 }
 
@@ -160,6 +168,7 @@ func (node *ACNodeRec) SetLastStarted(t time.Time) {
 
 	if t.After(node.LastStarted) {
 		node.LastStarted = t
+		node.updateTrigger.OnNodeUpdate(node)
 	}
 }
 
@@ -168,6 +177,7 @@ func (node *ACNodeRec) SetStatusMessage(m string) {
 	defer node.mtx.Unlock()
 
 	node.StatusMessage = m
+	node.updateTrigger.OnNodeUpdate(node)
 }
 
 func (node *ACNodeRec) SetSettingsVersion(ver int) {
@@ -175,12 +185,14 @@ func (node *ACNodeRec) SetSettingsVersion(ver int) {
 	defer node.mtx.Unlock()
 
 	node.SettingsVersion = ver
+	node.updateTrigger.OnNodeUpdate(node)
 }
 func (node *ACNodeRec) SetEepromSettingsVersion(ver int) {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
 	node.EEPROMSettingsVersion = ver
+	node.updateTrigger.OnNodeUpdate(node)
 }
 
 func (node *ACNodeRec) SetResetCause(rstc string) {
@@ -188,6 +200,7 @@ func (node *ACNodeRec) SetResetCause(rstc string) {
 	defer node.mtx.Unlock()
 
 	node.ResetCause = rstc
+	node.updateTrigger.OnNodeUpdate(node)
 }
 
 func (node *ACNodeRec) GetAPIRecord() apitypes.ACNode {

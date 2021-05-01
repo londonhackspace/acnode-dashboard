@@ -15,6 +15,10 @@ module.exports = merge(common, {
             '/swagger': 'http://localhost:8080',
             '/static/swagger': 'http://localhost:8080',
             '/static/api.yaml': 'http://localhost:8080',
+            '/ws': {
+                target: 'ws://localhost:8080',
+                ws: true
+            },
         },
     },
 });

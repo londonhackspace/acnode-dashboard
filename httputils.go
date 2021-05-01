@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bufio"
+	"errors"
 	"github.com/rs/zerolog/log"
+	"net"
 	"net/http"
 )
 
@@ -23,6 +26,15 @@ func (h statusIntercepter) WriteHeader(statusCode int) {
 	if h.statuscode != nil {
 		*h.statuscode = statusCode
 	}
+}
+
+func (h statusIntercepter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	next,ok := h.next.(http.Hijacker)
+	if !ok {
+		return nil, nil, errors.New("hijack not supported")
+	}
+
+	return next.Hijack()
 }
 
 func createStatusIntercepter(next http.ResponseWriter, i *int) statusIntercepter {
@@ -58,6 +70,8 @@ type CacheHeaderInserter struct {
 	next http.Handler
 	policy int
 }
+
+
 
 func (h CacheHeaderInserter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch h.policy {

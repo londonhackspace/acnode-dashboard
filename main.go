@@ -68,12 +68,15 @@ func main() {
 
 	acnodehandler := acnode.CreateACNodeHandler()
 
+	websockerServer := api.CreateWebsockerHandler(&acnodehandler)
+
 	if conf.LdapEnable {
 		ldapauth := auth.GetLDAPAuthenticator(&conf)
 		auth.AddProvider(&ldapauth)
 	}
 
 	var usageLogger usagelogs.UsageLogger = nil
+
 
 	if conf.RedisEnable {
 		redisConn := redis.NewClient(&redis.Options{
@@ -111,6 +114,7 @@ func main() {
 	rtr.NotFoundHandler = http.HandlerFunc(handle404)
 
 	rtr.PathPrefix("/api/").Handler(http.StripPrefix("/api", apihandler.GetRouter()))
+	rtr.PathPrefix("/ws").Handler(websockerServer)
 	
 	// Cache the assets, unless there's no version, in which case
 	// it's most likely a development version

@@ -31,7 +31,7 @@ export default class NodeDetailPanel extends React.Component<NodeDetailPanelProp
             let node = this.props.node;
 
             let addNodeProps = (name : string, value : string | number) => {
-                parts.push(<div className={styles.nodepropsline}>
+                parts.push(<div className={styles.nodepropsline} key={name}>
                     <span className={styles.nodepropstitle}>{name}:</span>
                     <span className={styles.nodepropsvalue}>{value || "Unknown"}</span>
                 </div>);
