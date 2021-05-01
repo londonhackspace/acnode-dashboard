@@ -240,11 +240,11 @@ func (node *ACNodeRec) SetResetCause(rstc string) {
 	node.updateTrigger.OnNodeUpdate(node)
 }
 
-func makeApiTimestamp(t time.Time) int {
+func makeApiTimestamp(t time.Time) int64 {
 	if t.IsZero() {
 		return -1
 	}
-	return int(time.Now().Sub(t).Seconds())
+	return t.Unix()
 }
 
 func (node *ACNodeRec) GetAPIRecord() apitypes.ACNode {

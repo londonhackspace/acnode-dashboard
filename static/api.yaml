@@ -34,17 +34,17 @@ components:
           description: The type of the node
         LastSeen:
           type: integer
-          description: The number of seconds since the node was last seen
+          description: The UTC timestamp the node was last seen
           deprecated: true
         LastSeenAPI:
           type: integer
-          description: The number of seconds since the node was last seen contacting ACServer
+          description: The UTC timestamp of when the node was last seen contacting ACServer
         LastSeenMQTT:
           type: integer
-          description: The number of seconds since the node was last seen sending messages on MQTT
+          description: The UTC timestamp of when the node was last seen sending messages on MQTT
         LastStarted:
           type: integer
-          description: The number of seconds since the node last sent a START message, or -1 if it has not been seen to send one
+          description: The UTC timestamp of when the node last sent a START message, or 0 if it has not been seen to send one
         MemFree:
           type: integer
           description: Amount of RAM free on the device

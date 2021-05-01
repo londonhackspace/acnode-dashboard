@@ -24,7 +24,7 @@ interface NodeLastSeenProps {
 }
 
 interface NodeLastSeenState {
-    sinceLoad : number
+    totalTime : number
 }
 
 const nodeHealthMapping = new Map<NodeHealth, keyof(typeof StatusBallStyleMap)>([
@@ -39,40 +39,39 @@ class NodeLastSeen extends React.Component<NodeLastSeenProps, NodeLastSeenState>
 
     constructor(props : NodeLastSeenProps) {
         super(props);
-        this.state = {sinceLoad: 0};
+        this.state = {totalTime : Math.floor(Date.now()/1000) - this.props.lastseen};
     }
 
     render() {
         let extratext = this.props.source ? " ("+this.props.source +")" : "";
-        let totalTime = this.props.lastseen + this.state.sinceLoad;
         if(this.props.lastseen == -1) {
             return "Never" + extratext;
-        } else if(totalTime < 600) {
-            return totalTime + " seconds ago" + extratext;
+        } else if(this.state.totalTime < 600) {
+            return this.state.totalTime + " seconds ago" + extratext;
         } else {
-            let timestamp = new Date(Date.now()-(totalTime*1000));
+            let timestamp = new Date(this.props.lastseen*1000);
             const today = new Date();
             if(timestamp.getDate()==today.getDate() &&
                 timestamp.getMonth()==today.getMonth() &&
                 timestamp.getFullYear() == today.getFullYear()) {
                 return "Today " + dateformat(timestamp, "hh:mm:ss o") + extratext;
             } else {
-                // if we have an update timer, cancel it since we won't be making any more changes
-                if(this.timer) {
-                    window.clearInterval(this.timer);
-                    this.timer = null;
-                }
                 return dateformat(timestamp, "ddd dd mmm yyyy hh:mm:ss o") + extratext;
             }
 
+            // if we have an update timer, cancel it since we won't be making any more changes
+            if(this.timer) {
+                window.clearInterval(this.timer);
+                this.timer = null;
+            }
         }
     }
 
     componentDidMount() {
-        // no point setting up an update timer if it won't ever do anythings
-        if(this.props.lastseen != -1 && this.props.lastseen < 600) {
+        // no point setting up an update timer if it won't ever do anything
+        if(this.props.lastseen != -1 && this.state.totalTime < 600) {
             this.timer = window.setInterval(() => {
-                this.setState({sinceLoad: this.state.sinceLoad + 1});
+                this.setState({totalTime : Math.floor(Date.now()/1000) - this.props.lastseen});
             }, 1000);
         }
     }
@@ -87,7 +86,7 @@ class NodeLastSeen extends React.Component<NodeLastSeenProps, NodeLastSeenState>
     componentDidUpdate(prevProps: Readonly<NodeLastSeenProps>) {
         if(prevProps.lastseen != this.props.lastseen) {
             // reset counter
-            this.setState({sinceLoad: 0});
+            this.setState({totalTime : Math.floor(Date.now()/1000) - this.props.lastseen});
         }
     }
 }

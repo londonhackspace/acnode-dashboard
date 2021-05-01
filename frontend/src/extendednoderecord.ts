@@ -31,11 +31,9 @@ export default class ExtendedNodeRecord implements NodeRecord {
     health : NodeHealth
     _healthHints : string[] = [];
     healthCalculated : number = 0;
-    recordTime : number;
 
     constructor(noderec : NodeRecord) {
         Object.assign(this, noderec)
-        this.recordTime = Date.now()
         this.health = this.calulateObjectHealth()
         // some fudging to make lastseen an aggregate
         if(this.LastSeenAPI > this.LastSeen) {
@@ -78,9 +76,9 @@ export default class ExtendedNodeRecord implements NodeRecord {
         let health = NodeHealth.GOOD;
         this._healthHints = [];
 
-        let lastSeen = this.LastSeen + (Date.now()-this.recordTime)/1000;
-        let lastSeenMQTT = this.LastSeenMQTT + (Date.now()-this.recordTime)/1000;
-        let lastSeenAPI = this.LastSeenAPI + (Date.now()-this.recordTime)/1000;
+        let lastSeen = (Date.now()/1000) - this.LastSeen;
+        let lastSeenMQTT = (Date.now()/1000) - this.LastSeenMQTT;
+        let lastSeenAPI = (Date.now()/1000) - this.LastSeenAPI;
 
         // use the newer LastSeen values?
         if(this.LastSeenMQTT > -1 || this.LastSeenAPI > -1) {
@@ -96,12 +94,12 @@ export default class ExtendedNodeRecord implements NodeRecord {
                 return NodeHealth.BAD
             }
 
-            if(lastSeenMQTT > 120) {
+            if(this.LastSeenMQTT == -1 || lastSeenMQTT > 120) {
                 this._healthHints.push("Has not sent a message via MQTT in over 2 minutes");
                 health = NodeHealth.MEH;
             }
 
-            if(lastSeenAPI > 600) {
+            if(this.LastSeenAPI == -1 || lastSeenAPI > 600) {
                 this._healthHints.push("Has not contacted ACServer in over 10 minutes");
                 health = NodeHealth.MEH;
             }
