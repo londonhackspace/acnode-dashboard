@@ -8,6 +8,8 @@ type ACNode struct {
 
 	// how many seconds ago was the node last seen?
 	LastSeen int `json:"LastSeen"`
+	LastSeenMQTT int `json:"LastSeenMQTT"`
+	LastSeenAPI int `json:"LastSeenAPI"`
 
 	// When did we last see a START message for it?
 	LastStarted int `json:"LastStarted"`

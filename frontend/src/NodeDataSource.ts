@@ -14,6 +14,7 @@ export default class NodeDataSource {
     private nodeData = new Map<string, ExtendedNodeRecord>();
 
     private ws : WebSocket;
+    private wsRetryMultiplier : number;
 
     constructor(api: APIClient) {
         this.api = api;
@@ -36,6 +37,8 @@ export default class NodeDataSource {
             this.refresh();
         }
         this.ws.onmessage = (evt: MessageEvent) => {
+            // on a message, we can reset the retry backoff
+            this.wsRetryMultiplier = 1;
             let node : NodeRecord =  JSON.parse(evt.data);
             this.nodeData.set(node.mqttName, new ExtendedNodeRecord(node));
             this.dataChangeSig.dispatch();
@@ -46,6 +49,18 @@ export default class NodeDataSource {
             // try to make a normal refresh anyway
             // this might well fix the error if it was an auth error!
             this.refresh()
+        }
+        this.ws.onclose = (evt: CloseEvent) => {
+            console.log("Websocket closed: " + evt.reason)
+            if(!evt.wasClean) {
+                setTimeout(() => {
+                    this.start()
+                }, 1000*this.wsRetryMultiplier);
+                this.wsRetryMultiplier++;
+                if(this.wsRetryMultiplier > 10) {
+                    this.wsRetryMultiplier = 10;
+                }
+            }
         }
     }
 

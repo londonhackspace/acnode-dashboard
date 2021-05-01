@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/londonhackspace/acnode-dashboard/acnode"
+	"github.com/londonhackspace/acnode-dashboard/apitypes"
 	"github.com/londonhackspace/acnode-dashboard/auth"
 	"github.com/londonhackspace/acnode-dashboard/config"
 	"github.com/rs/zerolog/log"
@@ -71,11 +72,6 @@ func (api *Api) handleNodeEntry(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(404)
 }
 
-type SetStatusBody struct {
-	Version string `json:"version",omitempty`
-	Timestamp int64 `json:"timestamp",omitempty`
-}
-
 func (api *Api) handleSetStatus(w http.ResponseWriter, r *http.Request) {
 	if ! api.checkAuth(w, r) {
 		return
@@ -94,7 +90,7 @@ func (api *Api) handleSetStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var status SetStatusBody
+	var status apitypes.SetStatusBody
 
 	err = json.Unmarshal(body, &status)
 	if err != nil {
@@ -115,7 +111,7 @@ func (api *Api) handleSetStatus(w http.ResponseWriter, r *http.Request) {
 
 		if status.Timestamp > 0 {
 			d := time.Unix(status.Timestamp, 0)
-			n.SetLastSeen(d)
+			n.SetLastSeenAPI(d)
 		}
 
 		var s = string(body)

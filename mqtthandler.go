@@ -104,7 +104,7 @@ func (handler *MqttHandler) cbMessage(client mqtt.Client, msg mqtt.Message) {
 
 	// this check prevents Octoprint from marking nodes as recently alive
 	if topicParts[3] == "announcements" || topicParts[3] == "status" || topicParts[3] == "bell" {
-		node.SetLastSeen(time.Now())
+		node.SetLastSeenMQTT(time.Now())
 	}
 
 	log.Debug().

@@ -1,4 +1,4 @@
-import React from "react";
+import React, {ReactElement} from "react";
 import dateformat from "dateformat";
 
 import styles from "./nodetable.module.css";
@@ -20,6 +20,7 @@ interface NodeTableState {
 
 interface NodeLastSeenProps {
     lastseen : number
+    source? : string
 }
 
 interface NodeLastSeenState {
@@ -42,20 +43,21 @@ class NodeLastSeen extends React.Component<NodeLastSeenProps, NodeLastSeenState>
     }
 
     render() {
+        let extratext = this.props.source ? " ("+this.props.source +")" : "";
         let totalTime = this.props.lastseen + this.state.sinceLoad;
         if(this.props.lastseen == -1) {
-            return "Never";
+            return "Never" + extratext;
         } else if(totalTime < 600) {
-            return totalTime + " seconds ago";
+            return totalTime + " seconds ago" + extratext;
         } else {
             let timestamp = new Date(Date.now()-(totalTime*1000));
             const today = new Date();
             if(timestamp.getDate()==today.getDate() &&
                 timestamp.getMonth()==today.getMonth() &&
                 timestamp.getFullYear() == today.getFullYear()) {
-                return "Today " + dateformat(timestamp, "hh:mm:ss o");
+                return "Today " + dateformat(timestamp, "hh:mm:ss o") + extratext;
             } else {
-                return dateformat(timestamp, "ddd dd mmm yyyy hh:mm:ss o");
+                return dateformat(timestamp, "ddd dd mmm yyyy hh:mm:ss o") + extratext;
             }
 
         }
@@ -110,11 +112,22 @@ export default class NodeTable extends React.Component<NodeTableProps, NodeTable
             let setActive = () => {
                 this.props.dataSource.setActiveRow(node.mqttName);
             }
+
+            let lastSeenNodes : ReactElement[] = []
+
+            if(node.LastSeenMQTT >= 0 || node.LastSeenAPI >= 0) {
+                lastSeenNodes.push(<NodeLastSeen source="MQTT" lastseen={node.LastSeenMQTT}/>);
+                lastSeenNodes.push(<br></br>);
+                lastSeenNodes.push(<NodeLastSeen  source="API" lastseen={node.LastSeenAPI}/>);
+            } else {
+                lastSeenNodes.push(<NodeLastSeen lastseen={node.LastSeen}/>);
+            }
+
             return <tr key={node.mqttName} className={rowStyle}>
                 <td>{node.id || "-"}</td>
                 <td><a href="#" onClick={setActive}>{node.name}</a></td>
                 <td>{node.SettingsVersion || ""}</td>
-                <td><NodeLastSeen lastseen={node.LastSeen}/></td>
+                <td>{ lastSeenNodes }</td>
                 <td><NodeLastSeen lastseen={node.LastStarted}/></td>
                 <td><StatusBall state={nodeHealthMapping.get(node.objectHealth)}/></td>
             </tr>;

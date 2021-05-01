@@ -6,6 +6,8 @@ export interface NodeRecord {
     mqttName: string;
     nodeType: string;
     LastSeen: number;
+    LastSeenAPI: number;
+    LastSeenMQTT: number;
     LastStarted: number;
     MemFree: number;
     MemUsed: number;

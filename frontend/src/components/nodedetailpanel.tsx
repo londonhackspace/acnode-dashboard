@@ -1,5 +1,5 @@
 import React, {ReactElement} from "react";
-import {NodeRecord} from "../apiclient/dashapi";
+import ExtendedNodeRecord from "../extendednoderecord";
 import Chart from "./chart";
 import styles from "./nodedetailspanel.module.css"
 
@@ -9,7 +9,7 @@ const chartColors : string[] = [
 ];
 
 interface NodeDetailPanelProps {
-    node : NodeRecord
+    node : ExtendedNodeRecord
 }
 
 interface NodeDetailPanelState {
@@ -43,6 +43,13 @@ export default class NodeDetailPanel extends React.Component<NodeDetailPanelProp
             addNodeProps("Settings Version", node.SettingsVersion);
             addNodeProps("Settings Version (EEPROM)", node.EEPROMSettingsVersion);
             addNodeProps("Reset Cause", node.ResetCause);
+
+            if(node.healthHints.length > 0) {
+                parts.push(<div className={styles.nodehealthints}>
+                    <span className={styles.nodepropstitle}>Health Hints:</span>
+                    <ul>{node.healthHints.map(hh => <li>{hh}</li>)}</ul>
+                </div>);
+            }
 
             if(node.MemUsed > 0) {
                 let data = new Map<string,number>();

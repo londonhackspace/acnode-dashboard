@@ -34,7 +34,14 @@ components:
           description: The type of the node
         LastSeen:
           type: integer
-          description: The number of seconds since the node was last seen sending messages
+          description: The number of seconds since the node was last seen
+          deprecated: true
+        LastSeenAPI:
+          type: integer
+          description: The number of seconds since the node was last seen contacting ACServer
+        LastSeenMQTT:
+          type: integer
+          description: The number of seconds since the node was last seen sending messages on MQTT
         LastStarted:
           type: integer
           description: The number of seconds since the node last sent a START message, or -1 if it has not been seen to send one

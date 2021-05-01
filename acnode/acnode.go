@@ -36,7 +36,10 @@ type ACNodeRec struct {
 	NodeType int
 
 	// last known status
-	LastSeen time.Time
+	LastSeen time.Time // old LastSeen field
+	LastSeenMQTT time.Time
+	LastSeenAPI time.Time
+
 	LastStarted time.Time
 	MemFree int
 	MemUsed int
@@ -59,7 +62,10 @@ type ACNode interface {
 	SetMemoryStats(free int, used int)
 	SetVersion(ver string)
 	GetLastSeen() time.Time
-	SetLastSeen(t time.Time)
+	GetLastSeenAPI() time.Time
+	SetLastSeenAPI(t time.Time)
+	GetLastSeenMQTT() time.Time
+	SetLastSeenMQTT(t time.Time)
 	GetLastStarted() time.Time
 	SetLastStarted(t time.Time)
 	SetStatusMessage(m string)
@@ -142,15 +148,46 @@ func (node *ACNodeRec) GetLastSeen() time.Time {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
-	return node.LastSeen
+	if node.LastSeen.After(node.LastSeenAPI) && node.LastSeen.After(node.LastSeenMQTT) {
+		return node.LastSeen
+	}
+
+	if node.LastSeenAPI.After(node.LastSeenMQTT) {
+		return node.LastSeenAPI
+	}
+
+	return node.LastSeenMQTT
 }
 
-func (node *ACNodeRec) SetLastSeen(t time.Time) {
+func (node *ACNodeRec) GetLastSeenAPI() time.Time {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
-	if t.After(node.LastSeen) {
-		node.LastSeen = t
+	return node.LastSeenAPI
+}
+
+func (node *ACNodeRec) SetLastSeenAPI(t time.Time) {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
+	if t.After(node.LastSeenAPI) {
+		node.LastSeenAPI = t
+		node.updateTrigger.OnNodeUpdate(node)
+	}
+}
+
+func (node *ACNodeRec) GetLastSeenMQTT() time.Time {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
+	return node.LastSeenMQTT
+}
+func (node *ACNodeRec) SetLastSeenMQTT(t time.Time) {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
+	if t.After(node.LastSeenMQTT) {
+		node.LastSeenMQTT = t
 		node.updateTrigger.OnNodeUpdate(node)
 	}
 }
@@ -203,19 +240,23 @@ func (node *ACNodeRec) SetResetCause(rstc string) {
 	node.updateTrigger.OnNodeUpdate(node)
 }
 
+func makeApiTimestamp(t time.Time) int {
+	if t.IsZero() {
+		return -1
+	}
+	return int(time.Now().Sub(t).Seconds())
+}
+
 func (node *ACNodeRec) GetAPIRecord() apitypes.ACNode {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
-	// if we've never seen it, return -1 in this field
-	lastSeen := int(time.Now().Sub(node.LastSeen).Seconds())
-	if node.LastSeen.IsZero() {
-		lastSeen = -1
-	}
-
-	lastStarted := int(time.Now().Sub(node.LastStarted).Seconds())
-	if node.LastStarted.IsZero() {
-		lastStarted = -1
+	// figure out which LastSeen value to include
+	lastSeen := makeApiTimestamp(node.LastSeen)
+	if node.LastSeenMQTT.After(node.LastSeenAPI) && node.LastSeenMQTT.After(node.LastSeen) {
+		lastSeen = makeApiTimestamp(node.LastSeenMQTT)
+	} else if node.LastSeenAPI.After(node.LastSeenMQTT) && node.LastSeenAPI.After(node.LastSeen) {
+		lastSeen = makeApiTimestamp(node.LastSeenAPI)
 	}
 
 	return apitypes.ACNode{
@@ -224,7 +265,9 @@ func (node *ACNodeRec) GetAPIRecord() apitypes.ACNode {
 		MqttName: 	   node.MqttName,
 		Type:          NodeTypeToString(node.NodeType),
 		LastSeen:      lastSeen,
-		LastStarted:   lastStarted,
+		LastSeenAPI:   makeApiTimestamp(node.LastSeenAPI),
+		LastSeenMQTT:  makeApiTimestamp(node.LastSeenMQTT),
+		LastStarted:   makeApiTimestamp(node.LastStarted),
 		MemFree:       node.MemFree,
 		MemUsed:       node.MemUsed,
 		StatusMessage: node.StatusMessage,

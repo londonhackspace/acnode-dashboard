@@ -17,3 +17,13 @@
 .nodepropsvalue {
 
 }
+
+.nodehealthints {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.nodehealthints ul {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
