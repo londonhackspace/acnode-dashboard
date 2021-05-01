@@ -30,9 +30,12 @@ export default class ExtendedNodeRecord implements NodeRecord {
 
     health : NodeHealth
     _healthHints : string[] = [];
+    healthCalculated : number = 0;
+    recordTime : number;
 
     constructor(noderec : NodeRecord) {
         Object.assign(this, noderec)
+        this.recordTime = Date.now()
         this.health = this.calulateObjectHealth()
         // some fudging to make lastseen an aggregate
         if(this.LastSeenAPI > this.LastSeen) {
@@ -48,16 +51,36 @@ export default class ExtendedNodeRecord implements NodeRecord {
     }
 
     get objectHealth() : NodeHealth {
-        return this.health
+        return this.health;
     }
 
     get healthHints() : string[] {
-        return this._healthHints
+        return this._healthHints;
+    }
+
+    get healthStatusAge() : number {
+        return Date.now()-this.healthCalculated;
+    }
+
+    refreshObjectHealth() : boolean {
+        console.log("Calculating health for " + this.name);
+        let newHealth = this.calulateObjectHealth();
+        if(newHealth != this.health) {
+            this.healthCalculated = Date.now();
+            this.health = newHealth;
+            return true;
+        }
+        return false;
     }
 
     private calulateObjectHealth() : NodeHealth {
         // basic idea: Start at good, degrade if needed
         let health = NodeHealth.GOOD;
+        this._healthHints = [];
+
+        let lastSeen = this.LastSeen + (Date.now()-this.recordTime)/1000;
+        let lastSeenMQTT = this.LastSeenMQTT + (Date.now()-this.recordTime)/1000;
+        let lastSeenAPI = this.LastSeenAPI + (Date.now()-this.recordTime)/1000;
 
         // use the newer LastSeen values?
         if(this.LastSeenMQTT > -1 || this.LastSeenAPI > -1) {
@@ -65,35 +88,35 @@ export default class ExtendedNodeRecord implements NodeRecord {
                 return NodeHealth.UNKNOWN;
             }
 
-            if(this.LastSeenMQTT > 120) {
+            // if we're seeing neither MQTT or ACServer log entries,
+            // it's probably dead
+            if((lastSeenAPI > 600 || this.LastSeenAPI == -1)
+                && (lastSeenMQTT > 600 || this.LastSeenMQTT == -1)) {
+                this._healthHints.push("Has not been seen online in any form in over 10 minutes");
+                return NodeHealth.BAD
+            }
+
+            if(lastSeenMQTT > 120) {
                 this._healthHints.push("Has not sent a message via MQTT in over 2 minutes");
                 health = NodeHealth.MEH;
             }
 
-            if(this.LastSeenAPI > 600) {
+            if(lastSeenAPI > 600) {
                 this._healthHints.push("Has not contacted ACServer in over 10 minutes");
                 health = NodeHealth.MEH;
             }
 
-            // if we're seeing neither MQTT or ACServer log entries,
-            // it's probably dead
-            if((this.LastSeenAPI > 600 || this.LastSeenAPI == -1)
-                && (this.LastSeenMQTT > 120 || this.LastSeenMQTT == -1)) {
-                this._healthHints.push("Has not been seen online in a while");
-                return NodeHealth.BAD
-            }
-
         } else {
-            if(this.LastSeen > 600) {
-                this._healthHints.push("Has not been seen online in over 10 minutes");
-                health = NodeHealth.BAD;
-            } else if(this.LastSeen > 60) {
-                this._healthHints.push("Has not been seen online in over a minute");
-                return NodeHealth.MEH;
-            }
-
             if(this.LastSeen == -1) {
                 return NodeHealth.UNKNOWN;
+            }
+
+            if(lastSeen > 600) {
+                this._healthHints.push("Has not been seen online in over 10 minutes");
+                health = NodeHealth.BAD;
+            } else if(lastSeen > 60) {
+                this._healthHints.push("Has not been seen online in over a minute");
+                return NodeHealth.MEH;
             }
         }
 

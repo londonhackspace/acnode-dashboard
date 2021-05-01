@@ -57,6 +57,11 @@ class NodeLastSeen extends React.Component<NodeLastSeenProps, NodeLastSeenState>
                 timestamp.getFullYear() == today.getFullYear()) {
                 return "Today " + dateformat(timestamp, "hh:mm:ss o") + extratext;
             } else {
+                // if we have an update timer, cancel it since we won't be making any more changes
+                if(this.timer) {
+                    window.clearInterval(this.timer);
+                    this.timer = null;
+                }
                 return dateformat(timestamp, "ddd dd mmm yyyy hh:mm:ss o") + extratext;
             }
 
@@ -64,13 +69,19 @@ class NodeLastSeen extends React.Component<NodeLastSeenProps, NodeLastSeenState>
     }
 
     componentDidMount() {
-        this.timer = window.setInterval(() => {
-            this.setState({sinceLoad: this.state.sinceLoad + 1});
-        }, 1000);
+        // no point setting up an update timer if it won't ever do anythings
+        if(this.props.lastseen != -1 && this.props.lastseen < 600) {
+            this.timer = window.setInterval(() => {
+                this.setState({sinceLoad: this.state.sinceLoad + 1});
+            }, 1000);
+        }
     }
 
     componentWillUnmount() {
-        window.clearInterval(this.timer);
+        if(this.timer) {
+            window.clearInterval(this.timer);
+            this.timer = null;
+        }
     }
 
     componentDidUpdate(prevProps: Readonly<NodeLastSeenProps>) {

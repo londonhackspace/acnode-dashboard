@@ -16,14 +16,14 @@ export default class NodeDataSource {
     private ws : WebSocket;
     private wsRetryMultiplier : number;
 
+    private recalculateTimer : number;
+
     constructor(api: APIClient) {
         this.api = api;
         this._activeRow = "";
     }
 
-    start() {
-        this.stop();
-
+    private connect() {
         let wsurl : string;
         if(window.location.protocol === 'https:') {
             wsurl = "wss://"+window.location.host+"/ws";
@@ -54,7 +54,7 @@ export default class NodeDataSource {
             console.log("Websocket closed: " + evt.reason)
             if(!evt.wasClean) {
                 setTimeout(() => {
-                    this.start()
+                    this.connect()
                 }, 1000*this.wsRetryMultiplier);
                 this.wsRetryMultiplier++;
                 if(this.wsRetryMultiplier > 10) {
@@ -64,12 +64,34 @@ export default class NodeDataSource {
         }
     }
 
+    start() {
+        this.stop();
+        this.connect()
+        this.recalculateTimer = window.setInterval(() => {
+            let changed = false;
+            console.log("Recalculating node health status");
+            this.nodeData.forEach((node, name) => {
+                let previousHealth = node.health;
+                let thisChanged = node.refreshObjectHealth();
+                changed = changed || thisChanged;
+                if(thisChanged) {
+                   console.log("Node " + node.name + " changed from " + previousHealth + " to " + node.health);
+                }
+            });
+            if(changed) {
+                this.dataChangeSig.dispatch();
+            }
+        }, 5000);
+    }
+
     stop() {
         if(this.ws) {
             console.log("Closing websocket connection");
             this.ws.close()
             this.ws = null;
         }
+        window.clearInterval(this.recalculateTimer);
+        this.recalculateTimer = -1;
     }
 
     refresh() {
