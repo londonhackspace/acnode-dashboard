@@ -50,7 +50,7 @@ COPY --from=nodebuilder /build/acnode-dashboard/frontend/bundle.tar frontend.tar
 COPY static static
 COPY templates templates
 
-RUN mkdir static/newfrontend && cd static/newfrontend && tar -xf ../../frontend.tar && rm -f ../../frontend.tar
+RUN mkdir static && cd static&& tar -xf ../frontend.tar && rm -f ../frontend.tar
 
 RUN adduser -S acnodedashboard
 
