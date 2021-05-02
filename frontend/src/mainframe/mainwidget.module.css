@@ -10,6 +10,7 @@
 .mainRow {
     grid-row: 1;
     overflow: scroll;
+    margin-top: 0.5em;
 }
 
 .wideRow {

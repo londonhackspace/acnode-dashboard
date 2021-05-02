@@ -62,7 +62,7 @@ export default class MainWidget extends React.Component<MainWidgetProps, MainWid
 
 
         return <div className={styles.mainwidget}>
-            <div className={styles.mainRow}>Nodes:<br/>{mainNode}</div>
+            <div className={styles.mainRow}>{mainNode}</div>
             <div className={styles.mainRow}><NodeDetailPanel node={activeNode}></NodeDetailPanel></div>
         </div>
     }
