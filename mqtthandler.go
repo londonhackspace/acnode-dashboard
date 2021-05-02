@@ -30,17 +30,10 @@ func CreateMQTTHandler(config *config.Config, acnodehandler *acnode.ACNodeHandle
 }
 
 func (handler *MqttHandler) cbMessage(client mqtt.Client, msg mqtt.Message) {
-	log.Debug().
-		Str("Topic", msg.Topic()).
-		Msg("Handing message start")
-
 	topicParts := strings.Split(msg.Topic(), "/")
 
 	if len(topicParts) < 4 {
-		// Not enough to work with ere
-		log.Debug().
-			Str("Topic", msg.Topic()).
-			Msg("Handing message end short")
+		// Not enough to work with here
 		return
 	}
 
@@ -106,10 +99,6 @@ func (handler *MqttHandler) cbMessage(client mqtt.Client, msg mqtt.Message) {
 	if topicParts[3] == "announcements" || topicParts[3] == "status" || topicParts[3] == "bell" {
 		node.SetLastSeenMQTT(time.Now())
 	}
-
-	log.Debug().
-		Str("Topic", msg.Topic()).
-		Msg("Handing message end")
 }
 
 func (handler *MqttHandler) handleMqtt() {

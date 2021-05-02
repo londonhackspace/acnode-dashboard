@@ -22,6 +22,7 @@ type client struct {
 }
 
 func (cl *client) run() {
+	log.Info().Str("RemoteAddr", cl.conn.RemoteAddr().String()).Msg("New Websocket Connection")
 	go cl.reader()
 	go cl.writer()
 }
@@ -35,6 +36,7 @@ func (cl *client) writer() {
 		}
 		err := cl.conn.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
+			log.Err(err).Msg("Error writing to websocket connection")
 			break
 		}
 	}
@@ -98,6 +100,7 @@ func (ws *WebSocket) process() {
 				if _, ok := ws.clients[c];ok {
 					delete(ws.clients, c)
 					close(c.outgoing)
+					log.Info().Msg("Websocket Connection Removed")
 				}
 		}
 	}
