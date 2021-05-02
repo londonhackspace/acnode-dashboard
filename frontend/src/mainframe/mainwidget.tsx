@@ -7,6 +7,7 @@ import styles from "./mainwidget.module.css";
 import NodeTable from "../components/nodetable";
 import NodeDetailPanel from "../components/nodedetailpanel"
 import Spinner from "../components/spinner"
+import ExtendedNodeRecord from "../extendednoderecord";
 
 interface MainWidgetProps {
     api : Api;
@@ -45,7 +46,7 @@ export default class MainWidget extends React.Component<MainWidgetProps, MainWid
     }
 
     render() {
-        let activeNode : NodeRecord = null;
+        let activeNode : ExtendedNodeRecord = null;
 
         if(this.state.activeRow && this.state.activeRow != "") {
             activeNode = this.ds.getNode(this.state.activeRow);

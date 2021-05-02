@@ -61,7 +61,6 @@ export default class ExtendedNodeRecord implements NodeRecord {
     }
 
     refreshObjectHealth() : boolean {
-        console.log("Calculating health for " + this.name);
         let newHealth = this.calulateObjectHealth();
         if(newHealth != this.health) {
             this.healthCalculated = Date.now();

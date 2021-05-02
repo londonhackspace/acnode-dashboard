@@ -56,7 +56,7 @@ export default class NodeDataSource {
             this.refresh()
         }
         this.ws.onclose = (evt: CloseEvent) => {
-            console.log("Websocket closed: " + evt.reason)
+            console.log("Websocket closed: " + evt.reason + " - " + evt.wasClean ? "clean" : "unclean")
             if(!evt.wasClean) {
                 setTimeout(() => {
                     this.connect()
@@ -70,12 +70,14 @@ export default class NodeDataSource {
     }
 
     start() {
-        this.stop();
+        if(this.running) {
+            this.stop();
+        }
+        console.log("Starting NodeDataSource");
         this.running = true;
         this.connect()
         this.recalculateTimer = window.setInterval(() => {
             let changed = false;
-            console.log("Recalculating node health status");
             this.nodeData.forEach((node, name) => {
                 let previousHealth = node.health;
                 let thisChanged = node.refreshObjectHealth();
@@ -91,6 +93,7 @@ export default class NodeDataSource {
     }
 
     stop() {
+        console.log("Stopping NodeDataSource");
         this.running = false;
         if(this.ws) {
             console.log("Closing websocket connection");
