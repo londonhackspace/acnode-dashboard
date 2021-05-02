@@ -21,9 +21,9 @@ func (w *Watcher) Run() {
 
 			var deducedType int = acnode.NodeTypeTool
 
-			if t.Type == "" {
+			if t.Type == "Tool" {
 				deducedType = acnode.NodeTypeTool
-			} else if t.Type == "" {
+			} else if t.Type == "Unrestricted Door" || t.Type == "Restricted Door" {
 				deducedType = acnode.NodeTypeDoor
 			}
 

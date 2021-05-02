@@ -138,6 +138,7 @@ export default class NodeDataSource {
             return Promise.all(nodes.map(n => this.api.getNode(n)));
         }).then((results) => {
             for(let res of results) {
+                if(!res) continue;
                 this.nodeData.set(res.mqttName, new ExtendedNodeRecord(res));
             }
             this.dataChangeSig.dispatch();
