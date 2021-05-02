@@ -8,6 +8,7 @@ import (
 
 type LogWatcherConfig struct {
 	LogFile string `json:"LogFile"`
+	Follow bool `json:"follow"`
 	ACNodeDashApiUrl string `json:"acnodedash-apiurl"`
 	ACNodeDashApiKey string `json:"acnodedash-apikey"`
 }
@@ -24,7 +25,9 @@ func GetConfig(filename string) LogWatcherConfig {
 		panic(err)
 	}
 
-	var ret LogWatcherConfig
+	ret := LogWatcherConfig{
+		Follow: true,
+	}
 
 	json.Unmarshal(data, &ret)
 

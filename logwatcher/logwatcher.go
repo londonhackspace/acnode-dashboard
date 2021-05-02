@@ -16,7 +16,7 @@ const regexmatcher string = "[0-9\\.]+\\s-\\s(?:.*)\\s\\[([0-9\\/A-Za-z\\:\\+\\s
 func main() {
 	cfg := GetConfig(os.Args[1])
 
-	t, err := tail.TailFile(cfg.LogFile, tail.Config{Follow: true, ReOpen: true, MustExist: true})
+	t, err := tail.TailFile(cfg.LogFile, tail.Config{Follow: cfg.Follow, ReOpen: cfg.Follow, MustExist: true})
 	if err != nil {
 		panic(err)
 	}
@@ -27,7 +27,7 @@ func main() {
 		if len(res) == 4 {
 			version := res[3]
 			nodeId := res[2]
-			date,_ := time.Parse("2/Jan/2006:15:04:05 -0700", res[1])
+			date,_ := time.Parse("02/Jan/2006:15:04:05 -0700", res[1])
 			var b apitypes.SetStatusBody
 			b.Version = version
 			b.Timestamp = date.Unix()
