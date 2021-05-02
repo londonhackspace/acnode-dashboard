@@ -43,7 +43,9 @@ export class MainFrame extends React.Component<MainFrameProps,MainFrameState> {
                     <div className={styles.title}>ACNode Dashboard</div>
                     <div className={styles.authButtons}><a href="#" onClick={this.onLogout.bind(this)}>Logout</a></div>
                 </div>
-                <MainWidget api={this.props.api}></MainWidget>
+                <div className={styles.pageBody}>
+                    <MainWidget api={this.props.api}></MainWidget>
+                </div>
             </div>;
     }
 
