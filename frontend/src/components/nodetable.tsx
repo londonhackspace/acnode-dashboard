@@ -54,9 +54,9 @@ class NodeLastSeen extends React.Component<NodeLastSeenProps, NodeLastSeenState>
             if(timestamp.getDate()==today.getDate() &&
                 timestamp.getMonth()==today.getMonth() &&
                 timestamp.getFullYear() == today.getFullYear()) {
-                return "Today " + dateformat(timestamp, "HH:mm:ss o") + extratext;
+                return "Today " + dateformat(timestamp, "HH:MM:ss o") + extratext;
             } else {
-                return dateformat(timestamp, "ddd dd mmm yyyy HH:mm:ss o") + extratext;
+                return dateformat(timestamp, "ddd dd mmm yyyy HH:MM:ss o") + extratext;
             }
 
             // if we have an update timer, cancel it since we won't be making any more changes
