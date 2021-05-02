@@ -19,6 +19,8 @@ export default class NodeDataSource {
     private recalculateTimer : number;
     private running : boolean;
 
+    private websocketpolltimer : number
+
     constructor(api: APIClient) {
         this.api = api;
         this._activeRow = "";
@@ -40,6 +42,10 @@ export default class NodeDataSource {
             console.log("Opened websocket connection");
             // once we're connected, do a full refresh so we don't miss anything
             this.refresh();
+            this.websocketpolltimer = window.setInterval(() => {
+                // send some data once in a while to prevent timeouts
+                this.ws.send("dummy");
+            },10000);
         }
         this.ws.onmessage = (evt: MessageEvent) => {
             // on a message, we can reset the retry backoff
@@ -54,8 +60,12 @@ export default class NodeDataSource {
             // try to make a normal refresh anyway
             // this might well fix the error if it was an auth error!
             this.refresh()
+            window.clearInterval(this.websocketpolltimer)
+            this.websocketpolltimer = null
         }
         this.ws.onclose = (evt: CloseEvent) => {
+            window.clearInterval(this.websocketpolltimer)
+            this.websocketpolltimer = null
             console.log("Websocket closed: " + evt.reason + " - " + evt.wasClean ? "clean" : "unclean")
             if(!evt.wasClean) {
                 setTimeout(() => {
