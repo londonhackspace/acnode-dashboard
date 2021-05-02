@@ -12,6 +12,11 @@ func CreateInitialUser(p Provider) {
 	if err != nil {
 		log.Err(err).Msg("")
 	} else {
-		log.Info().Str("username", "admin").Str("password", pw).Msg("Created initial user")
+		err = p.AddUserToGroup("admin", "Admins")
+		if err != nil {
+			log.Err(err).Msg("")
+		} else {
+			log.Info().Str("username", "admin").Str("password", pw).Msg("Created initial user")
+		}
 	}
 }

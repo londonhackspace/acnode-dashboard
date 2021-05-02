@@ -20,6 +20,8 @@ type User struct {
 	UserType int
 
 	Name string `json:"name"`
+	UserName string `json:"username"`
+	Groups []string
 
 	source string `json:"source"`
 }

@@ -114,7 +114,9 @@ func (h *ACNodeHandler) AddNode(node ACNodeRec) {
 	nodeCounter.Inc()
 	h.nodes = append(h.nodes, node)
 	for l := range h.listeners {
-		l.nodeAdded <- &h.nodes[len(h.nodes)-1]
+		go func() {
+			l.nodeAdded <- &h.nodes[len(h.nodes)-1]
+		}()
 	}
 }
 

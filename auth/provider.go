@@ -6,4 +6,7 @@ type Provider interface {
 	LoginUser(username string, password string) (User,error)
 
 	AddUser(username string, password string, usertype int) error
+	GetUser(username string) (User, error)
+
+	AddUserToGroup(username string, group string) error
 }
