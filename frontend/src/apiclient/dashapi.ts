@@ -98,7 +98,7 @@ export default class DashAPI {
     }
 
     login(username : string, password: string) : Promise<boolean> {
-        return this.makePostRequest("/auth/login", JSON.stringify({
+        return this.makePostRequest("auth/login", JSON.stringify({
             username: username,
             password: password,
         })).then((ret : number) =>{
@@ -109,7 +109,7 @@ export default class DashAPI {
     }
 
     logout() {
-        this.makeRequest("/auth/logout").then(() => {
+        this.makeRequest("auth/logout").then(() => {
             this._loginRequired = true;
             this.loginRequiredSignal.dispatchAsync(true);
         });
