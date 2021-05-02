@@ -3,7 +3,7 @@ import APIClient, {NodeRecord} from "./apiclient/dashapi"
 import { SignalDispatcher, SimpleEventDispatcher } from "strongly-typed-events"
 import ExtendedNodeRecord from "./extendednoderecord";
 
-
+const useWebsockets = false;
 
 export default class NodeDataSource {
     private api : APIClient;
@@ -19,7 +19,7 @@ export default class NodeDataSource {
     private recalculateTimer : number;
     private running : boolean;
 
-    private websocketpolltimer : number
+    private polltimer : number
 
     constructor(api: APIClient) {
         this.api = api;
@@ -27,10 +27,7 @@ export default class NodeDataSource {
         this.running = false;
     }
 
-    private connect() {
-        if(!this.running) {
-            return;
-        }
+    private connectWS() {
         let wsurl : string;
         if(window.location.protocol === 'https:') {
             wsurl = "wss://"+window.location.host+"/ws";
@@ -42,7 +39,8 @@ export default class NodeDataSource {
             console.log("Opened websocket connection");
             // once we're connected, do a full refresh so we don't miss anything
             this.refresh();
-            this.websocketpolltimer = window.setInterval(() => {
+            this.polltimer = window.setInterval(() => {
+                console.log("Stuffing junk into websocket to keep it alive (hopefully)");
                 // send some data once in a while to prevent timeouts
                 this.ws.send("dummy");
             },10000);
@@ -60,12 +58,12 @@ export default class NodeDataSource {
             // try to make a normal refresh anyway
             // this might well fix the error if it was an auth error!
             this.refresh()
-            window.clearInterval(this.websocketpolltimer)
-            this.websocketpolltimer = null
+            window.clearInterval(this.polltimer)
+            this.polltimer = null
         }
         this.ws.onclose = (evt: CloseEvent) => {
-            window.clearInterval(this.websocketpolltimer)
-            this.websocketpolltimer = null
+            window.clearInterval(this.polltimer)
+            this.polltimer = null
             console.log("Websocket closed: " + evt.reason + " - " + evt.wasClean ? "clean" : "unclean")
             if(!evt.wasClean) {
                 setTimeout(() => {
@@ -76,6 +74,22 @@ export default class NodeDataSource {
                     this.wsRetryMultiplier = 10;
                 }
             }
+        }
+    }
+
+    private connect() {
+        if(!this.running) {
+            return;
+        }
+        if(useWebsockets) {
+            this.connectWS()
+        } else {
+            console.log("Setting up periodic refresh timer");
+            this.polltimer = window.setInterval(() => {
+                console.log("Refreshing data");
+                this.refresh();
+            }, 10000);
+            this.refresh();
         }
     }
 
@@ -109,6 +123,11 @@ export default class NodeDataSource {
             console.log("Closing websocket connection");
             this.ws.close()
             this.ws = null;
+        }
+        if(this.polltimer) {
+            console.log("Clearing up poll timer");
+            window.clearInterval(this.polltimer);
+            this.polltimer = null;
         }
         window.clearInterval(this.recalculateTimer);
         this.recalculateTimer = -1;
