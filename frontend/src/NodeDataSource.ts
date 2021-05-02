@@ -17,13 +17,18 @@ export default class NodeDataSource {
     private wsRetryMultiplier : number;
 
     private recalculateTimer : number;
+    private running : boolean;
 
     constructor(api: APIClient) {
         this.api = api;
         this._activeRow = "";
+        this.running = false;
     }
 
     private connect() {
+        if(!this.running) {
+            return;
+        }
         let wsurl : string;
         if(window.location.protocol === 'https:') {
             wsurl = "wss://"+window.location.host+"/ws";
@@ -66,6 +71,7 @@ export default class NodeDataSource {
 
     start() {
         this.stop();
+        this.running = true;
         this.connect()
         this.recalculateTimer = window.setInterval(() => {
             let changed = false;
@@ -85,6 +91,7 @@ export default class NodeDataSource {
     }
 
     stop() {
+        this.running = false;
         if(this.ws) {
             console.log("Closing websocket connection");
             this.ws.close()
