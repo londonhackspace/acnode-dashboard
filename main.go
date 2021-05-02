@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/go-redis/redis/v8"
+	"github.com/gorilla/handlers"
 	"github.com/londonhackspace/acnode-dashboard/acnode"
 	"github.com/londonhackspace/acnode-dashboard/acserver_api"
 	"github.com/londonhackspace/acnode-dashboard/acserverwatcher"
@@ -14,6 +15,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"html/template"
 	"net/http"
@@ -148,6 +151,9 @@ func main() {
 	// Add Swagger for API docs
 	rtr.HandleFunc("/swagger/", handleSwagger)
 
+	// Prometheus-format metrics
+	rtr.Handle("/metrics", promhttp.Handler())
+
 	listen, ok := os.LookupEnv("LISTEN_ADDR")
 
 	if !ok {
@@ -156,5 +162,5 @@ func main() {
 
 	log.Info().Msg("Listening on " + listen)
 	handler := CreateCacheHeaderInserter(rtr, CachePolicyNever)
-	http.ListenAndServe(listen, LoggingHandler{ next: handler })
+	http.ListenAndServe(listen, handlers.ProxyHeaders(LoggingHandler{ next: handler }))
 }

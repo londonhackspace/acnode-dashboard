@@ -7,11 +7,24 @@ import (
 	"github.com/londonhackspace/acnode-dashboard/apitypes"
 	"github.com/londonhackspace/acnode-dashboard/auth"
 	"github.com/londonhackspace/acnode-dashboard/config"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
+)
+
+var (
+	requestCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "api_requests_served",
+		Help: "API Request counter",
+	}, []string{"endpoint","method"})
+	inflightCounter = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "api_inflight_requests",
+		Help: "Currently in-flight API requests",
+	})
 )
 
 type Api struct {
@@ -169,6 +182,17 @@ func (api *Api) handleLogout(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(204)
 }
 
+type promInterceptor struct {
+	next http.Handler
+}
+
+func (i promInterceptor) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	requestCounter.WithLabelValues(r.URL.Path, r.Method).Inc()
+	inflightCounter.Inc()
+	i.next.ServeHTTP(w, r)
+	inflightCounter.Dec()
+}
+
 func (api *Api) GetRouter() http.Handler {
 	rtr := mux.NewRouter()
 
@@ -177,5 +201,5 @@ func (api *Api) GetRouter() http.Handler {
 	rtr.HandleFunc("/nodes/setStatus/{id}", api.handleSetStatus)
 	rtr.Methods("POST").Path("/auth/login").HandlerFunc(api.handleLogin)
 	rtr.HandleFunc("/auth/logout", api.handleLogout)
-	return rtr
+	return promInterceptor{next: rtr}
 }

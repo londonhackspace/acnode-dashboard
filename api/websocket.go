@@ -5,8 +5,39 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/londonhackspace/acnode-dashboard/acnode"
 	"github.com/londonhackspace/acnode-dashboard/auth"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
 	"net/http"
+	"time"
+)
+
+const (
+	writeTimeout = 10 * time.Second
+
+	// Be fairly aggressive with the pings since we don't receive anything else
+	// and theoretically outoging messages might be occasional
+	pingPeriod = 10 * time.Second
+	pongWait = 30 * time.Second
+)
+
+var (
+	clientCounter = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "websocket_client_count",
+		Help: "Number of clients connected",
+	})
+	connectionCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "websocket_connection_count",
+		Help: "Total number of connections",
+	})
+	disconnectionCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "websocket_disconnection_count",
+		Help: "Total number of disconnections",
+	})
+	messageSentCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "websocket_message_sent_count",
+		Help: "Number of messages sent to clients",
+	})
 )
 
 var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool {
@@ -28,26 +59,51 @@ func (cl *client) run() {
 }
 
 func (cl *client) writer() {
+	ticker := time.NewTicker(pingPeriod)
 	for {
-		msg, ok := <- cl.outgoing
-		if !ok {
-			log.Warn().Msg("Error reading outgoing channel")
-			break
-		}
-		err := cl.conn.WriteMessage(websocket.TextMessage, msg)
-		if err != nil {
-			log.Err(err).Msg("Error writing to websocket connection")
-			break
+		select {
+			case msg, ok := <- cl.outgoing:
+				cl.conn.SetWriteDeadline(time.Now().Add(writeTimeout))
+				if !ok {
+					// channel was closed
+					cl.conn.WriteMessage(websocket.CloseMessage, []byte{})
+					cl.ws.unregister(cl)
+					cl.conn.Close()
+					return
+				}
+				messageSentCounter.Inc()
+				err := cl.conn.WriteMessage(websocket.TextMessage, msg)
+				if err != nil {
+					log.Err(err).Msg("Error writing to websocket connection")
+					cl.ws.unregister(cl)
+					cl.conn.Close()
+					return
+				}
+			case <- ticker.C:
+				cl.conn.SetWriteDeadline(time.Now().Add(writeTimeout))
+				if err := cl.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+					log.Err(err).Msg("Error writing ping to websocket")
+					return
+				}
 		}
 	}
 }
 
 // We pretty much just need this to respond to close messages and stuff
 func (cl *client) reader() {
+	connectionCounter.Inc()
 	defer func() {
 		cl.ws.unregister(cl)
 		cl.conn.Close()
+		disconnectionCounter.Inc()
 	}()
+
+	cl.conn.SetReadDeadline(time.Now().Add(pongWait))
+	cl.conn.SetPongHandler(func(string) error {
+		cl.conn.SetReadDeadline(time.Now().Add(pongWait))
+		return nil
+	})
+
 	for {
 		_, _, err := cl.conn.ReadMessage()
 		if err != nil {
@@ -96,8 +152,10 @@ func (ws *WebSocket) process() {
 		select {
 			case c := <- ws.addclient:
 				ws.clients[c] = true
+				clientCounter.Inc()
 			case c := <- ws.removeclient:
 				if _, ok := ws.clients[c];ok {
+					clientCounter.Dec()
 					delete(ws.clients, c)
 					close(c.outgoing)
 					log.Info().Msg("Websocket Connection Removed")

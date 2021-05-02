@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/go-redis/redis/v8"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
 	"sync"
 	"time"
@@ -12,6 +14,17 @@ import (
 type acnodeUpdateTrigger interface {
 	OnNodeUpdate(node ACNode)
 }
+
+var (
+	nodeCounter = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "acnode_count",
+		Help: "Number of ACNodes tracked",
+	})
+	updateCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "acnode_update_count",
+		Help: "Number of updates to ACNode status",
+	})
+)
 
 type ACNodeHandler struct {
 	nodes []ACNodeRec
@@ -98,6 +111,7 @@ func (h *ACNodeHandler) SetRedis(r *redis.Client, wg *sync.WaitGroup) {
 
 func (h *ACNodeHandler) AddNode(node ACNodeRec) {
 	node.updateTrigger = h
+	nodeCounter.Inc()
 	h.nodes = append(h.nodes, node)
 	for l := range h.listeners {
 		l.nodeAdded <- &h.nodes[len(h.nodes)-1]
@@ -105,6 +119,7 @@ func (h *ACNodeHandler) AddNode(node ACNodeRec) {
 }
 
 func (h *ACNodeHandler) OnNodeUpdate(node ACNode) {
+	updateCounter.Inc()
 	for l := range h.listeners {
 		go func() {
 			l.nodeChanged <- node

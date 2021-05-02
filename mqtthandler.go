@@ -6,9 +6,26 @@ import (
 	"github.com/londonhackspace/acnode-dashboard/acnode"
 	"github.com/londonhackspace/acnode-dashboard/config"
 	"github.com/londonhackspace/acnode-dashboard/usagelogs"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
 	"strings"
 	"time"
+)
+
+var (
+	messageCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "mqtt_message_count",
+		Help: "Number of MQTT messages received",
+	}, []string{"topic"})
+	statusCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "mqtt_status_count",
+		Help: "Number of ACNode status messages received",
+	}, []string{"type", "subtype"})
+	connectCount = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "mqtt_connection_count",
+		Help: "Number of connections made to the MQTT server",
+	})
 )
 
 type MqttHandler struct {
@@ -32,6 +49,8 @@ func CreateMQTTHandler(config *config.Config, acnodehandler *acnode.ACNodeHandle
 func (handler *MqttHandler) cbMessage(client mqtt.Client, msg mqtt.Message) {
 	topicParts := strings.Split(msg.Topic(), "/")
 
+	messageCounter.WithLabelValues(msg.Topic()).Inc()
+
 	if len(topicParts) < 4 {
 		// Not enough to work with here
 		return
@@ -54,7 +73,7 @@ func (handler *MqttHandler) cbMessage(client mqtt.Client, msg mqtt.Message) {
 	if topicParts[3] == "announcements" {
 		announcement := acnode.Announcement{}
 		json.Unmarshal(msg.Payload(), &announcement)
-
+		statusCounter.WithLabelValues("announcement", announcement.Type).Inc()
 		if announcement.Type == "RFID" {
 			if handler.usageLogger != nil {
 				handler.usageLogger.AddUsageLog(&node, announcement)
@@ -67,7 +86,7 @@ func (handler *MqttHandler) cbMessage(client mqtt.Client, msg mqtt.Message) {
 	} else if topicParts[3] == "status" {
 		status := acnode.Status{}
 		json.Unmarshal(msg.Payload(), &status)
-
+		statusCounter.WithLabelValues("status", status.Type).Inc()
 		if status.Type == "START" {
 			node.SetLastStarted(time.Now())
 			if status.SettingsVersion != 0 {
@@ -127,6 +146,7 @@ func (handler *MqttHandler) Init() {
 	opts := mqtt.NewClientOptions().SetClientID(handler.config.MqttClientId)
 	opts.AddBroker(handler.config.MqttServer)
 	opts.OnConnect = func(client mqtt.Client) {
+		connectCount.Inc()
 		// ok we connected. Now try to set our subscriptions
 		tok := handler.conn.Subscribe("/tool/#", 0, handler.cbMessage)
 		if tok.Wait() && tok.Error() != nil {
