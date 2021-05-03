@@ -1,0 +1,25 @@
+.tabbar {
+    display: flex;
+    padding-top: 5px;
+    background-color: black;
+}
+
+.activetab, .inactivetab {
+    font-family: sans-serif;
+    font-size: larger;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    margin-left: 5px;
+    background-color: black;
+    border-radius: 5px 5px 0px 0px;
+    border: none;
+}
+
+.activetab {
+    background-color: white;
+}
+
+.inactivetab {
+    background-color: #ccc;
+    color: #333
+}

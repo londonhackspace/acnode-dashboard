@@ -6,6 +6,7 @@ import Api, {User} from "../apiclient/dashapi"
 import Login from "../login/login"
 
 import MainWidget from "./mainwidget"
+import TabBar from "../components/tabbar";
 
 //injected by webpack
 declare var gitHash : string;
@@ -18,6 +19,7 @@ interface MainFrameState {
     loginRequired : boolean
     userName : string
     userIsAdmin: boolean
+    activeTab : number
 }
 
 export class MainFrame extends React.Component<MainFrameProps,MainFrameState> {
@@ -25,7 +27,7 @@ export class MainFrame extends React.Component<MainFrameProps,MainFrameState> {
 
     constructor(props : MainFrameProps) {
         super(props);
-        this.state = {loginRequired: false, userName: "", userIsAdmin: false };
+        this.state = {loginRequired: false, userName: "", userIsAdmin: false, activeTab: 0 };
     }
 
     private updateUserDetails() {
@@ -39,6 +41,7 @@ export class MainFrame extends React.Component<MainFrameProps,MainFrameState> {
                     loginRequired: prev.loginRequired,
                     userName: username,
                     userIsAdmin: user.admin,
+                    activeTab: prev.activeTab,
                 };
             });
         });
@@ -51,12 +54,24 @@ export class MainFrame extends React.Component<MainFrameProps,MainFrameState> {
                 loginRequired: loginRequired,
                 userName: loginRequired ? "" : prev.userName,
                 userIsAdmin: loginRequired ? false : prev.userIsAdmin,
+                activeTab: prev.activeTab,
             };
         });
     }
 
     onLogout() {
         this.props.api.logout();
+    }
+
+    tabChangeHandler(tabId : number) {
+        this.setState((prev) : MainFrameState => {
+            return {
+              loginRequired: prev.loginRequired,
+              userName: prev.userName,
+              userIsAdmin: prev.userIsAdmin,
+              activeTab: tabId,
+            };
+        });
     }
 
     render() {
@@ -70,6 +85,17 @@ export class MainFrame extends React.Component<MainFrameProps,MainFrameState> {
                 <Login api={this.props.api}></Login>
             </div>
         }
+
+        let activeObject : React.ReactElement = null;
+
+        switch(this.state.activeTab) {
+            case 0:
+                activeObject = <MainWidget api={this.props.api}/>;
+                break;
+            default:
+                activeObject = <MainWidget api={this.props.api}/>;
+        }
+
         return <div className={styles.container}>
                 <div className={styles.header} >
                     <div className={styles.title}>ACNode Dashboard</div>
@@ -77,7 +103,12 @@ export class MainFrame extends React.Component<MainFrameProps,MainFrameState> {
                     <div className={styles.authButtons}><a href="#" onClick={this.onLogout.bind(this)}>Logout</a></div>
                 </div>
                 <div className={styles.pageBody}>
-                    <MainWidget api={this.props.api}></MainWidget>
+                    <TabBar
+                        widgets={["main"]}
+                        active={this.state.activeTab}
+                        onTabChange={this.tabChangeHandler.bind(this)}
+                    />
+                    {activeObject}
                 </div>
             </div>;
     }

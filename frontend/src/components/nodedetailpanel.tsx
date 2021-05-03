@@ -60,7 +60,7 @@ export default class NodeDetailPanel extends React.Component<NodeDetailPanelProp
                 let data = new Map<string,number>();
                 data.set("Used Memory", node.MemUsed);
                 data.set("Free Memory", node.MemFree);
-                parts.push(<Chart type="doughnut" data={data} colors={chartColors}></Chart>);
+                parts.push(<Chart type="doughnut" data={data} colors={chartColors}/>);
             }
 
             return <div>

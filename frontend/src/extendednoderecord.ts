@@ -77,6 +77,7 @@ export default class ExtendedNodeRecord implements NodeRecord {
         let health = NodeHealth.GOOD;
         this._healthHints = [];
 
+        // Calculate relative values for decisions
         let lastSeen = (Date.now()/1000) - this.LastSeen;
         let lastSeenMQTT = (Date.now()/1000) - this.LastSeenMQTT;
         let lastSeenAPI = (Date.now()/1000) - this.LastSeenAPI;
@@ -100,10 +101,21 @@ export default class ExtendedNodeRecord implements NodeRecord {
                 health = NodeHealth.MEH;
             }
 
-            if(this.LastSeenAPI == -1 || lastSeenAPI > 600) {
-                this._healthHints.push("Has not contacted ACServer in over 10 minutes");
-                health = NodeHealth.MEH;
+            // unrestricted doors don't check in nearly so often if they're not
+            // running firmware new enough to periodically revalidate the cache
+            if(this.nodeType == "Door") {
+                if(this.LastSeenAPI == -1 || lastSeenAPI > 3600*12) {
+                    this._healthHints.push("Has not contacted ACServer in over 12 hours");
+                    health = NodeHealth.MEH;
+                }
+            } else {
+                if(this.LastSeenAPI == -1 || lastSeenAPI > 600) {
+                    this._healthHints.push("Has not contacted ACServer in over 10 minutes");
+                    health = NodeHealth.MEH;
+                }
             }
+
+
 
         } else {
             if(this.LastSeen == -1) {

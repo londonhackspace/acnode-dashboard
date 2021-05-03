@@ -152,7 +152,7 @@ export default class NodeTable extends React.Component<NodeTableProps, NodeTable
 
             if(node.LastSeenMQTT >= 0 || node.LastSeenAPI >= 0) {
                 lastSeenNodes.push(<NodeLastSeen source="MQTT" lastseen={node.LastSeenMQTT}/>);
-                lastSeenNodes.push(<br></br>);
+                lastSeenNodes.push(<br/>);
                 lastSeenNodes.push(<NodeLastSeen  source="API" lastseen={node.LastSeenAPI}/>);
             } else {
                 lastSeenNodes.push(<NodeLastSeen lastseen={node.LastSeen}/>);
