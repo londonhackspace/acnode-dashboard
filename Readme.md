@@ -26,6 +26,8 @@ It is possible for the dashboard to read configuration from a JSON file, however
 | LDAP_SKIPTLSVERIFY | Ignore certificate errors on LDAP connection (for testing only!) | false |
 | REDIS_ENABLE | Enable Redis persistence | false |
 | REDIS_SERVER | Redis server to connect to | (None) |
+| ADMIN_GROUPS | Comma separated list of admin user groups | (None) |
+| SYSLOG_SERVER | syslog server, in the format host:port to log to | (None) |
 
 LDAP
 ===

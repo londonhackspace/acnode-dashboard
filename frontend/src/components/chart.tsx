@@ -48,7 +48,11 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
     }
 
     componentDidUpdate(prevProps : Readonly<ChartProps>) {
-        this.update();
+        if(prevProps.data != this.props.data ||
+            prevProps.colors != this.props.colors ||
+            prevProps.type != this.props.type) {
+            this.update();
+        }
     }
 
     componentDidMount() {

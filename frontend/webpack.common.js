@@ -1,5 +1,10 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack')
+
+let gitHash = require('child_process')
+    .execSync("git describe --match=NeVeRmAtCh --always --abbrev=40 --dirty")
+    .toString();
 
 module.exports = {
     entry: './src/dash.ts',
@@ -43,6 +48,9 @@ module.exports = {
             title: 'ACNode Dashboard',
             template: "src/index.html",
         }),
+        new webpack.DefinePlugin({
+                gitHash: JSON.stringify(gitHash),
+            }),
     ],
     resolve: { extensions: ["*", ".js", ".jsx", ".ts", ".tsx"] },
     output: {

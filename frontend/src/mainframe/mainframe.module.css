@@ -1,6 +1,6 @@
 .header {
     display: flex;
-    align-items: flex-start;
+    align-items: flex-end;
     background: black;
     color: white;
     font-size: 16pt;
@@ -12,6 +12,11 @@
 
 .title {
     width: max-content;
+}
+
+.versionInfo {
+    font-size: 10pt;
+    margin-left: 0.8em;
 }
 
 .authButtons {

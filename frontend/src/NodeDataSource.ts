@@ -2,6 +2,7 @@ import APIClient, {NodeRecord} from "./apiclient/dashapi"
 
 import { SignalDispatcher, SimpleEventDispatcher } from "strongly-typed-events"
 import ExtendedNodeRecord from "./extendednoderecord";
+import GithubCommitInfo from "./githubcommitinfo"
 
 const useWebsockets = false;
 
@@ -139,7 +140,19 @@ export default class NodeDataSource {
         }).then((results) => {
             for(let res of results) {
                 if(!res) continue;
-                this.nodeData.set(res.mqttName, new ExtendedNodeRecord(res));
+                let extendedRec = new ExtendedNodeRecord(res);
+
+                if(extendedRec.Version && extendedRec.Version != "") {
+                    GithubCommitInfo.getCommit(extendedRec.Version)
+                        .then((res) => {
+                            if(res) {
+                                extendedRec.VersionDate = new Date(res.commit.committer.date);
+                            }
+                            this.dataChangeSig.dispatch();
+                        });
+                }
+
+                this.nodeData.set(res.mqttName, extendedRec);
             }
             this.dataChangeSig.dispatch();
         });

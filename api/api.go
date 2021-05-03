@@ -182,6 +182,25 @@ func (api *Api) handleLogout(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(204)
 }
 
+func (api *Api) handleCurrentUser(w http.ResponseWriter, r *http.Request) {
+	ok, user := auth.CheckAuthAPI(w, r)
+
+	if !ok {
+		w.WriteHeader(401)
+		return
+	}
+
+	ret := apitypes.User{
+		Username: user.UserName,
+		Name: user.Name,
+		Admin: user.IsAdmin(api.conf),
+	}
+
+	data,_ := json.Marshal(ret)
+
+	w.Write(data)
+}
+
 type promInterceptor struct {
 	next http.Handler
 }
@@ -201,5 +220,6 @@ func (api *Api) GetRouter() http.Handler {
 	rtr.HandleFunc("/nodes/setStatus/{id}", api.handleSetStatus)
 	rtr.Methods("POST").Path("/auth/login").HandlerFunc(api.handleLogin)
 	rtr.HandleFunc("/auth/logout", api.handleLogout)
+	rtr.HandleFunc("/auth/currentuser", api.handleCurrentUser)
 	return promInterceptor{next: rtr}
 }

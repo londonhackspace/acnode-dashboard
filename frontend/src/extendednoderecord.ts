@@ -1,6 +1,5 @@
 import { NodeRecord } from "./apiclient/dashapi";
 
-
 export enum NodeHealth {
     BAD,
     MEH,
@@ -10,7 +9,6 @@ export enum NodeHealth {
 
 // Basic idea is to take a NodeRecord and add extra derived values
 export default class ExtendedNodeRecord implements NodeRecord {
-
     // properties
     id: number;
     name: string;
@@ -24,6 +22,7 @@ export default class ExtendedNodeRecord implements NodeRecord {
     MemUsed: number;
     Status: string;
     Version: string;
+    VersionDate : Date;
     SettingsVersion: number | undefined;
     EEPROMSettingsVersion: number | undefined;
     ResetCause: string | undefined;
@@ -35,6 +34,9 @@ export default class ExtendedNodeRecord implements NodeRecord {
     constructor(noderec : NodeRecord) {
         Object.assign(this, noderec)
         this.health = this.calulateObjectHealth()
+
+        // null for now - can be filled in later
+        this.VersionDate = null;
         // some fudging to make lastseen an aggregate
         if(this.LastSeenAPI > this.LastSeen) {
             this.LastSeen = this.LastSeenAPI;

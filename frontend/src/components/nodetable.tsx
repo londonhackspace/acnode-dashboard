@@ -42,12 +42,37 @@ class NodeLastSeen extends React.Component<NodeLastSeenProps, NodeLastSeenState>
         this.state = {totalTime : Math.floor(Date.now()/1000) - this.props.lastseen};
     }
 
+    // converts a number in seconds to a human readable duration
+    private sinceTime(t : number) {
+        let out = ""
+        let hours = Math.floor(t/3600)
+        let minutes = Math.floor((t%3600)/60)
+        let seconds = t%60
+
+        if(hours > 0) {
+            if(out.length > 0) out += " ";
+            out += hours + " hour";
+            if(hours > 1) out += "s";
+        }
+        if(minutes > 0) {
+            if(out.length > 0) out += " ";
+            out += minutes + " minute";
+            if(minutes > 1) out += "s";
+        }
+        if(seconds > 0) {
+            if(out.length > 0) out += " ";
+            out += seconds + " second";
+            if(seconds > 1) out += "s";
+        }
+        return out
+    }
+
     render() {
         let extratext = this.props.source ? " ("+this.props.source +")" : "";
         if(this.props.lastseen == -1) {
             return "Never" + extratext;
-        } else if(this.state.totalTime < 600) {
-            return this.state.totalTime + " seconds ago" + extratext;
+        } else if(this.state.totalTime < 7200) {
+            return this.sinceTime(this.state.totalTime) + " ago" + extratext;
         } else {
             let timestamp = new Date(this.props.lastseen*1000);
             const today = new Date();
@@ -69,7 +94,7 @@ class NodeLastSeen extends React.Component<NodeLastSeenProps, NodeLastSeenState>
 
     componentDidMount() {
         // no point setting up an update timer if it won't ever do anything
-        if(this.props.lastseen != -1 && this.state.totalTime < 600) {
+        if(this.props.lastseen != -1 && this.state.totalTime < 7200) {
             this.timer = window.setInterval(() => {
                 this.setState({totalTime : Math.floor(Date.now()/1000) - this.props.lastseen});
             }, 1000);

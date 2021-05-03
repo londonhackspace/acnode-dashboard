@@ -173,4 +173,27 @@ paths:
       responses:
         204:
           description: Success
+  /auth/currentuser:
+    get:
+      summary: Get information about the logged in user
+      responses:
+        200:
+          description: User information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                    description: username
+                  name:
+                    type: string
+                    description: the user's name
+                  admin:
+                    type: boolean
+                    description: true if the user is an administrator
+
+        401:
+          description: Not logged in
 

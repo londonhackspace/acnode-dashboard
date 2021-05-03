@@ -1,5 +1,7 @@
 package auth
 
+import "github.com/londonhackspace/acnode-dashboard/config"
+
 const (
 	UserType_User = iota
 	UserType_Machine = iota
@@ -18,17 +20,21 @@ func UserTypeName(ut int) string {
 
 type User struct {
 	UserType int
-
 	Name string `json:"name"`
 	UserName string `json:"username"`
-	Groups []string
+	Groups []string `json:"groups"`
 
 	source string `json:"source"`
 }
 
-func CreateUser(usertype int, name string) User {
-	return User{
-		UserType: usertype,
-		Name: name,
+func (u *User) IsAdmin(config *config.Config) bool {
+	for _,ga := range u.Groups {
+		for _,gb := range config.AdminGroups {
+			if ga == gb {
+				return true
+			}
+		}
 	}
+	return false
 }
+

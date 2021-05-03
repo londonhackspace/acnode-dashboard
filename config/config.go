@@ -26,6 +26,10 @@ type Config struct {
 
 	RedisEnable bool `json:"redis_enable",omitempty`
 	RedisServer string `json:"redis_server",omitempty`
+
+	SyslogServer string `json:"syslog_server",omitempty`
+
+	AdminGroups []string `json:"admin_groups"`
 }
 
 func GetConfigurationFromEnvironment() Config {
@@ -44,6 +48,8 @@ func GetConfigurationFromEnvironment() Config {
 		LdapSkipTLSVerify: strings.ToLower(os.Getenv("LDAP_SKIPTLSVERIFY")) == "true",
 		RedisEnable: strings.ToLower(os.Getenv("REDIS_ENABLE")) == "true",
 		RedisServer: os.Getenv("REDIS_SERVER"),
+		AdminGroups: strings.Split(os.Getenv("ADMIN_GROUPS"), ","),
+		SyslogServer: os.Getenv("SYSLOG_SERVER"),
 	}
 }
 
@@ -123,6 +129,9 @@ func GetCombinedConfig(filename string) Config {
 		combined.LdapBindPW = fileconf.LdapBindPW
 	}
 
+	combined.AdminGroups = envvar.AdminGroups
+	combined.AdminGroups = append(combined.AdminGroups, fileconf.AdminGroups...)
+
 	if os.Getenv("LDAP_SKIPTLSVERIFY") != "" {
 		combined.LdapSkipTLSVerify = envvar.LdapSkipTLSVerify
 	} else {
@@ -157,6 +166,12 @@ func GetCombinedConfig(filename string) Config {
 		combined.RedisServer = envvar.RedisServer
 	} else {
 		combined.RedisServer = fileconf.RedisServer
+	}
+
+	if envvar.SyslogServer != "" {
+		combined.SyslogServer = envvar.SyslogServer
+	} else {
+		combined.SyslogServer = fileconf.SyslogServer
 	}
 
 	// set sensible defaults where we can

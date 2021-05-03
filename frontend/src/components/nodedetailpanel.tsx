@@ -42,12 +42,17 @@ export default class NodeDetailPanel extends React.Component<NodeDetailPanelProp
             addNodeProps("Status", node.Status);
             addNodeProps("Settings Version", node.SettingsVersion);
             addNodeProps("Settings Version (EEPROM)", node.EEPROMSettingsVersion);
+            addNodeProps("Version", node.Version);
+            if(node.VersionDate) {
+                addNodeProps("Version Date", node.VersionDate.toDateString());
+            }
             addNodeProps("Reset Cause", node.ResetCause);
 
             if(node.healthHints.length > 0) {
+                let hintCounter = 0;
                 parts.push(<div className={styles.nodehealthints}>
                     <span className={styles.nodepropstitle}>Health Hints:</span>
-                    <ul>{node.healthHints.map(hh => <li>{hh}</li>)}</ul>
+                    <ul>{node.healthHints.map(hh => <li key={hintCounter++}>{hh}</li>)}</ul>
                 </div>);
             }
 

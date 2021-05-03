@@ -10,6 +10,7 @@ import (
 	"github.com/londonhackspace/acnode-dashboard/auth"
 	"github.com/londonhackspace/acnode-dashboard/config"
 	"github.com/londonhackspace/acnode-dashboard/usagelogs"
+	"log/syslog"
 	"sync"
 
 	"github.com/gorilla/mux"
@@ -58,7 +59,8 @@ func handleSwagger(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// setup logging
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	consoleLogger := zerolog.ConsoleWriter{Out: os.Stderr}
+	log.Logger = log.Output(consoleLogger)
 
 	startupWg := sync.WaitGroup{}
 
@@ -67,6 +69,14 @@ func main() {
 	if !conf.Validate() {
 		log.Fatal().Msg("Invalid configuration")
 		return
+	}
+
+	if conf.SyslogServer != "" {
+		sls,err := syslog.Dial("tcp", conf.SyslogServer, syslog.LOG_WARNING | syslog.LOG_DAEMON, "")
+		if err == nil {
+			logCombo := zerolog.MultiLevelWriter(consoleLogger, zerolog.SyslogLevelWriter(sls))
+			log.Logger = log.Output(logCombo)
+		}
 	}
 
 	acnodehandler := acnode.CreateACNodeHandler()

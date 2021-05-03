@@ -30,6 +30,7 @@ RUN git rev-list -1 HEAD > version
 
 # Second container - build frontend
 FROM node:16.0-alpine as nodebuilder
+RUN apk add --no-cache git
 
 WORKDIR /build/acnode-dashboard/frontend
 

@@ -1,11 +1,14 @@
 import React from "react";
 
 import styles from "./mainframe.module.css";
-import Api from "../apiclient/dashapi"
+import Api, {User} from "../apiclient/dashapi"
 
 import Login from "../login/login"
 
 import MainWidget from "./mainwidget"
+
+//injected by webpack
+declare var gitHash : string;
 
 export interface MainFrameProps {
     api : Api;
@@ -13,6 +16,8 @@ export interface MainFrameProps {
 
 interface MainFrameState {
     loginRequired : boolean
+    userName : string
+    userIsAdmin: boolean
 }
 
 export class MainFrame extends React.Component<MainFrameProps,MainFrameState> {
@@ -20,11 +25,34 @@ export class MainFrame extends React.Component<MainFrameProps,MainFrameState> {
 
     constructor(props : MainFrameProps) {
         super(props);
-        this.state = {loginRequired: false};
+        this.state = {loginRequired: false, userName: "", userIsAdmin: false };
+    }
+
+    private updateUserDetails() {
+        this.props.api.getUser().then((user : User) => {
+            this.setState((prev : MainFrameState) : MainFrameState => {
+                let username = user.name;
+                if(username.length == 0) {
+                    username = user.username
+                }
+                return {
+                    loginRequired: prev.loginRequired,
+                    userName: username,
+                    userIsAdmin: user.admin,
+                };
+            });
+        });
     }
 
     onLoginRequiredChanged(loginRequired : boolean) {
-        this.setState({loginRequired: loginRequired});
+        if(!loginRequired) this.updateUserDetails();
+        this.setState((prev : MainFrameState) : MainFrameState => {
+            return {
+                loginRequired: loginRequired,
+                userName: loginRequired ? "" : prev.userName,
+                userIsAdmin: loginRequired ? false : prev.userIsAdmin,
+            };
+        });
     }
 
     onLogout() {
@@ -34,13 +62,18 @@ export class MainFrame extends React.Component<MainFrameProps,MainFrameState> {
     render() {
         if(this.state.loginRequired) {
             return <div className={styles.container}>
-                <div className={styles.header} >ACNode Dashboard</div>
+                <div className={styles.header} >
+                    <div className={styles.title}>ACNode Dashboard</div>
+                    <div className={styles.versionInfo}>version {gitHash}</div>
+                </div>
+
                 <Login api={this.props.api}></Login>
             </div>
         }
         return <div className={styles.container}>
                 <div className={styles.header} >
                     <div className={styles.title}>ACNode Dashboard</div>
+                    <div className={styles.versionInfo}>version {gitHash}</div>
                     <div className={styles.authButtons}><a href="#" onClick={this.onLogout.bind(this)}>Logout</a></div>
                 </div>
                 <div className={styles.pageBody}>
@@ -51,6 +84,7 @@ export class MainFrame extends React.Component<MainFrameProps,MainFrameState> {
 
     componentDidMount() {
         this.unsubscriber = this.props.api.onLoginRequired.subscribe(this.onLoginRequiredChanged.bind(this));
+        this.updateUserDetails()
     }
 
     componentWillUnmount() {

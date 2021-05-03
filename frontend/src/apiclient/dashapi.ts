@@ -1,4 +1,5 @@
 import { SimpleEventDispatcher } from "strongly-typed-events"
+import {restGetRequest} from "../utils";
 
 export interface NodeRecord {
     id: number;
@@ -18,6 +19,12 @@ export interface NodeRecord {
     ResetCause: string | undefined;
 }
 
+export interface User {
+    username: string;
+    name: string;
+    admin: boolean;
+}
+
 export default class DashAPI {
     private readonly baseurl : string;
     private _loginRequired : boolean;
@@ -32,22 +39,7 @@ export default class DashAPI {
 
     private makeRequest(req : string) : Promise<string> {
         let url : string = this.baseurl+req;
-
-        let p = new Promise<string>((resolve, reject) => {
-            let httpReq = new XMLHttpRequest();
-            httpReq.open("GET", url, true);
-            httpReq.onreadystatechange = function() {
-                if(this.readyState == 4) {
-                    if(this.status >= 200 && this.status < 300) {
-                        resolve(this.response);
-                    } else {
-                        reject(this.status);
-                    }
-                }
-            }
-            httpReq.send();
-        });
-        return p;
+        return restGetRequest(url);
     }
 
     private makePostRequest(req : string, body : string) : Promise<number> {
@@ -114,4 +106,11 @@ export default class DashAPI {
             this.loginRequiredSignal.dispatchAsync(true);
         });
     }
+
+    getUser() : Promise<User> {
+        return this.makeRequest("auth/currentuser").then((res : string) => {
+            return JSON.parse(res);
+        }, this.handleErrorCode.bind(this));
+    }
+
 };
