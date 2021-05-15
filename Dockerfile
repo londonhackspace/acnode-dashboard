@@ -34,7 +34,7 @@ RUN apk add --no-cache git
 
 WORKDIR /build/acnode-dashboard/frontend
 
-COPY frontend /build/acnode-dashboard/frontend
+COPY . /build/acnode-dashboard/
 
 RUN npm install
 RUN npm run build && cd dist && tar -cf ../bundle.tar static index.html
