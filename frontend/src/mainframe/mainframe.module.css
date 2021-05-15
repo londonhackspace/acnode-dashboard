@@ -39,3 +39,12 @@
     overflow: hidden;
 
 }
+
+.versionLink {
+    color: white;
+    text-decoration: none;
+}
+
+.versionLink:hover {
+    text-decoration: underline;
+}

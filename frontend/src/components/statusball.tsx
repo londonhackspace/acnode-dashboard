@@ -18,12 +18,20 @@ export const StyleMap : StyleMapType = {
 
 interface StatusBallProps {
     state : keyof(StyleMapType)
+    text? : string
 }
 
 export default class StatusBall extends React.Component<StatusBallProps, null> {
 
     render() {
-        return <div className={StyleMap[this.props.state]}></div>;
+        if(this.props.text)
+        {
+            return <div className={StyleMap[this.props.state]}>{this.props.text}</div>;
+        }
+        else
+        {
+            return <div className={StyleMap[this.props.state] + " " + styles.notext}></div>;
+        }
     }
 
 }

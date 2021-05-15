@@ -23,6 +23,7 @@ export default class ExtendedNodeRecord implements NodeRecord {
     Status: string;
     Version: string;
     VersionDate : Date;
+    VersionMessage : string;
     SettingsVersion: number | undefined;
     EEPROMSettingsVersion: number | undefined;
     ResetCause: string | undefined;

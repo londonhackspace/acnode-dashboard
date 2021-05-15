@@ -164,7 +164,7 @@ export default class NodeTable extends React.Component<NodeTableProps, NodeTable
                 <td>{node.SettingsVersion || ""}</td>
                 <td>{ lastSeenNodes }</td>
                 <td><NodeLastSeen lastseen={node.LastStarted}/></td>
-                <td><StatusBall state={nodeHealthMapping.get(node.objectHealth)}/></td>
+                <td><StatusBall state={nodeHealthMapping.get(node.objectHealth)} text="Node" /></td>
             </tr>;
         })
         return <table className={styles.NodeTable}>

@@ -72,6 +72,7 @@ export default class DashAPI {
 
     handleErrorCode(code : number) {
         if(code == 401) {
+            console.log("Auth error");
             this._loginRequired = true;
             this.loginRequiredSignal.dispatchAsync(this._loginRequired);
         }

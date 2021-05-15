@@ -147,6 +147,7 @@ export default class NodeDataSource {
                         .then((res) => {
                             if(res) {
                                 extendedRec.VersionDate = new Date(res.commit.committer.date);
+                                extendedRec.VersionMessage = res.commit.message;
                             }
                             this.dataChangeSig.dispatch();
                         });

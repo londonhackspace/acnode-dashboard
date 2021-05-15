@@ -30,11 +30,18 @@ export default class NodeDetailPanel extends React.Component<NodeDetailPanelProp
 
             let node = this.props.node;
 
-            let addNodeProps = (name : string, value : string | number) => {
+            let addNodeProps = (name : string, value : string | number | JSX.Element ) => {
                 parts.push(<div className={styles.nodepropsline} key={name}>
                     <span className={styles.nodepropstitle}>{name}:</span>
                     <span className={styles.nodepropsvalue}>{value || "Unknown"}</span>
                 </div>);
+            }
+
+            let versionLink = null;
+            if(node.Version)
+            {
+                let cleanedHash = node.Version.split('-')[0]
+                versionLink = <a href={"https://github.com/londonhackspace/acnode-cl/commit/" + cleanedHash} >{node.Version}</a>
             }
 
             addNodeProps("Type", node.nodeType);
@@ -42,7 +49,7 @@ export default class NodeDetailPanel extends React.Component<NodeDetailPanelProp
             addNodeProps("Status", node.Status);
             addNodeProps("Settings Version", node.SettingsVersion);
             addNodeProps("Settings Version (EEPROM)", node.EEPROMSettingsVersion);
-            addNodeProps("Version", node.Version);
+            addNodeProps("Version", versionLink);
             if(node.VersionDate) {
                 addNodeProps("Version Date", node.VersionDate.toDateString());
             }

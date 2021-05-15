@@ -10,7 +10,7 @@ import Spinner from "../components/spinner"
 import ExtendedNodeRecord from "../extendednoderecord";
 
 interface MainWidgetProps {
-    api : Api;
+    ds : DataSource
 }
 
 interface MainWidgetState {
@@ -18,7 +18,7 @@ interface MainWidgetState {
 }
 
 export default class MainWidget extends React.Component<MainWidgetProps, MainWidgetState> {
-    private ds : DataSource;
+    private unsubscribers : {():void}[] = [];
 
     constructor(props : MainWidgetProps) {
         super(props);
@@ -27,35 +27,26 @@ export default class MainWidget extends React.Component<MainWidgetProps, MainWid
     }
 
     private createAndSetupDataSource() {
-        this.ds = new DataSource(this.props.api);
         // force a redraw when things change
-        this.ds.onDataChange.subscribe(() => {
+        this.unsubscribers.push(this.props.ds.onDataChange.subscribe(() => {
             this.forceUpdate();
-        })
-        this.ds.onActiveRowChange.subscribe((current : string) => {
+        }));
+        this.unsubscribers.push(this.props.ds.onActiveRowChange.subscribe((current : string) => {
             this.setState({activeRow: current});
-        });
-    }
-
-    componentDidUpdate(prevProps : Readonly<MainFrameProps>) {
-        if(prevProps.api !== this.props.api) {
-            this.ds.stop();
-            this.createAndSetupDataSource();
-            this.ds.start();
-        }
+        }));
     }
 
     render() {
         let activeNode : ExtendedNodeRecord = null;
 
         if(this.state.activeRow && this.state.activeRow != "") {
-            activeNode = this.ds.getNode(this.state.activeRow);
+            activeNode = this.props.ds.getNode(this.state.activeRow);
         }
 
         let mainNode : ReactElement;
-        if(this.ds.nodes.length > 0)
+        if(this.props.ds.nodes.length > 0)
         {
-            mainNode = <NodeTable dataSource={this.ds}></NodeTable>;
+            mainNode = <NodeTable dataSource={this.props.ds}></NodeTable>;
         } else {
             mainNode = <Spinner></Spinner>;
         }
@@ -68,11 +59,14 @@ export default class MainWidget extends React.Component<MainWidgetProps, MainWid
     }
 
     componentDidMount() {
-        this.ds.start();
+        this.createAndSetupDataSource()
     }
 
     componentWillUnmount() {
-        this.ds.stop();
+        for(let f of this.unsubscribers) {
+            f();
+        }
+        this.unsubscribers = []
     }
 
 }
