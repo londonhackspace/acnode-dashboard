@@ -99,6 +99,12 @@ func (handler *MqttHandler) cbMessage(client mqtt.Client, msg mqtt.Message) {
 
 			if status.ResetCause != "" {
 				node.SetResetCause(status.ResetCause)
+			} else {
+				node.SetResetCause("Probably not Watchdog")
+			}
+
+			if status.GitHash != "" {
+				node.SetVersion(status.GitHash)
 			}
 		} else if status.Type == "ALIVE" {
 			node.SetStatusMessage(status.Message)
@@ -161,6 +167,14 @@ func (handler *MqttHandler) Init() {
 				Msg("Error adding subscription")
 		}
 		log.Info().Msg("MQTT Subscriptions set up")
+	}
+
+	opts.OnConnectionLost = func(cl mqtt.Client, err error) {
+		log.Err(err).Msg("MQTT Connection Lost")
+	}
+
+	opts.OnReconnecting = func(cl mqtt.Client, o *mqtt.ClientOptions) {
+		log.Info().Msg("Reconnecting MQTT")
 	}
 
 	handler.conn = mqtt.NewClient(opts)
