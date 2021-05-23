@@ -24,6 +24,12 @@ interface MainFrameState {
     activeTab : number
 }
 
+interface tabRecord {
+    getWidget : ()=>React.ReactElement;
+    name : string;
+    requiresAdmin: boolean;
+}
+
 export class MainFrame extends React.Component<MainFrameProps,MainFrameState> {
     private unsubscriber : ()=>void = null;
     private ds : DataSource;
@@ -93,22 +99,31 @@ export class MainFrame extends React.Component<MainFrameProps,MainFrameState> {
             </div>
         }
 
-        let activeObject : React.ReactElement = null;
-
-        switch(this.state.activeTab) {
-            case 0:
-                activeObject = <MainWidget ds={this.ds}/>;
-                break;
-            case 1:
-                activeObject = <Versions dataSource={this.ds} />;
-                break;
-            default:
-                activeObject = <MainWidget ds={this.ds}/>;
-        }
+        // Each record is a name and a factory function
+        let widgets : tabRecord[] = [
+            {
+                name: "main",
+                getWidget: () => <MainWidget ds={this.ds}/>,
+                requiresAdmin: false,
+            },
+            {
+                name: "Versions",
+                getWidget: () => <Versions dataSource={this.ds} />,
+                requiresAdmin: false,
+            },
+        ];
 
         let gitHashClean = gitHash.split('-')[0]
 
         let gitHashLink = <a className={styles.versionLink} href={"https://github.com/londonhackspace/acnode-dashboard/commit/"+gitHashClean}>{gitHash}</a>
+
+        let widgetsList = widgets.filter((w) => {
+            if(w.requiresAdmin)
+            {
+                return this.state.userIsAdmin;
+            }
+            return true;
+        }).map(w => w.name);
 
         return <div className={styles.container}>
                 <div className={styles.header} >
@@ -118,12 +133,12 @@ export class MainFrame extends React.Component<MainFrameProps,MainFrameState> {
                 </div>
                 <div className={styles.pageBody}>
                     <TabBar
-                        widgets={["main","Versions"]}
+                        widgets={widgetsList}
                         active={this.state.activeTab}
                         onTabChange={this.tabChangeHandler.bind(this)}
                     />
                     <div className={styles.selectedPage}>
-                        {activeObject}
+                        {widgets[this.state.activeTab].getWidget()}
                     </div>
                 </div>
             </div>;
