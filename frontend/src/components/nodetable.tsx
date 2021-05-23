@@ -161,8 +161,12 @@ export default class NodeTable extends React.Component<NodeTableProps, NodeTable
             let statusBalls : ReactElement[] = []
             statusBalls.push(<StatusBall state={nodeHealthMapping.get(node.objectHealth)} text="Node" />);
 
+            if(node.nodeType == "Tool" || node.nodeType == "Printer") {
+                statusBalls.push(<StatusBall state={node.inService ? "good" : "bad"} text="Tool"/>)
+            }
+
             if(node.nodeType == "Printer") {
-                statusBalls.push(<StatusBall state={ nodeHealthMapping.get(node.printerHealth) } text="Printer" />);
+                statusBalls.push(<StatusBall state={ nodeHealthMapping.get(node.printerHealth) } text="Octoprint" />);
             }
 
 

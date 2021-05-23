@@ -17,6 +17,7 @@ export interface NodeRecord {
     name: string;
     mqttName: string;
     nodeType: string;
+    inService: boolean;
     LastSeen: number;
     LastSeenAPI: number;
     LastSeenMQTT: number;

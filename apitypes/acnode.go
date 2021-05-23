@@ -16,6 +16,7 @@ type ACNode struct {
 	Name string `json:"name"`
 	MqttName string `json:"mqttName",omitempty`
 	Type string `json:"nodeType"`
+	InService bool `json:"inService"`
 
 	// What was the timestamp this node was last seen at?
 	LastSeen int64 `json:"LastSeen"`

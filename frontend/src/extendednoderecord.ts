@@ -14,6 +14,7 @@ export default class ExtendedNodeRecord implements NodeRecord {
     name: string;
     mqttName: string;
     nodeType: string;
+    inService: boolean;
     LastSeen: number;
     LastSeenMQTT: number;
     LastSeenAPI: number;
@@ -112,6 +113,10 @@ export default class ExtendedNodeRecord implements NodeRecord {
         // basic idea: Start at good, degrade if needed
         let health = NodeHealth.GOOD;
         this._healthHints = [];
+
+        if(!this.inService) {
+            this._healthHints.push("Tool out of service");
+        }
 
         // Calculate relative values for decisions
         let lastSeen = (Date.now()/1000) - this.LastSeen;

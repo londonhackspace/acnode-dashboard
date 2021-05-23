@@ -41,6 +41,12 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
 
     private update() {
         console.log("Updating chart");
+        if(this.chart.data.datasets[0].data == this.getDataValues() &&
+            this.chart.data.labels == this.getDataKeys() &&
+            this.chart.data.datasets[0].backgroundColor == this.props.colors
+        ) {
+            return;
+        }
         this.chart.data.datasets[0].data = this.getDataValues();
         this.chart.data.labels = this.getDataKeys();
         this.chart.data.datasets[0].backgroundColor = this.props.colors;

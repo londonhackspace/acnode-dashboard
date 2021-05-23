@@ -32,6 +32,9 @@ components:
         nodeType:
           type: string
           description: The type of the node
+        inService:
+          type: bool
+          description: Is the tool in service on ACServer?
         LastSeen:
           type: integer
           description: The UTC timestamp the node was last seen

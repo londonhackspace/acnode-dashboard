@@ -38,6 +38,8 @@ func (w *Watcher) Run() {
 				currentType != deducedType {
 				node.SetType(deducedType)
 			}
+
+			node.SetInService(t.Status == "Operational")
 		}
 		time.Sleep(5 * time.Minute)
 	}

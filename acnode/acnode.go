@@ -34,6 +34,7 @@ type ACNodeRec struct {
 	Name     string
 	MqttName string
 	NodeType int
+	InService bool
 
 	// last known status
 	LastSeen time.Time // old LastSeen field
@@ -57,6 +58,8 @@ type ACNode interface {
 	GetId() int
 	SetId(id int)
 	GetType() int
+	GetInService() bool
+	SetInService(inService bool)
 	GetName() string
 	SetName(name string)
 	GetMqttName() string
@@ -98,6 +101,20 @@ func (node *ACNodeRec) GetType() int {
 	defer node.mtx.Unlock()
 
 	return node.NodeType
+}
+
+func (node* ACNodeRec) GetInService() bool {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
+	return node.InService
+}
+
+func (node* ACNodeRec) SetInService(inService bool) {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
+	node.InService = inService
 }
 
 func (node *ACNodeRec) GetName() string {
@@ -292,6 +309,7 @@ func (node *ACNodeRec) GetAPIRecord() apitypes.ACNode {
 		Name:          node.Name,
 		MqttName: 	   node.MqttName,
 		Type:          NodeTypeToString(node.NodeType),
+		InService: 	   node.InService,
 		LastSeen:      lastSeen,
 		LastSeenAPI:   makeApiTimestamp(node.LastSeenAPI),
 		LastSeenMQTT:  makeApiTimestamp(node.LastSeenMQTT),
