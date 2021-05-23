@@ -36,8 +36,7 @@
 
 .pageBody {
     width: 100%;
-    overflow: hidden;
-
+    overflow: auto;
 }
 
 .versionLink {
