@@ -122,7 +122,9 @@ export class MainFrame extends React.Component<MainFrameProps,MainFrameState> {
                         active={this.state.activeTab}
                         onTabChange={this.tabChangeHandler.bind(this)}
                     />
-                    {activeObject}
+                    <div className={styles.selectedPage}>
+                        {activeObject}
+                    </div>
                 </div>
             </div>;
     }

@@ -36,7 +36,15 @@
 
 .pageBody {
     width: 100%;
-    overflow: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.selectedPage {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
 }
 
 .versionLink {
