@@ -69,7 +69,44 @@ components:
           type: string
           required: false
           description: The cause of the last reset
-
+        PrinterStatus:
+          $ref: '#/components/schemas/PrinterStatus'
+    PrinterStatus:
+      type: object
+      required: false
+      properties:
+        mqttConnected:
+          type: boolean
+          required: true
+          description: Is Octoprint connected over MQTT?
+        octoprintConnected:
+          type: boolean
+          required: true
+          description: Is Octoprint connected to the printer?
+        firmwareVersion:
+          type: string
+          required: true
+          description: Firmware version of the printer
+        zHeight:
+          type: number
+          required: true
+          description: Last known Z height of the printer
+        piUndervoltage:
+          type: boolean
+          required: true
+          description: Is the pi struggling for power?
+        piOverheat:
+          type: boolean
+          required: true
+          description: Is the pi cooking?
+        hotendTemperature:
+          type: number
+          required: true
+          description: Last known temperature of the hotend
+        bedTemperature:
+          type: number
+          required: true
+          description: Last known temperature of the bed
 security:
   - ApiKeyAuth: []
     CookieAuth: []

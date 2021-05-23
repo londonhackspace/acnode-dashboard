@@ -7,7 +7,7 @@ import NodeDataSource from "../NodeDataSource";
 import {NodeRecord} from "../apiclient/dashapi";
 import ExtendedNodeRecord, {NodeHealth} from "../extendednoderecord";
 import {isUndefined} from "webpack-merge/dist/utils";
-import StatusBall, {StyleMap as StatusBallStyleMap} from "./statusball"
+import StatusBall, {StyleMap as StatusBallStyleMap, StyleMapType} from "./statusball"
 
 interface NodeTableProps {
     dataSource : NodeDataSource
@@ -158,13 +158,21 @@ export default class NodeTable extends React.Component<NodeTableProps, NodeTable
                 lastSeenNodes.push(<NodeLastSeen lastseen={node.LastSeen}/>);
             }
 
+            let statusBalls : ReactElement[] = []
+            statusBalls.push(<StatusBall state={nodeHealthMapping.get(node.objectHealth)} text="Node" />);
+
+            if(node.nodeType == "Printer") {
+                statusBalls.push(<StatusBall state={ nodeHealthMapping.get(node.printerHealth) } text="Printer" />);
+            }
+
+
             return <tr key={node.mqttName} className={rowStyle}>
                 <td>{node.id || "-"}</td>
                 <td><a href="#" onClick={setActive}>{node.name}</a></td>
                 <td>{node.SettingsVersion || ""}</td>
                 <td>{ lastSeenNodes }</td>
                 <td><NodeLastSeen lastseen={node.LastStarted}/></td>
-                <td><StatusBall state={nodeHealthMapping.get(node.objectHealth)} text="Node" /></td>
+                <td>{ statusBalls }</td>
             </tr>;
         })
         return <table className={styles.NodeTable}>

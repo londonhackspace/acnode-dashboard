@@ -1,5 +1,16 @@
 package apitypes
 
+type PrinterStatus struct {
+	MqttConnected bool `json:"mqttConnected"`
+	OctoprintConnected bool `json:"octoprintConnected"`
+	FirmwareVersion string `json:"firmwareVersion"`
+	ZHeight float32 `json:"zHeight"`
+	PiUndervoltage bool `json:"piUndervoltage"`
+	PiOverheat bool `json:"piOverheat"`
+	HotendTemperature float32 `json:"hotendTemperature"`
+	BedTemperature float32 `json:"bedTemperature"`
+}
+
 type ACNode struct {
 	Id int `json:"id"`
 	Name string `json:"name"`
@@ -22,4 +33,6 @@ type ACNode struct {
 	SettingsVersion int `json:"SettingsVersion,omitempty"`
 	EEPROMSettingsVersion int `json:"EEPROMSettingsVersion,omitempty"`
 	ResetCause string `json:"ResetCause,omitempty"`
+
+	PrinterStatus *PrinterStatus `json:"PrinterStatus,omitempty"`
 }

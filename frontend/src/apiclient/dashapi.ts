@@ -1,6 +1,17 @@
 import { SimpleEventDispatcher } from "strongly-typed-events"
 import {restGetRequest} from "../utils";
 
+export interface PrinterStatus {
+    mqttConnected: boolean;
+    octoprintConnected: boolean;
+    firmwareVersion: string;
+    zHeight: number;
+    piUndervoltage: boolean;
+    piOverheat: boolean;
+    hotendTemperature: number;
+    bedTemperature: number;
+}
+
 export interface NodeRecord {
     id: number;
     name: string;
@@ -17,6 +28,7 @@ export interface NodeRecord {
     SettingsVersion: number | undefined;
     EEPROMSettingsVersion: number | undefined;
     ResetCause: string | undefined;
+    PrinterStatus : PrinterStatus | null;
 }
 
 export interface User {

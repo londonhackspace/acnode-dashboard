@@ -49,6 +49,8 @@ type ACNodeRec struct {
 	SettingsVersion int
 	EEPROMSettingsVersion int
 	ResetCause string
+
+	PrinterStatus *PrinterStatus
 }
 
 type ACNode interface {
@@ -73,6 +75,7 @@ type ACNode interface {
 	SetSettingsVersion(ver int)
 	SetEepromSettingsVersion(ver int)
 	SetResetCause(rstc string)
+	GetPrinterStatus() *PrinterStatus
 }
 
 func (node *ACNodeRec) GetId() int {
@@ -247,6 +250,16 @@ func makeApiTimestamp(t time.Time) int64 {
 	return t.Unix()
 }
 
+func (node *ACNodeRec) GetPrinterStatus() *PrinterStatus {
+	if node.NodeType != NodeTypePrinter {
+		return nil
+	}
+	if node.PrinterStatus == nil {
+		node.PrinterStatus = GetDefaultPrinterStatus()
+	}
+	return node.PrinterStatus
+}
+
 func (node *ACNodeRec) GetAPIRecord() apitypes.ACNode {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
@@ -257,6 +270,21 @@ func (node *ACNodeRec) GetAPIRecord() apitypes.ACNode {
 		lastSeen = makeApiTimestamp(node.LastSeenMQTT)
 	} else if node.LastSeenAPI.After(node.LastSeenMQTT) && node.LastSeenAPI.After(node.LastSeen) {
 		lastSeen = makeApiTimestamp(node.LastSeenAPI)
+	}
+
+	var printerStatus *apitypes.PrinterStatus = nil
+
+	if node.NodeType == NodeTypePrinter {
+		printerStatus = &apitypes.PrinterStatus{
+			MqttConnected: node.PrinterStatus.MqttConneced,
+			OctoprintConnected: node.PrinterStatus.OctoprintConnected,
+			FirmwareVersion: node.PrinterStatus.FirmwareVersion,
+			ZHeight: node.PrinterStatus.ZHeight,
+			PiUndervoltage: node.PrinterStatus.PiUndervoltage,
+			PiOverheat: node.PrinterStatus.PiOverheat,
+			HotendTemperature: node.PrinterStatus.HotendTemperature,
+			BedTemperature: node.PrinterStatus.BedTemperature,
+		}
 	}
 
 	return apitypes.ACNode{
@@ -275,5 +303,6 @@ func (node *ACNodeRec) GetAPIRecord() apitypes.ACNode {
 		SettingsVersion: node.SettingsVersion,
 		EEPROMSettingsVersion: node.EEPROMSettingsVersion,
 		ResetCause: node.ResetCause,
+		PrinterStatus: printerStatus,
 	}
 }

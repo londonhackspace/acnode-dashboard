@@ -1,4 +1,4 @@
-import { NodeRecord } from "./apiclient/dashapi";
+import {NodeRecord, PrinterStatus} from "./apiclient/dashapi";
 
 export enum NodeHealth {
     BAD,
@@ -27,14 +27,19 @@ export default class ExtendedNodeRecord implements NodeRecord {
     SettingsVersion: number | undefined;
     EEPROMSettingsVersion: number | undefined;
     ResetCause: string | undefined;
+    PrinterStatus: PrinterStatus | null;
 
     health : NodeHealth
     _healthHints : string[] = [];
     healthCalculated : number = 0;
 
+    printerHealth : NodeHealth
+    _printerHealthHints : string[] = [];
+
     constructor(noderec : NodeRecord) {
         Object.assign(this, noderec)
-        this.health = this.calulateObjectHealth()
+        this.health = this.calulateObjectHealth();
+        this.printerHealth = this.calculatePrinterHealth();
 
         // null for now - can be filled in later
         this.VersionDate = null;
@@ -59,18 +64,48 @@ export default class ExtendedNodeRecord implements NodeRecord {
         return this._healthHints;
     }
 
+    get printerHealthHints() : string[] {
+        return this._printerHealthHints;
+    }
+
     get healthStatusAge() : number {
         return Date.now()-this.healthCalculated;
     }
 
     refreshObjectHealth() : boolean {
         let newHealth = this.calulateObjectHealth();
-        if(newHealth != this.health) {
+        let printerHealth = this.calculatePrinterHealth();
+        if(newHealth != this.health || printerHealth != this.printerHealth) {
             this.healthCalculated = Date.now();
             this.health = newHealth;
+            this.printerHealth = printerHealth;
             return true;
         }
         return false;
+    }
+
+    private calculatePrinterHealth() : NodeHealth {
+        this._printerHealthHints = [];
+        if(this.PrinterStatus == null) {
+            return NodeHealth.UNKNOWN;
+        }
+
+        if(!this.PrinterStatus.mqttConnected) {
+            this._printerHealthHints.push("Octoprint disconnected from MQTT");
+            return NodeHealth.BAD;
+        }
+
+        if(this.PrinterStatus.piOverheat) {
+            this._printerHealthHints.push("Pi Overheating");
+            return NodeHealth.MEH;
+        }
+
+        if(this.PrinterStatus.piUndervoltage) {
+            this._printerHealthHints.push("Pi Undervoltage");
+            return NodeHealth.MEH;
+        }
+
+        return NodeHealth.GOOD;
     }
 
     private calulateObjectHealth() : NodeHealth {

@@ -54,12 +54,31 @@ export default class NodeDetailPanel extends React.Component<NodeDetailPanelProp
                 addNodeProps("Version Date", node.VersionDate.toDateString());
             }
             addNodeProps("Reset Cause", node.ResetCause);
+            
+            if(node.nodeType == "Printer") {
+                if(node.PrinterStatus.firmwareVersion != "") {
+                    addNodeProps("Printer Firmware Version", node.PrinterStatus.firmwareVersion);
+                }
+                if(node.PrinterStatus.mqttConnected) {
+                    addNodeProps("Octoprint Connected", node.PrinterStatus.octoprintConnected ? "Yes" : "No");
+                    if(node.PrinterStatus.octoprintConnected) {
+                        addNodeProps("Hotend Temperature", node.PrinterStatus.hotendTemperature);
+                        addNodeProps("Bed Temperature", node.PrinterStatus.bedTemperature);
+                    }
+                } else {
+                    addNodeProps("Octoprint MQTT Connection", "No");
+                }
 
-            if(node.healthHints.length > 0) {
+            }
+
+            if(node.healthHints.length > 0 || node.printerHealthHints.length > 0) {
                 let hintCounter = 0;
                 parts.push(<div className={styles.nodehealthints}>
                     <span className={styles.nodepropstitle}>Health Hints:</span>
-                    <ul>{node.healthHints.map(hh => <li key={hintCounter++}>{hh}</li>)}</ul>
+                    <ul>
+                        {node.healthHints.map(hh => <li key={hintCounter++}>{hh}</li>)}
+                        {node.printerHealthHints.map(hh => <li key={hintCounter++}>{hh}</li>)}
+                    </ul>
                 </div>);
             }
 

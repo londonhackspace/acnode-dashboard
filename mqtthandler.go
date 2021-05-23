@@ -65,9 +65,15 @@ func (handler *MqttHandler) cbMessage(client mqtt.Client, msg mqtt.Message) {
 		node.SetType(acnode.NodeTypeDoor)
 	}
 
-	if (msg.Topic() == "/tool/" + topicParts[2] + "/event/PrinterStateChanged") &&
+	if isOctoprintTopic(msg.Topic()) &&
 			(node.GetType() != acnode.NodeTypePrinter) {
 		node.SetType(acnode.NodeTypePrinter)
+	}
+
+	if node.GetType() == acnode.NodeTypePrinter {
+		if topicParts[3] == "mqtt" {
+			node.GetPrinterStatus().MqttConneced = string(msg.Payload()) == "connected"
+		}
 	}
 
 	if topicParts[3] == "announcements" {
@@ -118,6 +124,10 @@ func (handler *MqttHandler) cbMessage(client mqtt.Client, msg mqtt.Message) {
 		log.Info().
 			Str("Node", node.GetName()).
 			Msg("Got Node Status")
+	}
+
+	if isOctoprintTopic(msg.Topic()) {
+		handleOctoprintMessage(node, msg)
 	}
 
 	// this check prevents Octoprint from marking nodes as recently alive
