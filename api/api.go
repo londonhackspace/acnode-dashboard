@@ -7,6 +7,7 @@ import (
 	"github.com/londonhackspace/acnode-dashboard/apitypes"
 	"github.com/londonhackspace/acnode-dashboard/auth"
 	"github.com/londonhackspace/acnode-dashboard/config"
+	"github.com/londonhackspace/acnode-dashboard/usagelogs"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
@@ -31,12 +32,14 @@ type Api struct {
 	conf *config.Config
 
 	acnodeHandler *acnode.ACNodeHandler
+	usageLogger usagelogs.UsageLogger
 }
 
-func CreateApi(conf *config.Config, acnodeHandler *acnode.ACNodeHandler) Api {
+func CreateApi(conf *config.Config, acnodeHandler *acnode.ACNodeHandler, usageLogger usagelogs.UsageLogger) Api {
 	return Api{
 		conf: conf,
 		acnodeHandler: acnodeHandler,
+		usageLogger: usageLogger,
 	}
 }
 
@@ -44,6 +47,16 @@ func (api *Api) checkAuth(w http.ResponseWriter, r *http.Request) bool {
 	ok, _ := auth.CheckAuthAPI(w, r)
 
 	if !ok {
+		w.WriteHeader(401)
+	}
+
+	return ok
+}
+
+func (api *Api) checkAuthAdmin(w http.ResponseWriter, r *http.Request) bool {
+	ok, user := auth.CheckAuthAPI(w, r)
+
+	if !ok || !user.IsAdmin(api.conf) {
 		w.WriteHeader(401)
 	}
 
@@ -183,7 +196,7 @@ func (api *Api) handleLogout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *Api) handleCurrentUser(w http.ResponseWriter, r *http.Request) {
-	ok, user := auth.CheckAuthAPI(w, r)
+	ok, user := auth.CheckAuthUser(w, r)
 
 	if !ok {
 		w.WriteHeader(401)
@@ -218,6 +231,10 @@ func (api *Api) GetRouter() http.Handler {
 	rtr.HandleFunc("/nodes", api.handleNodes)
 	rtr.HandleFunc("/nodes/{nodeName}", api.handleNodeEntry)
 	rtr.HandleFunc("/nodes/setStatus/{id}", api.handleSetStatus)
+
+	rtr.HandleFunc("/accesslogs", api.handleAccessLogs)
+	rtr.HandleFunc("/accesslogs/{node}", api.handleAccessLogsNode)
+
 	rtr.Methods("POST").Path("/auth/login").HandlerFunc(api.handleLogin)
 	rtr.HandleFunc("/auth/logout", api.handleLogout)
 	rtr.HandleFunc("/auth/currentuser", api.handleCurrentUser)

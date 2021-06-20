@@ -20,6 +20,7 @@ type UserToolSummaryResponse struct {
 }
 
 type UserCardResponse struct {
+	Id string `json:"id"`
 	UserName string `json:"user_name"`
 	GlaDOSFile string `json:"gladosfile"`
 	Subscribed bool `json:"subscribed"`

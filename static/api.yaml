@@ -237,3 +237,68 @@ paths:
         401:
           description: Not logged in
 
+  /accesslogs:
+    get:
+      summary: Returns a list of ACNodes with access logs available
+      responses:
+        200:
+          description: A list of known nodes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+  /accesslogs/{node}:
+    get:
+      summary: Get the access logs for a particular node
+      parameters:
+        - name: node
+          in: path
+          description: the name of the node to get the log for
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          description: the page to get
+          schema:
+            type: integer
+      responses:
+        404:
+          description: The node does not exist
+        200:
+          description: Usage logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: total number of entries
+                  page:
+                    type: integer
+                    description: The current page number
+                  pageCount:
+                    type: integer
+                    description: The number of pages
+                  entries:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        timestamp:
+                          description: timestamp of the usage
+                          type: integer
+                        user_name:
+                          type: string
+                          description: the name of the user
+                        user_card:
+                          type: string
+                          description: the card ID used
+                        success:
+                          type: boolean
+                          description: was the usage successful, as in, not denied
+

@@ -107,7 +107,7 @@ func main() {
 		usageLogger = usagelogs.CreateRedisUsageLogger(redisConn)
 	}
 
-	apihandler := api.CreateApi(&conf, &acnodehandler)
+	apihandler := api.CreateApi(&conf, &acnodehandler, usageLogger)
 
 	acserverapi := acserver_api.CreateACServer(&conf)
 	acsw := acserverwatcher.Watcher{ acserverapi, &acnodehandler }
