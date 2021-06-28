@@ -9,6 +9,7 @@ import MainWidget from "./mainwidget"
 import Versions from "./versions"
 import TabBar from "../components/tabbar";
 import DataSource from "../NodeDataSource";
+import AccessLogs from "./accesslogs";
 
 //injected by webpack
 declare var gitHash : string;
@@ -110,6 +111,11 @@ export class MainFrame extends React.Component<MainFrameProps,MainFrameState> {
                 name: "Versions",
                 getWidget: () => <Versions dataSource={this.ds} />,
                 requiresAdmin: false,
+            },
+            {
+                name: "Access Logs",
+                getWidget: ()=> <AccessLogs api={this.props.api}/>,
+                requiresAdmin: true,
             },
         ];
 

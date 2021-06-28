@@ -38,6 +38,20 @@ export interface User {
     admin: boolean;
 }
 
+export interface AccessControlEntry {
+    timestamp : number;
+    user_name : string;
+    user_card : string;
+    success : boolean;
+}
+
+export interface AccessControl {
+    count : number;
+    page : number;
+    pageCount : number;
+    entries : AccessControlEntry[];
+}
+
 export default class DashAPI {
     private readonly baseurl : string;
     private _loginRequired : boolean;
@@ -99,6 +113,18 @@ export default class DashAPI {
 
     getNode(name : string) : Promise<NodeRecord> {
         return this.makeRequest("nodes/"+name).then((res : string) => {
+            return JSON.parse(res);
+        }, this.handleErrorCode.bind(this));
+    }
+
+    getAccessControlNodes() : Promise<string[]> {
+        return this.makeRequest("accesslogs").then((res : string) => {
+            return JSON.parse(res);
+        }, this.handleErrorCode.bind(this));
+    }
+
+    getAccessControlForNode(node : string, page : number) : Promise<AccessControl> {
+        return this.makeRequest("accesslogs/" + node + "?page="+page).then((res : string) => {
             return JSON.parse(res);
         }, this.handleErrorCode.bind(this));
     }
