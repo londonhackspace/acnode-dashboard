@@ -291,7 +291,7 @@ func (node *ACNodeRec) GetAPIRecord() apitypes.ACNode {
 
 	var printerStatus *apitypes.PrinterStatus = nil
 
-	if node.NodeType == NodeTypePrinter {
+	if node.NodeType == NodeTypePrinter && node.PrinterStatus != nil {
 		printerStatus = &apitypes.PrinterStatus{
 			MqttConnected: node.PrinterStatus.MqttConneced,
 			OctoprintConnected: node.PrinterStatus.OctoprintConnected,
