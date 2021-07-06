@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/go-redis/redis/v8"
 	"github.com/londonhackspace/acnode-dashboard/acnode"
+	"github.com/londonhackspace/acnode-dashboard/acserver_api"
 	"github.com/rs/zerolog/log"
 	"strings"
 	"time"
@@ -13,16 +14,20 @@ import (
 type RedisUsageLogger struct {
 	redis *redis.Client
 	ctx context.Context
+	acserver *acserver_api.ACServer
 }
 
-func CreateRedisUsageLogger(redis *redis.Client) UsageLogger {
+func CreateRedisUsageLogger(redis *redis.Client, acserver *acserver_api.ACServer) UsageLogger {
 	return &RedisUsageLogger{
 		redis: redis,
 		ctx: context.Background(),
+		acserver: acserver,
 	}
 }
 
 func (rul *RedisUsageLogger) AddUsageLog(node *acnode.ACNode, msg acnode.Announcement) {
+
+
 	log := LogEntry{
 		Timestamp: time.Now(),
 		Card:      msg.Card,

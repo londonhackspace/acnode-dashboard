@@ -90,6 +90,8 @@ func main() {
 
 	var usageLogger usagelogs.UsageLogger = nil
 
+	acserverapi := acserver_api.CreateACServer(&conf)
+	acsw := acserverwatcher.Watcher{ acserverapi, &acnodehandler }
 
 	if conf.RedisEnable {
 		redisConn := redis.NewClient(&redis.Options{
@@ -104,13 +106,10 @@ func main() {
 		auth.AddProvider(userStore)
 
 		acnodehandler.SetRedis(redisConn, &startupWg)
-		usageLogger = usagelogs.CreateRedisUsageLogger(redisConn)
+		usageLogger = usagelogs.CreateRedisUsageLogger(redisConn, &acserverapi)
 	}
 
 	apihandler := api.CreateApi(&conf, &acnodehandler, usageLogger)
-
-	acserverapi := acserver_api.CreateACServer(&conf)
-	acsw := acserverwatcher.Watcher{ acserverapi, &acnodehandler }
 
 	mqttHandler := CreateMQTTHandler(&conf, &acnodehandler, usageLogger)
 

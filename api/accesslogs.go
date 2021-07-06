@@ -33,7 +33,7 @@ func (api *Api) handleAccessLogsNode(w http.ResponseWriter, r *http.Request) {
 		page = 1
 	}
 
-	entriesPerPage := int64(6)
+	entriesPerPage := int64(50)
 
 	entryCount := api.usageLogger.GetUsageLogCountForNode(node)
 

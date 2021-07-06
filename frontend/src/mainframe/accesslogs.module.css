@@ -1,0 +1,8 @@
+.logId {
+    margin-right: 2em;
+}
+
+.accessLogs {
+    overflow: scroll;
+    height: 100%;
+}
