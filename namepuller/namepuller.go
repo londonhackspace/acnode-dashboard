@@ -53,7 +53,7 @@ func main() {
 			}
 
 			remarshalled,_ := json.Marshal(&entry)
-			redisConn.LPush(ctx, "new_"+val, remarshalled).Result()
+			redisConn.RPush(ctx, "new_"+val, remarshalled).Result()
 		}
 		redisConn.Del(ctx, val).Result()
 		redisConn.Rename(ctx, "new_"+val, val).Result()
