@@ -60,10 +60,11 @@ export default class AccessLogs extends React.Component<AccessLogsProps, AccessL
                 }
                 return <tr><td>{d.toDateString() + " " + d.toTimeString()}</td>
                         <td>{nameObject}</td><td>{entry.user_card}</td>
+                        <td>{entry.success ? "Granted" : "Denied"}</td>
                     </tr>;
             });
             logs = <table className={tablestyles.NodeTable}>
-                <thead><tr className={tablestyles.NodeTable}><td>When</td><td>Who</td><td>Card Id</td></tr></thead>
+                <thead><tr className={tablestyles.NodeTable}><td>When</td><td>Who</td><td>Card Id</td><td>Granted</td></tr></thead>
                 <tbody>{entries}</tbody>
             </table>;
             let pagenumberparts : ReactElement[] = [];

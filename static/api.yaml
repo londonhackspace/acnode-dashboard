@@ -295,6 +295,9 @@ paths:
                         user_name:
                           type: string
                           description: the name of the user
+                        user_id:
+                          type: string
+                          description: the user id, in the format of HS1234
                         user_card:
                           type: string
                           description: the card ID used
