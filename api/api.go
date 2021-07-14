@@ -26,6 +26,11 @@ var (
 		Name: "api_inflight_requests",
 		Help: "Currently in-flight API requests",
 	})
+	requestTimer = promauto.NewSummaryVec(prometheus.SummaryOpts{
+		Name: "api_processing_time",
+		Help: "Time taken to process requests, in milliseconds",
+		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+	}, []string{"path"})
 )
 
 type Api struct {
@@ -221,7 +226,10 @@ type promInterceptor struct {
 func (i promInterceptor) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestCounter.WithLabelValues(r.URL.Path, r.Method).Inc()
 	inflightCounter.Inc()
+	start := time.Now()
 	i.next.ServeHTTP(w, r)
+	end := time.Since(start)
+	requestTimer.WithLabelValues(r.URL.Path).Observe(float64(end.Nanoseconds())/1000000)
 	inflightCounter.Dec()
 }
 
