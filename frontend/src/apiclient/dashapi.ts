@@ -40,6 +40,7 @@ export interface User {
 
 export interface AccessControlEntry {
     timestamp : number;
+    user_id : string;
     user_name : string;
     user_card : string;
     success : boolean;

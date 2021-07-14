@@ -44,6 +44,7 @@ func (api *Api) handleAccessLogsNode(w http.ResponseWriter, r *http.Request) {
 	for _,i := range entries {
 		e := apitypes.AccessLogEntry{
 			Timestamp: i.Timestamp.Unix(),
+			UserId : i.UserId,
 			UserName: i.Name,
 			UserCard: i.Card,
 			Success: i.Success,

@@ -27,13 +27,21 @@ func CreateRedisUsageLogger(redis *redis.Client, acserver *acserver_api.ACServer
 
 func (rul *RedisUsageLogger) AddUsageLog(node *acnode.ACNode, msg acnode.Announcement) {
 
+	rec := rul.acserver.GetUserRecordForCard(msg.Card)
+	var user_name string
+	var user_id string
+	if rec != nil {
+		user_name = rec.UserName
+		user_id = rec.Id
+	}
 
 	log := LogEntry{
 		Timestamp: time.Now(),
 		Card:      msg.Card,
 		Node:      (*node).GetMqttName(),
 		Success:   msg.Granted != 0,
-		// Name: user_name,
+		Name: user_name,
+		UserId: user_id,
 	}
 
 	data,_ := json.Marshal(log)

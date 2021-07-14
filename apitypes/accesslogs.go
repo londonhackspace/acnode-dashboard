@@ -3,6 +3,7 @@ package apitypes
 type AccessLogEntry struct {
 	Timestamp int64 `json:"timestamp"`
 
+	UserId string `json:"user_id"`
 	UserName string `json:"user_name"`
 	UserCard string `json:"user_card"`
 

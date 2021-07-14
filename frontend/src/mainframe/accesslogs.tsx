@@ -50,8 +50,16 @@ export default class AccessLogs extends React.Component<AccessLogsProps, AccessL
             let entries = this.state.data.entries.map((entry : AccessControlEntry) => {
                 console.log("Entry: " + entry.user_name);
                 let d = new Date(entry.timestamp*1000);
+                let nameObject : ReactElement;
+
+                if(entry.user_id  && entry.user_id.length > 0) {
+                    let shortenedid = entry.user_id.substr(2);
+                    nameObject = <a href={"https://london.hackspace.org.uk/members/member.php?id="+shortenedid}>{entry.user_name}</a>
+                } else {
+                    nameObject = <span>{entry.user_name}</span>
+                }
                 return <tr><td>{d.toDateString() + " " + d.toTimeString()}</td>
-                        <td>{entry.user_name}</td><td>{entry.user_card}</td>
+                        <td>{nameObject}</td><td>{entry.user_card}</td>
                     </tr>;
             });
             logs = <table className={tablestyles.NodeTable}>

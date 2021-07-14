@@ -49,3 +49,23 @@ func (svr *ACServer) GetTools() []ToolStatusResponse {
 
 	return response
 }
+
+func (svr *ACServer) GetUserRecordForCard(card string) *UserCardResponse {
+	response := UserCardResponse{}
+	var rawResponse map[string]interface{}
+
+	data := svr.makeRequest("/api/get_user_name/"+card)
+
+	// first unmarshall generically to check for errors, then try the actual struct
+	json.Unmarshal(data, rawResponse)
+	if _,ok := rawResponse["error"]; ok {
+		return nil
+	}
+
+	err := json.Unmarshal(data, &response)
+	if err != nil {
+		println("Error unmarshalling JSON: " + err.Error())
+	}
+
+	return &response
+}

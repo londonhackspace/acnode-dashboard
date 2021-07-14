@@ -19,6 +19,7 @@ type UserToolSummaryResponse struct {
 	Type string `json:"type"`
 }
 
+// {"user_name": "Tim Jacobs", "gladosfile": "", "subscribed": true, "id": "HS20571"}
 type UserCardResponse struct {
 	Id string `json:"id"`
 	UserName string `json:"user_name"`
