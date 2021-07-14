@@ -48,7 +48,7 @@ WORKDIR /opt/acnode-dashboard
 
 COPY --from=builder /build/acnode-dashboard/acnode-dashboard acnode-dashboard
 COPY --from=builder /build/acnode-dashboard/bootstrapper/bootstrapper bootstrapper
-COPY --from=builder /build/acnode-dashboard/bootstrapper/namepuller namepuller
+COPY --from=builder /build/acnode-dashboard/namepuller/namepuller namepuller
 COPY --from=builder /build/acnode-dashboard/version version
 COPY --from=nodebuilder /build/acnode-dashboard/frontend/bundle.tar frontend.tar
 COPY static static
