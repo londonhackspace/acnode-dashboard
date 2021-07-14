@@ -17,6 +17,7 @@ COPY config config
 COPY bootstrapper bootstrapper
 COPY logwatcher logwatcher
 COPY usagelogs usagelogs
+COPY namepuller namepuller
 
 COPY *.go ./
 COPY go.mod .
