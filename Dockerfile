@@ -17,7 +17,7 @@ COPY config config
 COPY bootstrapper bootstrapper
 COPY logwatcher logwatcher
 COPY usagelogs usagelogs
-COPY namepuller namepuller
+COPY cleanuptool cleanuptool
 
 COPY *.go ./
 COPY go.mod .
@@ -27,7 +27,7 @@ COPY .git .git
 RUN go build
 RUN cd bootstrapper && go build
 RUN cd logwatcher && go build
-RUN cd namepuller && go build
+RUN cd cleanuptool && go build
 RUN git rev-list -1 HEAD > version
 
 # Second container - build frontend
@@ -48,7 +48,7 @@ WORKDIR /opt/acnode-dashboard
 
 COPY --from=builder /build/acnode-dashboard/acnode-dashboard acnode-dashboard
 COPY --from=builder /build/acnode-dashboard/bootstrapper/bootstrapper bootstrapper
-COPY --from=builder /build/acnode-dashboard/namepuller/namepuller namepuller
+COPY --from=builder /build/acnode-dashboard/cleanuptool/cleanuptool cleanuptool
 COPY --from=builder /build/acnode-dashboard/version version
 COPY --from=nodebuilder /build/acnode-dashboard/frontend/bundle.tar frontend.tar
 COPY static static
