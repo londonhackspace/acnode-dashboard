@@ -51,6 +51,9 @@ type ACNodeRec struct {
 	EEPROMSettingsVersion int
 	ResetCause string
 
+	CameraId *int
+	Transient bool
+
 	PrinterStatus *PrinterStatus
 }
 
@@ -79,6 +82,10 @@ type ACNode interface {
 	SetEepromSettingsVersion(ver int)
 	SetResetCause(rstc string)
 	GetPrinterStatus() *PrinterStatus
+	GetCameraId() *int
+	GetIsTransient() bool
+	SetIsTransient(transient bool)
+	SetCameraId(id *int)
 }
 
 func (node *ACNodeRec) GetId() int {
@@ -277,6 +284,32 @@ func (node *ACNodeRec) GetPrinterStatus() *PrinterStatus {
 	return node.PrinterStatus
 }
 
+func (node *ACNodeRec) GetCameraId() *int {
+	return node.CameraId
+}
+
+func (node *ACNodeRec) SetCameraId(id *int) {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
+	node.CameraId = id
+
+	node.updateTrigger.OnNodeUpdate(node)
+}
+
+func (node *ACNodeRec) GetIsTransient() bool {
+	return node.Transient
+}
+
+func (node *ACNodeRec) SetIsTransient(transient bool) {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
+	node.Transient = transient
+
+	node.updateTrigger.OnNodeUpdate(node)
+}
+
 func (node *ACNodeRec) GetAPIRecord() apitypes.ACNode {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
@@ -322,5 +355,7 @@ func (node *ACNodeRec) GetAPIRecord() apitypes.ACNode {
 		EEPROMSettingsVersion: node.EEPROMSettingsVersion,
 		ResetCause: node.ResetCause,
 		PrinterStatus: printerStatus,
+		CameraId: node.CameraId,
+		IsTransient: node.Transient,
 	}
 }

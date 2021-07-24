@@ -104,7 +104,7 @@ export class MainFrame extends React.Component<MainFrameProps,MainFrameState> {
         let widgets : tabRecord[] = [
             {
                 name: "main",
-                getWidget: () => <MainWidget ds={this.ds}/>,
+                getWidget: () => <MainWidget ds={this.ds} isAdmin={this.state.userIsAdmin}/>,
                 requiresAdmin: false,
             },
             {

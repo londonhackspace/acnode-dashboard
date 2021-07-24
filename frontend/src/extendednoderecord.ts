@@ -23,6 +23,8 @@ export default class ExtendedNodeRecord implements NodeRecord {
     MemUsed: number;
     Status: string;
     Version: string;
+    CameraId : number | undefined;
+    IsTransient: boolean;
     VersionDate : Date;
     VersionMessage : string;
     SettingsVersion: number | undefined;
@@ -134,7 +136,7 @@ export default class ExtendedNodeRecord implements NodeRecord {
             if((lastSeenAPI > 600 || this.LastSeenAPI == -1)
                 && (lastSeenMQTT > 600 || this.LastSeenMQTT == -1)) {
                 this._healthHints.push("Has not been seen online in any form in over 10 minutes");
-                return NodeHealth.BAD
+                return this.IsTransient ? NodeHealth.UNKNOWN : NodeHealth.BAD
             }
 
             if(this.LastSeenMQTT == -1 || lastSeenMQTT > 120) {
@@ -165,7 +167,7 @@ export default class ExtendedNodeRecord implements NodeRecord {
 
             if(lastSeen > 600) {
                 this._healthHints.push("Has not been seen online in over 10 minutes");
-                health = NodeHealth.BAD;
+                health = this.IsTransient ? NodeHealth.UNKNOWN : NodeHealth.BAD;
             } else if(lastSeen > 60) {
                 this._healthHints.push("Has not been seen online in over a minute");
                 return NodeHealth.MEH;

@@ -11,6 +11,7 @@ import StatusBall, {StyleMap as StatusBallStyleMap, StyleMapType} from "./status
 
 interface NodeTableProps {
     dataSource : NodeDataSource
+    userIsAdmin : boolean
 }
 
 interface NodeTableState {
@@ -145,7 +146,7 @@ export default class NodeTable extends React.Component<NodeTableProps, NodeTable
                 rowStyle = styles.ActiveRow;
             }
             let setActive = () => {
-                this.props.dataSource.setActiveRow(node.mqttName);
+                this.props.dataSource.setActiveRow(node.mqttName, false);
             }
 
             let lastSeenNodes : ReactElement[] = []
@@ -169,6 +170,13 @@ export default class NodeTable extends React.Component<NodeTableProps, NodeTable
                 statusBalls.push(<StatusBall state={ nodeHealthMapping.get(node.printerHealth) } text="Octoprint" />);
             }
 
+            let editButton : ReactElement = null;
+            if(this.props.userIsAdmin) {
+                let onEdit = () => {
+                    this.props.dataSource.setActiveRow(node.mqttName, true);
+                };
+                editButton = <td><a href="#" onClick={onEdit}>Edit</a></td>;
+            }
 
             return <tr key={node.mqttName} className={rowStyle}>
                 <td>{node.id || "-"}</td>
@@ -177,10 +185,17 @@ export default class NodeTable extends React.Component<NodeTableProps, NodeTable
                 <td>{ lastSeenNodes }</td>
                 <td><NodeLastSeen lastseen={node.LastStarted}/></td>
                 <td>{ statusBalls }</td>
+                {editButton}
             </tr>;
         })
+
+        let editColumn : ReactElement = null;
+        if(this.props.userIsAdmin) {
+            editColumn = <th>Edit</th>;
+        }
+
         return <table className={styles.NodeTable}>
-            <thead><tr><th>Id</th><th>Name</th><th>Settings Version</th><th>Last Seen</th><th>Last Started</th><th>Health</th></tr></thead>
+            <thead><tr><th>Id</th><th>Name</th><th>Settings Version</th><th>Last Seen</th><th>Last Started</th><th>Health</th>{editColumn}</tr></thead>
             <tbody>{rows}</tbody>
         </table>
     }
@@ -195,7 +210,7 @@ export default class NodeTable extends React.Component<NodeTableProps, NodeTable
             this.refresh.bind(this)
         ));
         this.unsubscribers.push(this.props.dataSource.onActiveRowChange.subscribe((row) => {
-            this.setState({nodes: this.state.nodes, activeRow: row});
+            this.setState({nodes: this.state.nodes, activeRow: row.node});
         }));
         this.refresh()
     }

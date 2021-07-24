@@ -26,10 +26,17 @@ export interface NodeRecord {
     MemUsed: number;
     Status: string;
     Version: string;
+    CameraId : number | undefined;
+    IsTransient: boolean;
     SettingsVersion: number | undefined;
     EEPROMSettingsVersion: number | undefined;
     ResetCause: string | undefined;
     PrinterStatus : PrinterStatus | null;
+}
+
+export interface NodeProps {
+    CameraId : number | undefined;
+    IsTransient: boolean | undefined;
 }
 
 export interface User {
@@ -152,6 +159,11 @@ export default class DashAPI {
         return this.makeRequest("auth/currentuser").then((res : string) => {
             return JSON.parse(res);
         }, this.handleErrorCode.bind(this));
+    }
+
+    public setProps(node : string, props : NodeProps) {
+        JSON.stringify(props)
+        this.makePostRequest("nodes/setProps/" + node, JSON.stringify(props))
     }
 
 };

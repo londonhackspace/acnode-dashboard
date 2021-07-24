@@ -35,7 +35,12 @@ func (rul *RedisUsageLogger) AddUsageLog(node *acnode.ACNode, msg acnode.Announc
 		user_id = rec.Id
 	}
 
-	log := LogEntry{
+	log.Info().Str("user_name", user_name).
+		Str("user_id", user_id).Str("node", (*node).GetMqttName()).
+		Bool("granted", msg.Granted != 0).
+		Msg("Usage Log Added")
+
+	ulog := LogEntry{
 		Timestamp: time.Now(),
 		Card:      msg.Card,
 		Node:      (*node).GetMqttName(),
@@ -44,7 +49,7 @@ func (rul *RedisUsageLogger) AddUsageLog(node *acnode.ACNode, msg acnode.Announc
 		UserId: user_id,
 	}
 
-	data,_ := json.Marshal(log)
+	data,_ := json.Marshal(ulog)
 
 	rul.redis.LPush(rul.ctx, "nodeusage:"+(*node).GetMqttName(), string(data)).Result()
 	// maybe trim the list?

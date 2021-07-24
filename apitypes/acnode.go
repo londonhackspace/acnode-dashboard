@@ -26,14 +26,22 @@ type ACNode struct {
 	// When did we last see a START message for it?
 	LastStarted int64 `json:"LastStarted"`
 
-	MemFree int `json:"MemFree",omitempty`
-	MemUsed int `json:"MemUsed",omitempty"`
-	StatusMessage string `json:"Status", omitempty`
-	Version string `json:"Version"",omitempty`
+	MemFree int `json:"MemFree,omitempty"`
+	MemUsed int `json:"MemUsed,omitempty""`
+	StatusMessage string `json:"Status,omitempty"`
+	Version string `json:"Version,omitempty"`
 
 	SettingsVersion int `json:"SettingsVersion,omitempty"`
 	EEPROMSettingsVersion int `json:"EEPROMSettingsVersion,omitempty"`
 	ResetCause string `json:"ResetCause,omitempty"`
 
+	CameraId *int `json:"CameraId,omitempty"`
+	IsTransient bool `json:"IsTransient"`
+
 	PrinterStatus *PrinterStatus `json:"PrinterStatus,omitempty"`
+}
+
+type NodeProps struct {
+	CameraId *int `json:"CameraId,omitempty"`
+	IsTransient *bool `json:"isTransient,omitempty"`
 }

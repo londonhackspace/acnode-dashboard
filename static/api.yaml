@@ -60,6 +60,13 @@ components:
         Version:
           type: string
           description: The firmware version of the device
+        CameraId:
+          type: integer
+          description: The Zoneminder Camera Id associated with the Node
+          required: false
+        IsTransient:
+          type: boolean
+          description: Is the node known to only be active some of the time
         SettingsVersion:
           type: integer
           required: false
@@ -145,6 +152,35 @@ paths:
                 $ref: '#/components/schemas/ACNode'
         404:
           description: Unknown node
+  /nodes/setProps/{nodeName}:
+    post:
+      summary: Set the properties of the node
+      parameters:
+        - name: nodeName
+          in: path
+          description: MQTT name of the node
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                CameraId:
+                  type: integer
+                  description: Zoneminder ID of camera
+                  required: false
+                isTransient:
+                  type: boolean
+                  description: Is the node transient?
+                  required: false
+      responses:
+        204:
+          description: Accepted
+        404:
+          description: Node not known
   /nodes/setStatus/{id}:
     post:
       summary: Set the status of a node, intended for log parser

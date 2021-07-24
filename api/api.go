@@ -103,6 +103,48 @@ func (api *Api) handleNodeEntry(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(404)
 }
 
+func (api *Api) handleSetProps(w http.ResponseWriter, r *http.Request) {
+	if !api.checkAuth(w, r) {
+		return
+	}
+
+	name := mux.Vars(r)["nodeName"]
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(401)
+		return
+	}
+
+	var props apitypes.NodeProps
+
+	err = json.Unmarshal(body, &props)
+	if err != nil {
+		log.Err(err).Msg("Error unmarshalling request")
+	}
+
+	nodes := api.acnodeHandler.GetNodes()
+
+	for i, _ := range nodes {
+		n := nodes[i]
+
+		if n.GetMqttName() == name {
+			if props.CameraId != nil {
+				n.SetCameraId(props.CameraId)
+			}
+			if props.IsTransient != nil {
+				n.SetIsTransient(*props.IsTransient)
+			}
+
+			w.WriteHeader(204)
+			return
+		}
+	}
+
+	// node doesn't exist
+	w.WriteHeader(404)
+}
+
 func (api *Api) handleSetStatus(w http.ResponseWriter, r *http.Request) {
 	if ! api.checkAuth(w, r) {
 		return
@@ -239,6 +281,7 @@ func (api *Api) GetRouter() http.Handler {
 	rtr.HandleFunc("/nodes", api.handleNodes)
 	rtr.HandleFunc("/nodes/{nodeName}", api.handleNodeEntry)
 	rtr.HandleFunc("/nodes/setStatus/{id}", api.handleSetStatus)
+	rtr.HandleFunc("/nodes/setProps/{nodeName}", api.handleSetProps)
 
 	rtr.HandleFunc("/accesslogs", api.handleAccessLogs)
 	rtr.HandleFunc("/accesslogs/{node}", api.handleAccessLogsNode)

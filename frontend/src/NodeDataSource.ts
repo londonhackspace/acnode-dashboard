@@ -1,16 +1,22 @@
-import APIClient, {NodeRecord} from "./apiclient/dashapi"
+import APIClient, {NodeProps, NodeRecord} from "./apiclient/dashapi"
 
 import { SignalDispatcher, SimpleEventDispatcher } from "strongly-typed-events"
 import ExtendedNodeRecord from "./extendednoderecord";
 import GithubCommitInfo from "./githubcommitinfo"
 
-const useWebsockets = false;
+const useWebsockets = true;
+
+interface RowChangeSignal {
+    node : string;
+    edit : boolean;
+}
 
 export default class NodeDataSource {
     private api : APIClient;
     private _activeRow : string;
+    private _isEdit : boolean;
 
-    private rowChangeSig = new SimpleEventDispatcher<string>();
+    private rowChangeSig = new SimpleEventDispatcher<RowChangeSignal>();
     private dataChangeSig = new SignalDispatcher();
     private nodeData = new Map<string, ExtendedNodeRecord>();
 
@@ -25,6 +31,7 @@ export default class NodeDataSource {
     constructor(api: APIClient) {
         this.api = api;
         this._activeRow = "";
+        this._isEdit = false;
         this.running = false;
     }
 
@@ -170,13 +177,18 @@ export default class NodeDataSource {
         return null;
     }
 
-    setActiveRow(row : string) {
+    setActiveRow(row : string, edit : boolean) {
         this._activeRow = row;
-        this.rowChangeSig.dispatch(row);
+        this._isEdit = edit;
+        this.rowChangeSig.dispatch({node : row, edit: edit});
     }
 
     public get activeRow() {
         return this._activeRow;
+    }
+
+    public get isEdit() {
+        return this._isEdit;
     }
 
     public get onActiveRowChange() {
@@ -187,4 +199,7 @@ export default class NodeDataSource {
         return this.dataChangeSig.asEvent();
     }
 
+    public setNodeProps(node : string, props : NodeProps) {
+        this.api.setProps(node ,props);
+    }
 }
