@@ -11,6 +11,7 @@ COPY . /build/acnode-dashboard/
 
 RUN git status
 RUN git rev-list -1 HEAD > version
+RUN cat version
 RUN go build
 RUN cd bootstrapper && go build
 RUN cd logwatcher && go build
