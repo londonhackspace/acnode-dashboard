@@ -9,25 +9,28 @@ import (
 )
 
 type Config struct {
-	MqttServer string `json:"mqtt_server",omitempty`
-	MqttClientId string `json:"mqtt_clientid",omitempty`
+	MqttServer string `json:"mqtt_server,omitempty"`
+	MqttClientId string `json:"mqtt_clientid,omitempty"`
 
-	AcserverUrl string `json:"acserver_url",omitempty`
-	AcserverApiKey string `json:"acserver_key",omitempty`
+	AcserverUrl string `json:"acserver_url,omitempty"`
+	AcserverApiKey string `json:"acserver_key,omitempty"`
 
-	LdapEnable bool `json:"ldap_enable",omitempty`
-	LdapServer string `json:"ldap_server",omitempty`
-	LdapBindDN string `json:"ldap_binddn",omitempty`
-	LdapBindPW string `json:"ldap_bindpw",omitempty`
-	LdapBaseDN string `json:"ldap_basedn",omitempty`
-	LdapUserOU string `json:"ldap_userou",omitempty`
-	LdapGroupOU string `json:"ldap_groupou",omitempty`
-	LdapSkipTLSVerify bool `json:"ldap_skipverify",omitempty`
+	LdapEnable bool `json:"ldap_enable,omitempty"`
+	LdapServer string `json:"ldap_server,omitempty"`
+	LdapBindDN string `json:"ldap_binddn,omitempty"`
+	LdapBindPW string `json:"ldap_bindpw,omitempty"`
+	LdapBaseDN string `json:"ldap_basedn,omitempty"`
+	LdapUserOU string `json:"ldap_userou,omitempty"`
+	LdapGroupOU string `json:"ldap_groupou,omitempty"`
+	LdapSkipTLSVerify bool `json:"ldap_skipverify,omitempty"`
 
-	RedisEnable bool `json:"redis_enable",omitempty`
-	RedisServer string `json:"redis_server",omitempty`
+	RedisEnable bool `json:"redis_enable,omitempty"`
+	RedisServer string `json:"redis_server,omitempty"`
 
-	SyslogServer string `json:"syslog_server",omitempty`
+	SyslogServer string `json:"syslog_server,omitempty"`
+
+	ZoneminderUrl string `json:"zoneminder_url,omitempty"`
+	ImageStore string `json:"image_store,omitempty"`
 
 	AdminGroups []string `json:"admin_groups"`
 }
@@ -49,6 +52,8 @@ func GetConfigurationFromEnvironment() Config {
 		RedisEnable: strings.ToLower(os.Getenv("REDIS_ENABLE")) == "true",
 		RedisServer: os.Getenv("REDIS_SERVER"),
 		AdminGroups: strings.Split(os.Getenv("ADMIN_GROUPS"), ","),
+		ZoneminderUrl: os.Getenv("ZONEMINDER_URL"),
+		ImageStore: os.Getenv("IMAGE_STORE"),
 		SyslogServer: os.Getenv("SYSLOG_SERVER"),
 	}
 }
@@ -162,6 +167,18 @@ func GetCombinedConfig(filename string) Config {
 		combined.RedisEnable = fileconf.RedisEnable
 	}
 
+	if len(envvar.ZoneminderUrl) != 0 {
+		combined.ZoneminderUrl = envvar.ZoneminderUrl
+	} else {
+		combined.ZoneminderUrl = fileconf.ZoneminderUrl
+	}
+
+	if len(envvar.ImageStore) != 0 {
+		combined.ImageStore = envvar.ImageStore
+	} else {
+		combined.ImageStore = fileconf.ImageStore
+	}
+
 	if envvar.RedisServer != "" {
 		combined.RedisServer = envvar.RedisServer
 	} else {
@@ -224,6 +241,23 @@ func (c *Config) Validate()  bool {
 	if c.RedisEnable {
 		if c.RedisServer == "" {
 			log.Error().Msg("Empty Redis Server")
+			return false
+		}
+	}
+
+	if len(c.ZoneminderUrl) != 0 {
+		if strings.Index(c.ZoneminderUrl, "{ID}") == -1 {
+			log.Error().Msg("Zoneminder URL does not contain camera ID placeholder")
+			return false
+		}
+
+		if len(c.ImageStore) == 0 {
+			log.Error().Msg("Image store path empty")
+			return false
+		}
+
+		if _, err := os.Stat(c.ImageStore); os.IsNotExist(err) {
+			log.Error().Msg("Image store path does not exist")
 			return false
 		}
 	}

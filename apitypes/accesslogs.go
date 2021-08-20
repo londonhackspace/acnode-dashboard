@@ -7,6 +7,8 @@ type AccessLogEntry struct {
 	UserName string `json:"user_name"`
 	UserCard string `json:"user_card"`
 
+	PictureKey string `json:"picture_key,omitempty"`
+
 	Success bool `json:"success"`
 }
 

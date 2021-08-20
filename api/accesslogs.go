@@ -48,6 +48,7 @@ func (api *Api) handleAccessLogsNode(w http.ResponseWriter, r *http.Request) {
 			UserName: i.Name,
 			UserCard: i.Card,
 			Success: i.Success,
+			PictureKey: i.PictureKey,
 		}
 
 		entriesOut = append(entriesOut, e)

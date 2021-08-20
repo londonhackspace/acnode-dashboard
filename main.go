@@ -93,6 +93,12 @@ func main() {
 	acserverapi := acserver_api.CreateACServer(&conf)
 	acsw := acserverwatcher.Watcher{ acserverapi, &acnodehandler }
 
+	var pictureTaker usagelogs.PictureTaker
+
+	if(len(conf.ZoneminderUrl) != 0) {
+		pictureTaker = usagelogs.CreateZMPictureTaker(conf.ZoneminderUrl, conf.ImageStore)
+	}
+
 	if conf.RedisEnable {
 		redisConn := redis.NewClient(&redis.Options{
 			Addr: conf.RedisServer,
@@ -106,7 +112,7 @@ func main() {
 		auth.AddProvider(userStore)
 
 		acnodehandler.SetRedis(redisConn, &startupWg)
-		usageLogger = usagelogs.CreateRedisUsageLogger(redisConn, &acserverapi)
+		usageLogger = usagelogs.CreateRedisUsageLogger(redisConn, &acserverapi, pictureTaker)
 	}
 
 	apihandler := api.CreateApi(&conf, &acnodehandler, usageLogger)

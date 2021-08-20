@@ -340,4 +340,7 @@ paths:
                         success:
                           type: boolean
                           description: was the usage successful, as in, not denied
+                        picture_key:
+                          type: string
+                          description: Filename of photo of entry attempt
 
