@@ -26,6 +26,8 @@ WORKDIR /build/acnode-dashboard/frontend
 COPY . /build/acnode-dashboard/
 
 RUN npm install
+# stop git thinking it's dirty because of this
+RUN git checkout package-lock.json
 RUN npm run build && cd dist && tar -cf ../bundle.tar static index.html
 
 # Third container - this one actually runs the code
