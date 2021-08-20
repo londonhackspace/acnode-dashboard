@@ -9,6 +9,7 @@ WORKDIR /build/acnode-dashboard
 # copy sources into container build environment
 COPY . /build/acnode-dashboard/
 
+RUN git status
 RUN git rev-list -1 HEAD > version
 RUN go build
 RUN cd bootstrapper && go build
