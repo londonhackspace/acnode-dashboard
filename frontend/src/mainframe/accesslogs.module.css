@@ -2,6 +2,10 @@
     margin-right: 2em;
 }
 
+.activeList {
+    font-weight: bold;
+}
+
 .accessLogs {
     overflow: scroll;
     height: 100%;

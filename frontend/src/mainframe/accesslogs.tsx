@@ -41,7 +41,13 @@ export default class AccessLogs extends React.Component<AccessLogsProps, AccessL
             let onclick = () => {
                 this.getData(node, 1);
             };
-           return <a href="#" onClick={onclick} className={styles.logId}>{node}</a>;
+
+            let entry = <a href="#" onClick={onclick} className={styles.logId}>{node}</a>;
+
+            if(this.state.node == node) {
+                return <span className={styles.activeList}>{entry}</span>
+            }
+            return entry
         });
 
         let logs = null;
