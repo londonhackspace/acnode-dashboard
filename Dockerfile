@@ -9,11 +9,11 @@ WORKDIR /build/acnode-dashboard
 # copy sources into container build environment
 COPY . /build/acnode-dashboard/
 
+RUN git rev-list -1 HEAD > version
 RUN go build
 RUN cd bootstrapper && go build
 RUN cd logwatcher && go build
 RUN cd cleanuptool && go build
-RUN git rev-list -1 HEAD > version
 
 # Second container - build frontend
 FROM node:16.0-alpine as nodebuilder
