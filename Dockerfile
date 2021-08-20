@@ -7,22 +7,7 @@ RUN apk update && apk upgrade && \
 WORKDIR /build/acnode-dashboard
 
 # copy sources into container build environment
-COPY acnode acnode
-COPY acserver_api acserver_api
-COPY acserverwatcher acserverwatcher
-COPY api api
-COPY apitypes apitypes
-COPY auth auth
-COPY config config
-COPY bootstrapper bootstrapper
-COPY logwatcher logwatcher
-COPY usagelogs usagelogs
-COPY cleanuptool cleanuptool
-
-COPY *.go ./
-COPY go.mod .
-COPY go.sum .
-COPY .git .git
+COPY . /build/acnode-dashboard/
 
 RUN go build
 RUN cd bootstrapper && go build
