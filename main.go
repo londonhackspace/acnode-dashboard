@@ -79,25 +79,15 @@ func main() {
 		}
 	}
 
-	acnodehandler := acnode.CreateACNodeHandler()
+	acserverapi := acserver_api.CreateACServer(&conf)
+	var pictureTaker usagelogs.PictureTaker
 
-	websockerServer := api.CreateWebsockerHandler(&acnodehandler)
-
-	if conf.LdapEnable {
-		ldapauth := auth.GetLDAPAuthenticator(&conf)
-		auth.AddProvider(&ldapauth)
+	if len(conf.ZoneminderUrl) != 0 {
+		pictureTaker = usagelogs.CreateZMPictureTaker(conf.ZoneminderUrl, conf.ImageStore)
 	}
 
 	var usageLogger usagelogs.UsageLogger = nil
-
-	acserverapi := acserver_api.CreateACServer(&conf)
-	acsw := acserverwatcher.Watcher{ acserverapi, &acnodehandler }
-
-	var pictureTaker usagelogs.PictureTaker
-
-	if(len(conf.ZoneminderUrl) != 0) {
-		pictureTaker = usagelogs.CreateZMPictureTaker(conf.ZoneminderUrl, conf.ImageStore)
-	}
+	var persistence acnode.NodePersistence = nil
 
 	if conf.RedisEnable {
 		redisConn := redis.NewClient(&redis.Options{
@@ -111,9 +101,22 @@ func main() {
 		userStore := auth.CreateRedisProvider(redisConn)
 		auth.AddProvider(userStore)
 
-		acnodehandler.SetRedis(redisConn, &startupWg)
+		persistence = acnode.GetRedisNodePersistence(redisConn)
 		usageLogger = usagelogs.CreateRedisUsageLogger(redisConn, &acserverapi, pictureTaker)
+	} else {
+		persistence = acnode.CreateMemoryNodePersistence()
 	}
+
+	acnodehandler := acnode.CreateACNodeHandler(persistence)
+
+	websockerServer := api.CreateWebsockerHandler(&acnodehandler)
+
+	if conf.LdapEnable {
+		ldapauth := auth.GetLDAPAuthenticator(&conf)
+		auth.AddProvider(&ldapauth)
+	}
+
+	acsw := acserverwatcher.Watcher{ acserverapi, &acnodehandler }
 
 	apihandler := api.CreateApi(&conf, &acnodehandler, usageLogger)
 
@@ -125,7 +128,6 @@ func main() {
 		go acsw.Run()
 		mqttHandler.Init()
 	}()
-
 
 	// create a URL router
 	rtr := mux.NewRouter()

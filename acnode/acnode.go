@@ -122,6 +122,7 @@ func (node* ACNodeRec) SetInService(inService bool) {
 	defer node.mtx.Unlock()
 
 	node.InService = inService
+	node.updateTrigger.OnNodeUpdate(node)
 }
 
 func (node *ACNodeRec) GetName() string {

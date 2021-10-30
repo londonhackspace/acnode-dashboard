@@ -1,14 +1,10 @@
 package acnode
 
 import (
-	"context"
-	"encoding/json"
 	"github.com/go-redis/redis/v8"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
-	"sync"
-	"time"
 )
 
 type acnodeUpdateTrigger interface {
@@ -27,16 +23,18 @@ var (
 )
 
 type ACNodeHandler struct {
-	nodes []ACNodeRec
+	persistence NodePersistence
 
 	redis *redis.Client
-	syncchannel chan bool
 
 	listeners map[*HandlerListener]bool
 }
 
-func CreateACNodeHandler() ACNodeHandler {
-	return ACNodeHandler{ listeners: make(map[*HandlerListener]bool) }
+func CreateACNodeHandler(persistence NodePersistence) ACNodeHandler {
+	return ACNodeHandler{
+		persistence: persistence,
+		listeners:   make(map[*HandlerListener]bool),
+	}
 }
 
 func (h *ACNodeHandler) AddListener(l *HandlerListener) {
@@ -49,79 +47,25 @@ func (h *ACNodeHandler) RemoveListener(l *HandlerListener) {
 	close(l.nodeChanged)
 }
 
-// Every minute, this syncs to redis
-func (h *ACNodeHandler) syncer(stopper chan bool) {
-	for {
-		select {
-		case <- stopper: {
-			return
-		}
-		default: {
-			time.Sleep(time.Minute*1)
-			for i,_ := range h.nodes {
-				node := &h.nodes[i]
-				data, _ := json.Marshal(node)
-				h.redis.Set(context.Background(), "node:" + node.MqttName, string(data), 0)
-			}
-			log.Info().Msg("Dumped nodes to Redis")
-		}
-		}
-	}
-}
-
-func (h *ACNodeHandler) SetRedis(r *redis.Client, wg *sync.WaitGroup) {
-	h.redis = r
-	wg.Add(1)
-	// if we have a sync running already, stop it
-	if h.syncchannel != nil {
-		h.syncchannel <- true
-	}
-
-	// read from redis
-	ctx := context.Background()
-	iter := h.redis.Scan(ctx, 0, "node:*", 0).Iterator()
-
-	for iter.Next(ctx) {
-		data := h.redis.Get(ctx, iter.Val()).Val()
-		var node ACNodeRec
-		err := json.Unmarshal([]byte(data), &node)
-		if err != nil {
-			log.Err(err).Str("node", iter.Val()).Msg("Error unmarshalling node")
-		} else {
-			found := false
-			for i,_ := range h.nodes {
-				if h.nodes[i].MqttName == node.MqttName {
-					found = true
-					h.nodes[i] = node
-					log.Info().Str("node", node.MqttName).Msg("Updated node from Redis")
-					break
-				}
-			}
-			if !found {
-				log.Info().Str("node", node.MqttName).Msg("Added node from Redis")
-				h.AddNode(node)
-			}
-		}
-	}
-
-	h.syncchannel = make(chan bool)
-	wg.Done()
-	go h.syncer(h.syncchannel)
-}
-
 func (h *ACNodeHandler) AddNode(node ACNodeRec) {
 	node.updateTrigger = h
 	nodeCounter.Inc()
-	h.nodes = append(h.nodes, node)
+	nrec, err := h.persistence.StoreNode(&node)
+
+	if err != nil {
+		log.Err(err).Msg("Error adding node")
+	}
+
 	for l := range h.listeners {
 		go func() {
-			l.nodeAdded <- &h.nodes[len(h.nodes)-1]
+			l.nodeAdded <- nrec
 		}()
 	}
 }
 
 func (h *ACNodeHandler) OnNodeUpdate(node ACNode) {
 	updateCounter.Inc()
+	h.persistence.StoreNode(node.(*ACNodeRec))
 	for l := range h.listeners {
 		go func() {
 			l.nodeChanged <- node
@@ -130,10 +74,10 @@ func (h *ACNodeHandler) OnNodeUpdate(node ACNode) {
 }
 
 func (h *ACNodeHandler) GetNodeByMqttName(name string) ACNode {
-	for i, _ := range h.nodes {
-		if h.nodes[i].GetMqttName() == name {
-			return &h.nodes[i]
-		}
+	noderec, err := h.persistence.GetNodeByMqttName(name)
+	if err == nil {
+		noderec.updateTrigger = h
+		return noderec
 	}
 
 	node := ACNodeRec{
@@ -144,13 +88,17 @@ func (h *ACNodeHandler) GetNodeByMqttName(name string) ACNode {
 	h.AddNode(node)
 
 	// return a ref to the last entry we just added
-	return &h.nodes[len(h.nodes)-1]
+	noderec, _ = h.persistence.GetNodeByMqttName(name)
+	noderec.updateTrigger = h
+	return noderec
 }
 
 func (h *ACNodeHandler) GetNodes() []ACNode {
 	var ret []ACNode
-	for i,_ := range h.nodes {
-		ret = append(ret, &h.nodes[i])
+	nodes,_ := h.persistence.GetAllNodes()
+	for i,_ := range nodes {
+		nodes[i].updateTrigger = h
+		ret = append(ret, &nodes[i])
 	}
 
 	return ret
