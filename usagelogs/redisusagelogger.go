@@ -51,7 +51,7 @@ func (rul *RedisUsageLogger) AddUsageLog(node *acnode.ACNode, msg acnode.Announc
 
 	log.Info().Str("user_name", user_name).
 		Str("user_id", user_id).Str("node", (*node).GetMqttName()).
-		Bool("granted", msg.Granted != 0).
+		Bool("granted", msg.Granted == 1).
 		Str("pictureKey", pickey).
 		Msg("Usage Log Added")
 
@@ -59,7 +59,7 @@ func (rul *RedisUsageLogger) AddUsageLog(node *acnode.ACNode, msg acnode.Announc
 		Timestamp: time.Now(),
 		Card:      msg.Card,
 		Node:      (*node).GetMqttName(),
-		Success:   msg.Granted != 0,
+		Success:   msg.Granted == 1,
 		Name: user_name,
 		UserId: user_id,
 		PictureKey: pickey,
