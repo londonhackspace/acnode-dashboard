@@ -60,10 +60,10 @@ class NodeLastSeen extends React.Component<NodeLastSeenProps, NodeLastSeenState>
             out += minutes + " minute";
             if(minutes > 1) out += "s";
         }
-        if(seconds > 0) {
+        if(seconds >= 0) {
             if(out.length > 0) out += " ";
             out += seconds + " second";
-            if(seconds > 1) out += "s";
+            if(seconds != 1) out += "s";
         }
         return out
     }
@@ -73,6 +73,8 @@ class NodeLastSeen extends React.Component<NodeLastSeenProps, NodeLastSeenState>
         if(this.props.lastseen == -1) {
             return "Never" + extratext;
         } else if(this.state.totalTime < 7200) {
+            // just in case the timer doesn't exist, create it
+            this.createTimer();
             return this.sinceTime(this.state.totalTime) + " ago" + extratext;
         } else {
             let timestamp = new Date(this.props.lastseen*1000);
@@ -86,14 +88,15 @@ class NodeLastSeen extends React.Component<NodeLastSeenProps, NodeLastSeenState>
             }
 
             // if we have an update timer, cancel it since we won't be making any more changes
-            if(this.timer) {
-                window.clearInterval(this.timer);
-                this.timer = null;
-            }
+            this.removeTimer();
         }
     }
 
-    componentDidMount() {
+    createTimer() {
+        // bail early if it already exists
+        if(this.timer) {
+            return;
+        }
         // no point setting up an update timer if it won't ever do anything
         if(this.props.lastseen != -1 && this.state.totalTime < 7200) {
             this.timer = window.setInterval(() => {
@@ -102,11 +105,19 @@ class NodeLastSeen extends React.Component<NodeLastSeenProps, NodeLastSeenState>
         }
     }
 
-    componentWillUnmount() {
+    removeTimer() {
         if(this.timer) {
             window.clearInterval(this.timer);
             this.timer = null;
         }
+    }
+
+    componentDidMount() {
+        this.createTimer();
+    }
+
+    componentWillUnmount() {
+        this.removeTimer();
     }
 
     componentDidUpdate(prevProps: Readonly<NodeLastSeenProps>) {
