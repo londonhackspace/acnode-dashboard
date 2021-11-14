@@ -57,7 +57,9 @@ export default class NodeDataSource {
             // on a message, we can reset the retry backoff
             this.wsRetryMultiplier = 1;
             let node : NodeRecord =  JSON.parse(evt.data);
-            this.nodeData.set(node.mqttName, new ExtendedNodeRecord(node));
+            let extRec = new ExtendedNodeRecord(node);
+            this.nodeData.set(node.mqttName, extRec);
+            this.getGithubInfo(extRec);
             this.dataChangeSig.dispatch();
             console.log("Got updated status for node " + node.mqttName);
         }
@@ -82,6 +84,19 @@ export default class NodeDataSource {
                     this.wsRetryMultiplier = 10;
                 }
             }
+        }
+    }
+
+    private getGithubInfo(node : ExtendedNodeRecord) {
+        if(node.Version && node.Version != "") {
+            GithubCommitInfo.getCommit(node.Version)
+                .then((res) => {
+                    if(res) {
+                        node.VersionDate = new Date(res.commit.committer.date);
+                        node.VersionMessage = res.commit.message;
+                        this.dataChangeSig.dispatch();
+                    }
+                });
         }
     }
 
@@ -149,16 +164,7 @@ export default class NodeDataSource {
                 if(!res) continue;
                 let extendedRec = new ExtendedNodeRecord(res);
 
-                if(extendedRec.Version && extendedRec.Version != "") {
-                    GithubCommitInfo.getCommit(extendedRec.Version)
-                        .then((res) => {
-                            if(res) {
-                                extendedRec.VersionDate = new Date(res.commit.committer.date);
-                                extendedRec.VersionMessage = res.commit.message;
-                            }
-                            this.dataChangeSig.dispatch();
-                        });
-                }
+                this.getGithubInfo(extendedRec);
 
                 this.nodeData.set(res.mqttName, extendedRec);
             }
