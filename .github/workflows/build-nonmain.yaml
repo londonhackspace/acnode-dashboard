@@ -29,4 +29,4 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            docker.pkg.github.com/londonhackspace/acnode-dashboard/acnode-dashboard:${{ steps.extract_branch.outputs.branch }}
+            docker.pkg.github.com/londonhackspace/acnode-dashboard/acnode-dashboard:${{ steps.extract_branch.outputs.branch }}-${{ github.run_number }}
