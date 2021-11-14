@@ -15,7 +15,6 @@ RUN cat version
 RUN go build
 RUN cd bootstrapper && go build
 RUN cd logwatcher && go build
-RUN cd cleanuptool && go build
 
 # Second container - build frontend
 FROM node:16.0-alpine as nodebuilder
@@ -37,7 +36,6 @@ WORKDIR /opt/acnode-dashboard
 
 COPY --from=builder /build/acnode-dashboard/acnode-dashboard acnode-dashboard
 COPY --from=builder /build/acnode-dashboard/bootstrapper/bootstrapper bootstrapper
-COPY --from=builder /build/acnode-dashboard/cleanuptool/cleanuptool cleanuptool
 COPY --from=builder /build/acnode-dashboard/version version
 COPY --from=nodebuilder /build/acnode-dashboard/frontend/bundle.tar frontend.tar
 COPY static static
