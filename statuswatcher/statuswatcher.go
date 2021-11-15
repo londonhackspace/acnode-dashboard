@@ -76,8 +76,8 @@ func (sw *StatusWatcher) postSlackMessage(node *apitypes.ACNode, hints []string,
 		for i, h := range hints {
 			if i > 0 {
 				msg += ", "
-				msg += h
 			}
+			msg += h
 		}
 
 		if len(hints) == 0 {
