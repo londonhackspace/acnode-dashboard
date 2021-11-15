@@ -41,7 +41,7 @@ func main() {
 	// Set up the watcher itself
 	apiClient := apiclient.MakeAPIClient(cfg.ApiKey, cfg.ACNodeDashAPI)
 	watcher := CreateStatusWatcher(apiClient, slackClient, cfg.SlackChannel)
-	watcher.Run(ctx)
+	go watcher.Run(ctx)
 
 	// Set up a webserver for stats and stuff
 	rtr := mux.NewRouter()
