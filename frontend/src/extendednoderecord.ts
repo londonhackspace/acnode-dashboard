@@ -124,12 +124,10 @@ export default class ExtendedNodeRecord implements NodeRecord {
         let lastSeen = (Date.now()/1000) - this.LastSeen;
         let lastSeenMQTT = (Date.now()/1000) - this.LastSeenMQTT;
         let lastSeenAPI = (Date.now()/1000) - this.LastSeenAPI;
+        let lastStarted = (Date.now()/1000) - this.LastStarted;
 
         // use the newer LastSeen values?
         if(this.LastSeenMQTT > -1 || this.LastSeenAPI > -1) {
-            if(this.LastSeenAPI == -1 && this.LastSeenMQTT == -1) {
-                return NodeHealth.UNKNOWN;
-            }
 
             // if we're seeing neither MQTT or ACServer log entries,
             // it's probably dead
@@ -175,7 +173,7 @@ export default class ExtendedNodeRecord implements NodeRecord {
         }
 
         // lower the health if the node watchdog'd recently
-        if(this.LastStarted > 0 && this.LastStarted < 600) {
+        if(this.LastStarted > 0 && lastStarted < 600) {
             if(this.ResetCause == "Watchdog") {
                 this._healthHints.push("Watchdog reset detected in last 10 minutes");
                 health = NodeHealth.MEH;
