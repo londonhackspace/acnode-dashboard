@@ -66,9 +66,10 @@ func (sw *StatusWatcher) Run(ctx context.Context) {
 func (sw *StatusWatcher) postIrcMessage(node *apitypes.ACNode, hints []string, oldState int, newState int) {
 	if sw.irccat != nil {
 		if newState > oldState {
-			sw.irccat.SendMessage(node.MqttName + " has improved to " + getStringFromNodeState(newState))
+			sw.irccat.SendMessage("ACNode Status: " + node.MqttName + " has improved to " + getStringFromNodeState(newState))
 		} else if newState < oldState {
-			msg := node.MqttName + " has degraded to " + getStringFromNodeState(newState)
+			msg := "ACNode Status: " + node.MqttName + " has degraded to " +
+				getStringFromNodeState(newState)
 			if len(hints) > 0 {
 				msg += " ("
 				for i,h := range hints {
