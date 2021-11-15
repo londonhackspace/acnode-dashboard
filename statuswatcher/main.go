@@ -24,9 +24,14 @@ func main() {
 	cfg := GetConfig()
 
 	var slackClient slackapi.SlackAPI = nil
+	var ircCatClient *IRCCatClient = nil
 
 	if len(cfg.SlackToken) > 0 {
 		slackClient = slackapi.CreateSlackAPI(cfg.SlackToken)
+	}
+
+	if len(cfg.IRCCat) > 0 {
+		ircCatClient = MakeIRCCatClient(cfg.IRCCat, cfg.IRCChannel)
 	}
 
 	// set up a signal handler to cancel the context
@@ -40,7 +45,7 @@ func main() {
 
 	// Set up the watcher itself
 	apiClient := apiclient.MakeAPIClient(cfg.ApiKey, cfg.ACNodeDashAPI)
-	watcher := CreateStatusWatcher(apiClient, slackClient, cfg.SlackChannel)
+	watcher := CreateStatusWatcher(apiClient, slackClient, cfg.SlackChannel, ircCatClient)
 	go watcher.Run(ctx)
 
 	// Set up a webserver for stats and stuff

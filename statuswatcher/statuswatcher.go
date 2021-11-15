@@ -13,6 +13,7 @@ type StatusWatcher struct {
 	client apiclient.APIClient
 	slack slackapi.SlackAPI
 	slackChannel string
+	irccat *IRCCatClient
 
 	previousStates map[string]int
 }
@@ -38,12 +39,13 @@ func getStringFromNodeState(state int) string {
 	return "<Unknown>"
 }
 
-func CreateStatusWatcher(client apiclient.APIClient, slack slackapi.SlackAPI, slackChannel string) *StatusWatcher {
+func CreateStatusWatcher(client apiclient.APIClient, slack slackapi.SlackAPI, slackChannel string, irccat *IRCCatClient) *StatusWatcher {
 	return &StatusWatcher{
 		client: client,
 		previousStates: map[string]int{},
 		slack: slack,
 		slackChannel: slackChannel,
+		irccat: irccat,
 	}
 }
 
@@ -59,6 +61,27 @@ func (sw *StatusWatcher) Run(ctx context.Context) {
 		}
 	}
 	log.Info().Msg("Node Watcher Exiting")
+}
+
+func (sw *StatusWatcher) postIrcMessage(node *apitypes.ACNode, hints []string, oldState int, newState int) {
+	if sw.irccat != nil {
+		if newState > oldState {
+			sw.irccat.SendMessage(node.MqttName + " has improved to " + getStringFromNodeState(newState))
+		} else if newState < oldState {
+			msg := node.MqttName + " has degraded to " + getStringFromNodeState(newState)
+			if len(hints) > 0 {
+				msg += " ("
+				for i,h := range hints {
+					if i > 0 {
+						msg += ", "
+					}
+					msg += h
+				}
+				msg += ")"
+			}
+			sw.irccat.SendMessage(msg)
+		}
+	}
 }
 
 func (sw *StatusWatcher) postSlackMessage(node *apitypes.ACNode, hints []string, oldState int, newState int) {
@@ -104,12 +127,15 @@ func (sw *StatusWatcher) checkNode(name string) {
 			log.Info().Str("node", status.MqttName).
 				Str("State", getStringFromNodeState(newState)).
 				Msg("Node has improved")
-			sw.postSlackMessage(status, hints, oldState, newState)
 		} else if newState < oldState {
 			log.Info().Str("node", status.MqttName).
 				Str("State", getStringFromNodeState(newState)).
 				Msg("Node has degraded")
+		}
+
+		if oldState != newState {
 			sw.postSlackMessage(status, hints, oldState, newState)
+			sw.postIrcMessage(status, hints, oldState, newState)
 		}
 	} else {
 		log.Info().Str("node", status.MqttName).

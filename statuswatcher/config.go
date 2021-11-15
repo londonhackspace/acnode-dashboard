@@ -8,6 +8,8 @@ type Config struct {
 	ACNodeDashAPI string
 	SlackToken string
 	SlackChannel string
+	IRCCat string
+	IRCChannel string
 }
 
 func GetConfig() Config {
@@ -17,6 +19,8 @@ func GetConfig() Config {
 		ACNodeDashAPI: os.Getenv("ACNODE_DASH"),
 		SlackToken: os.Getenv("SLACK_TOKEN"),
 		SlackChannel: os.Getenv("SLACK_CHANNEL"),
+		IRCCat : os.Getenv("IRCCAT_SERVER"),
+		IRCChannel : os.Getenv("IRC_CHANNEL"),
 	}
 
 	if len(c.HTTPListen) == 0 {
@@ -29,6 +33,10 @@ func GetConfig() Config {
 
 	if len(c.SlackChannel) == 0 {
 		c.SlackChannel = "bot-test"
+	}
+
+	if len(c.IRCChannel) == 0 {
+		c.IRCChannel = "#lhs-bottest"
 	}
 
 	return c
