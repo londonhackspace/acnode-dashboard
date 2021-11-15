@@ -9,7 +9,7 @@ components:
     ApiKeyAuth:
       type: apiKey
       in: header
-      name: X-API-KEY
+      name: API-KEY
       description: API Key for machine use
     CookieAuth:
       type: apiKey
