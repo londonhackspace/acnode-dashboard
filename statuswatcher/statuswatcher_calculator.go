@@ -22,8 +22,8 @@ func (sw *StatusWatcher) calculateNodeState(node *apitypes.ACNode) (int, []strin
 	if node.LastSeenMQTT > -1 || node.LastSeenAPI > -1 {
 		// if we're seeing neither MQTT or ACServer log entries,
 		// it's probably dead
-		if (lastSeenApi > 600 || node.LastSeenAPI == -1) &&
-			 (lastSeenMQTT > 600 || node.LastSeenMQTT == -1) {
+		if (lastSeenApi > 610 || node.LastSeenAPI == -1) &&
+			 (lastSeenMQTT > 610 || node.LastSeenMQTT == -1) {
 			healthHints = append(healthHints, "Has not been seen online in any form in over 10 minutes")
 			if node.IsTransient {
 				return STATE_UNKNOWN, healthHints
@@ -31,7 +31,7 @@ func (sw *StatusWatcher) calculateNodeState(node *apitypes.ACNode) (int, []strin
 			return STATE_BAD, healthHints
 		}
 
-		if node.LastSeenMQTT == -1 || lastSeenMQTT > 120 {
+		if node.LastSeenMQTT == -1 || lastSeenMQTT > 130 {
 			healthHints = append(healthHints, "Has not sent a message via MQTT in over 2 minutes")
 			health = STATE_WARN
 		}
@@ -39,12 +39,12 @@ func (sw *StatusWatcher) calculateNodeState(node *apitypes.ACNode) (int, []strin
 		// unrestricted doors don't check in nearly so often if they're not
 		// running firmware new enough to periodically revalidate the cache
 		if node.Type == "Door" {
-			if node.LastSeenAPI == -1 || lastSeenApi > 3600*12 {
+			if node.LastSeenAPI == -1 || lastSeenApi > ((3600*12) + 10) {
 				healthHints = append(healthHints, "Has not contacted ACServer in over 12 hours")
 				health = STATE_WARN
 			}
 		} else {
-			if node.LastSeenAPI == -1 || lastSeenApi > 600 {
+			if node.LastSeenAPI == -1 || lastSeenApi > 610 {
 				healthHints = append(healthHints, "Has not contacted ACServer in over 10 minutes")
 				health = STATE_WARN
 			}
@@ -58,21 +58,21 @@ func (sw *StatusWatcher) calculateNodeState(node *apitypes.ACNode) (int, []strin
 			return STATE_UNKNOWN, healthHints
 		}
 
-		if lastSeen > 600 {
+		if lastSeen > 610 {
 			healthHints = append(healthHints, "Has not been seen online in over 10 minutes")
 			if node.IsTransient {
 				health = STATE_UNKNOWN
 			} else {
 				health = STATE_BAD
 			}
-		} else if lastSeen > 60 {
+		} else if lastSeen > 70 {
 			healthHints = append(healthHints, "Has not been seen online in over a minute")
 			return STATE_WARN, healthHints;
 		}
 	}
 
 	// lower the health if the node watchdog'd recently
-	if node.LastStarted > 0 && lastStarted < 600 {
+	if node.LastStarted > 0 && lastStarted < 610 {
 		if node.ResetCause == "Watchdog" {
 			healthHints = append(healthHints, "Watchdog reset detected in last 10 minutes")
 			health = STATE_WARN
