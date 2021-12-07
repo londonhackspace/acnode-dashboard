@@ -70,7 +70,7 @@ class NodeLastSeen extends React.Component<NodeLastSeenProps, NodeLastSeenState>
 
     render() {
         let extratext = this.props.source ? " ("+this.props.source +")" : "";
-        if(this.props.lastseen == -1) {
+        if(this.props.lastseen == undefined || this.props.lastseen == -1) {
             return "Never" + extratext;
         } else if(this.state.totalTime < 7200) {
             // just in case the timer doesn't exist, create it
