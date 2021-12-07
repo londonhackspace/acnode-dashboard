@@ -163,13 +163,18 @@ func main() {
 
 	//favicon and index don't get cache headers so we can change them
 	rtr.Handle("/favicon.png", fs)
-	rtr.Handle("/", fs)
 
 	// Add Swagger for API docs
 	rtr.HandleFunc("/swagger/", handleSwagger)
 
 	// Prometheus-format metrics
 	rtr.Handle("/metrics", promhttp.Handler())
+
+	//Default, catch all handler so the client-side router works:
+	rtr.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = "/"
+		fs.ServeHTTP(w, r)
+	})
 
 	listen, ok := os.LookupEnv("LISTEN_ADDR")
 

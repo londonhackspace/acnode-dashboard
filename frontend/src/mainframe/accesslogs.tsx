@@ -26,7 +26,16 @@ export default class AccessLogs extends React.Component<AccessLogsProps, AccessL
             node : null,
         };
         props.api.getAccessControlNodes().then((nodes : string[]) => {
-           this.setState({ nodeList : nodes, data: null, page: 1, node: null});
+            let u = new URL(document.URL);
+            let node = null;
+            if(u.pathname.indexOf('/', 1) > -1) {
+                let part = u.pathname.substring(u.pathname.indexOf('/', 1)+1);
+                if(nodes.indexOf(part) != -1) {
+                    this.getData(part, 1);
+                }
+            }
+
+           this.setState({ nodeList : nodes, data: null, page: 1, node: node});
         });
     }
 
@@ -38,11 +47,18 @@ export default class AccessLogs extends React.Component<AccessLogsProps, AccessL
 
     render() {
         let lst = this.state.nodeList.map((node : string ) : ReactElement => {
-            let onclick = () => {
+            let onclick = (evt : React.MouseEvent<HTMLElement>) => {
+                let u = new URL(document.URL);
+                let base = u.pathname.substring(0, u.pathname.indexOf("/", 1))
+                if( u.pathname.indexOf("/", 1) == -1) {
+                    base = u.pathname;
+                }
+                history.pushState({}, "", base + "/" + node);
                 this.getData(node, 1);
+                evt.preventDefault();
             };
 
-            let entry = <a href="#" onClick={onclick} className={styles.logId}>{node}</a>;
+            let entry = <a key={node} href="#" onClick={onclick} className={styles.logId}>{node}</a>;
 
             if(this.state.node == node) {
                 return <span className={styles.activeList}>{entry}</span>
@@ -64,7 +80,7 @@ export default class AccessLogs extends React.Component<AccessLogsProps, AccessL
                 } else {
                     nameObject = <span>{entry.user_name}</span>
                 }
-                return <tr><td>{d.toDateString() + " " + d.toTimeString()}</td>
+                return <tr key={entry.timestamp}><td>{d.toDateString() + " " + d.toTimeString()}</td>
                         <td>{nameObject}</td><td>{entry.user_card}</td>
                         <td>{entry.success ? "Granted" : "Denied"}</td>
                     </tr>;

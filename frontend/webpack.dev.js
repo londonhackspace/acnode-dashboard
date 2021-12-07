@@ -18,6 +18,7 @@ module.exports = merge(common, {
             directory: path.join(__dirname, "static"),
         },
         port: 3000,
+        historyApiFallback: true,
         hot: true,
         proxy: {
             '/api': 'http://localhost:8080',
