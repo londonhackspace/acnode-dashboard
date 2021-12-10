@@ -12,7 +12,6 @@ interface NodeEditPanelProps {
 }
 
 interface NodeEditPanelState {
-    currentCameraId : string;
     currentTransient : boolean;
 }
 
@@ -20,43 +19,22 @@ export default class NodeEditPanel extends React.Component<NodeEditPanelProps, N
 
     constructor(props : NodeEditPanelProps) {
         super(props);
-        let camId = "";
-        if(props.node.CameraId != null) {
-            camId = String(props.node.CameraId);
-        }
         this.state = {
-            currentCameraId: camId,
             currentTransient: props.node.IsTransient,
         };
     }
 
     private hasChanged() : boolean {
-        let camId = "";
-        if(this.props.node.CameraId != null) {
-            camId = String(this.props.node.CameraId);
-        }
-        return camId != this.state.currentCameraId ||
-                this.props.node.IsTransient != this.state.currentTransient;
+        return this.props.node.IsTransient != this.state.currentTransient;
     }
 
     render() {
         if(this.props.node) {
 
-            let onCameraIdChange = (evt : React.ChangeEvent<HTMLInputElement>) => {
-                let newVal = evt.currentTarget.value;
-                this.setState((oldState : NodeEditPanelState) : NodeEditPanelState => {
-                    return {
-                      currentCameraId: newVal,
-                      currentTransient: oldState.currentTransient,
-                    };
-                });
-            };
-
             let onTransientChange = (evt : React.ChangeEvent<HTMLInputElement>) => {
                 let newVal = evt.currentTarget.checked;
                 this.setState((oldState : NodeEditPanelState) : NodeEditPanelState => {
                     return {
-                        currentCameraId: oldState.currentCameraId,
                         currentTransient: newVal,
                     };
                 });
@@ -64,8 +42,6 @@ export default class NodeEditPanel extends React.Component<NodeEditPanelProps, N
 
             let onSave = () => {
                 let props : NodeProps = {
-                    CameraId : this.state.currentCameraId == "" ?
-                        null : Number(this.state.currentCameraId),
                     IsTransient: this.state.currentTransient,
                 }
                 this.props.ds.setNodeProps(this.props.node.mqttName, props)
@@ -73,11 +49,6 @@ export default class NodeEditPanel extends React.Component<NodeEditPanelProps, N
 
             return <div>
                 <div className={styles.nodetitle}>Editing {this.props.node.name}</div>
-                <div className={styles.nodepropsline}>
-                    <span className={styles.nodepropstitle}>Camera Id: </span>
-                    <span className={styles.nodepropsvalue}><input name="cameraId" value={this.state.currentCameraId} onChange={onCameraIdChange}/> </span>
-                </div>
-
 
                 <div className={styles.nodepropsline}>
                     <span className={styles.nodepropstitle}>Is Transient: </span>

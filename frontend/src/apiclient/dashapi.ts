@@ -26,7 +26,6 @@ export interface NodeRecord {
     MemUsed: number;
     Status: string;
     Version: string;
-    CameraId : number | undefined;
     IsTransient: boolean;
     InUse: boolean;
     SettingsVersion: number | undefined;
@@ -36,7 +35,6 @@ export interface NodeRecord {
 }
 
 export interface NodeProps {
-    CameraId : number | undefined;
     IsTransient: boolean | undefined;
 }
 

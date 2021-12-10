@@ -36,13 +36,11 @@ type ACNode struct {
 	EEPROMSettingsVersion int    `json:"EEPROMSettingsVersion,omitempty"`
 	ResetCause            string `json:"ResetCause,omitempty"`
 
-	CameraId    *int `json:"CameraId,omitempty"`
 	IsTransient bool `json:"IsTransient"`
 
 	PrinterStatus *PrinterStatus `json:"PrinterStatus,omitempty"`
 }
 
 type NodeProps struct {
-	CameraId    *int  `json:"CameraId,omitempty"`
 	IsTransient *bool `json:"isTransient,omitempty"`
 }

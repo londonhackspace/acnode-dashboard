@@ -82,11 +82,6 @@ func main() {
 	}
 
 	acserverapi := acserver_api.CreateACServer(&conf)
-	var pictureTaker usagelogs.PictureTaker
-
-	if len(conf.ZoneminderUrl) != 0 {
-		pictureTaker = usagelogs.CreateZMPictureTaker(conf.ZoneminderUrl, conf.ImageStore)
-	}
 
 	var usageLogger usagelogs.UsageLogger = nil
 	var persistence acnode.NodePersistence = nil
@@ -104,7 +99,7 @@ func main() {
 		auth.AddProvider(userStore)
 
 		persistence = acnode.GetRedisNodePersistence(redisConn)
-		usageLogger = usagelogs.CreateRedisUsageLogger(redisConn, &acserverapi, pictureTaker)
+		usageLogger = usagelogs.CreateRedisUsageLogger(redisConn, &acserverapi)
 	} else {
 		persistence = acnode.CreateMemoryNodePersistence()
 	}

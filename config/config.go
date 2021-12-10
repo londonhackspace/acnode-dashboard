@@ -29,9 +29,6 @@ type Config struct {
 
 	SyslogServer string `json:"syslog_server,omitempty"`
 
-	ZoneminderUrl string `json:"zoneminder_url,omitempty"`
-	ImageStore    string `json:"image_store,omitempty"`
-
 	AdminGroups []string `json:"admin_groups"`
 }
 
@@ -52,8 +49,6 @@ func GetConfigurationFromEnvironment() Config {
 		RedisEnable:       strings.ToLower(os.Getenv("REDIS_ENABLE")) == "true",
 		RedisServer:       os.Getenv("REDIS_SERVER"),
 		AdminGroups:       strings.Split(os.Getenv("ADMIN_GROUPS"), ","),
-		ZoneminderUrl:     os.Getenv("ZONEMINDER_URL"),
-		ImageStore:        os.Getenv("IMAGE_STORE"),
 		SyslogServer:      os.Getenv("SYSLOG_SERVER"),
 	}
 }
@@ -167,18 +162,6 @@ func GetCombinedConfig(filename string) Config {
 		combined.RedisEnable = fileconf.RedisEnable
 	}
 
-	if len(envvar.ZoneminderUrl) != 0 {
-		combined.ZoneminderUrl = envvar.ZoneminderUrl
-	} else {
-		combined.ZoneminderUrl = fileconf.ZoneminderUrl
-	}
-
-	if len(envvar.ImageStore) != 0 {
-		combined.ImageStore = envvar.ImageStore
-	} else {
-		combined.ImageStore = fileconf.ImageStore
-	}
-
 	if envvar.RedisServer != "" {
 		combined.RedisServer = envvar.RedisServer
 	} else {
@@ -241,23 +224,6 @@ func (c *Config) Validate() bool {
 	if c.RedisEnable {
 		if c.RedisServer == "" {
 			log.Error().Msg("Empty Redis Server")
-			return false
-		}
-	}
-
-	if len(c.ZoneminderUrl) != 0 {
-		if strings.Index(c.ZoneminderUrl, "{ID}") == -1 {
-			log.Error().Msg("Zoneminder URL does not contain camera ID placeholder")
-			return false
-		}
-
-		if len(c.ImageStore) == 0 {
-			log.Error().Msg("Image store path empty")
-			return false
-		}
-
-		if _, err := os.Stat(c.ImageStore); os.IsNotExist(err) {
-			log.Error().Msg("Image store path does not exist")
 			return false
 		}
 	}

@@ -12,18 +12,16 @@ import (
 )
 
 type RedisUsageLogger struct {
-	redis        *redis.Client
-	ctx          context.Context
-	acserver     *acserver_api.ACServer
-	pictureTaker PictureTaker
+	redis    *redis.Client
+	ctx      context.Context
+	acserver *acserver_api.ACServer
 }
 
-func CreateRedisUsageLogger(redis *redis.Client, acserver *acserver_api.ACServer, pictureTaker PictureTaker) UsageLogger {
+func CreateRedisUsageLogger(redis *redis.Client, acserver *acserver_api.ACServer) UsageLogger {
 	return &RedisUsageLogger{
-		redis:        redis,
-		ctx:          context.Background(),
-		acserver:     acserver,
-		pictureTaker: pictureTaker,
+		redis:    redis,
+		ctx:      context.Background(),
+		acserver: acserver,
 	}
 }
 
@@ -32,37 +30,24 @@ func (rul *RedisUsageLogger) AddUsageLog(node *acnode.ACNode, msg acnode.Announc
 	rec := rul.acserver.GetUserRecordForCard(msg.Card)
 	var user_name string
 	var user_id string
-	var pickey string
+
 	if rec != nil {
 		user_name = rec.UserName
 		user_id = rec.Id
 	}
 
-	if rul.pictureTaker != nil {
-		camId := (*node).GetCameraId()
-		if camId != nil {
-			var err error
-			pickey, err = rul.pictureTaker.TakePicture(*camId)
-			if err != nil {
-				log.Err(err).Int("CamId", *camId).Msg("Error getting picture")
-			}
-		}
-	}
-
 	log.Info().Str("user_name", user_name).
 		Str("user_id", user_id).Str("node", (*node).GetMqttName()).
 		Bool("granted", msg.Granted == 1).
-		Str("pictureKey", pickey).
 		Msg("Usage Log Added")
 
 	ulog := LogEntry{
-		Timestamp:  time.Now(),
-		Card:       msg.Card,
-		Node:       (*node).GetMqttName(),
-		Success:    msg.Granted == 1,
-		Name:       user_name,
-		UserId:     user_id,
-		PictureKey: pickey,
+		Timestamp: time.Now(),
+		Card:      msg.Card,
+		Node:      (*node).GetMqttName(),
+		Success:   msg.Granted == 1,
+		Name:      user_name,
+		UserId:    user_id,
 	}
 
 	data, _ := json.Marshal(ulog)

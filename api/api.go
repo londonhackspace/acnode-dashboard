@@ -129,9 +129,7 @@ func (api *Api) handleSetProps(w http.ResponseWriter, r *http.Request) {
 		n := nodes[i]
 
 		if n.GetMqttName() == name {
-			if props.CameraId != nil {
-				n.SetCameraId(props.CameraId)
-			}
+
 			if props.IsTransient != nil {
 				n.SetIsTransient(*props.IsTransient)
 			}
