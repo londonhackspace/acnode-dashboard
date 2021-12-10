@@ -10,7 +10,6 @@ import (
 	"github.com/londonhackspace/acnode-dashboard/auth"
 	"github.com/londonhackspace/acnode-dashboard/config"
 	"github.com/londonhackspace/acnode-dashboard/usagelogs"
-	"log/syslog"
 	"sync"
 
 	"github.com/gorilla/mux"
@@ -73,12 +72,8 @@ func main() {
 		return
 	}
 
-	if conf.SyslogServer != "" {
-		sls, err := syslog.Dial("tcp", conf.SyslogServer, syslog.LOG_WARNING|syslog.LOG_DAEMON, "")
-		if err == nil {
-			logCombo := zerolog.MultiLevelWriter(consoleLogger, zerolog.SyslogLevelWriter(sls))
-			log.Logger = log.Output(logCombo)
-		}
+	if conf.LogJSON {
+		log.Logger = log.Output(os.Stdout)
 	}
 
 	acserverapi := acserver_api.CreateACServer(&conf)

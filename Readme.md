@@ -27,7 +27,7 @@ It is possible for the dashboard to read configuration from a JSON file, however
 | REDIS_ENABLE | Enable Redis persistence | false |
 | REDIS_SERVER | Redis server to connect to | (None) |
 | ADMIN_GROUPS | Comma separated list of admin user groups | (None) |
-| SYSLOG_SERVER | syslog server, in the format host:port to log to | (None) |
+| LOG_FMT_JSON | Boolean, should logs be emitted as JSON? | false |
 
 LDAP
 ===

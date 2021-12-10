@@ -27,7 +27,7 @@ type Config struct {
 	RedisEnable bool   `json:"redis_enable,omitempty"`
 	RedisServer string `json:"redis_server,omitempty"`
 
-	SyslogServer string `json:"syslog_server,omitempty"`
+	LogJSON bool `json:"log_json"`
 
 	AdminGroups []string `json:"admin_groups"`
 }
@@ -48,8 +48,8 @@ func GetConfigurationFromEnvironment() Config {
 		LdapSkipTLSVerify: strings.ToLower(os.Getenv("LDAP_SKIPTLSVERIFY")) == "true",
 		RedisEnable:       strings.ToLower(os.Getenv("REDIS_ENABLE")) == "true",
 		RedisServer:       os.Getenv("REDIS_SERVER"),
+		LogJSON:           strings.ToLower(os.Getenv("LOG_FMT_JSON")) == "true",
 		AdminGroups:       strings.Split(os.Getenv("ADMIN_GROUPS"), ","),
-		SyslogServer:      os.Getenv("SYSLOG_SERVER"),
 	}
 }
 
@@ -168,12 +168,6 @@ func GetCombinedConfig(filename string) Config {
 		combined.RedisServer = fileconf.RedisServer
 	}
 
-	if envvar.SyslogServer != "" {
-		combined.SyslogServer = envvar.SyslogServer
-	} else {
-		combined.SyslogServer = fileconf.SyslogServer
-	}
-
 	// set sensible defaults where we can
 	if combined.MqttClientId == "" {
 		combined.MqttClientId = "ACNodeDash"
@@ -189,6 +183,12 @@ func GetCombinedConfig(filename string) Config {
 
 	if combined.LdapGroupOU == "" {
 		combined.LdapGroupOU = "ou=Groups"
+	}
+
+	if os.Getenv("LOG_FMT_JSON") != "" {
+		combined.LogJSON = envvar.LogJSON
+	} else {
+		combined.LogJSON = fileconf.LogJSON
 	}
 
 	return combined
