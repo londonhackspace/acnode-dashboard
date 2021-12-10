@@ -84,6 +84,9 @@ func (handler *MqttHandler) cbMessage(client mqtt.Client, msg mqtt.Message) {
 			if handler.usageLogger != nil {
 				handler.usageLogger.AddUsageLog(&node, announcement)
 			}
+			if acnode.NodeTypeIsTool(node.GetType()) && announcement.Granted == 1 {
+				node.SetInUse(true)
+			}
 		}
 
 		log.Info().
@@ -95,6 +98,11 @@ func (handler *MqttHandler) cbMessage(client mqtt.Client, msg mqtt.Message) {
 		statusCounter.WithLabelValues("status", status.Type).Inc()
 		if status.Type == "START" {
 			node.SetLastStarted(time.Now())
+
+			// a node cannot be marked as in use if it just restarted
+			// If it becomes in use again, there will be a new card message
+			node.SetInUse(false)
+
 			if status.SettingsVersion != 0 {
 				node.SetSettingsVersion(status.SettingsVersion)
 			}
@@ -119,6 +127,8 @@ func (handler *MqttHandler) cbMessage(client mqtt.Client, msg mqtt.Message) {
 			if (status.Mem.HeapUsed + status.Mem.HeapFree) > 0 {
 				node.SetMemoryStats(status.Mem.HeapFree, status.Mem.HeapUsed)
 			}
+		} else if status.Type == "DEACTIVATED" && acnode.NodeTypeIsTool(node.GetType()) {
+			node.SetInUse(false)
 		}
 
 		log.Info().

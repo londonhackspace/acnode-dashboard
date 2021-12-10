@@ -25,6 +25,7 @@ export default class ExtendedNodeRecord implements NodeRecord {
     Version: string;
     CameraId : number | undefined;
     IsTransient: boolean;
+    InUse: boolean;
     VersionDate : Date;
     VersionMessage : string;
     SettingsVersion: number | undefined;
@@ -150,7 +151,7 @@ export default class ExtendedNodeRecord implements NodeRecord {
                     health = NodeHealth.MEH;
                 }
             } else {
-                if(this.LastSeenAPI == -1 || lastSeenAPI > 600) {
+                if((this.LastSeenAPI == -1 || lastSeenAPI > 600) && !this.InUse) {
                     this._healthHints.push("Has not contacted ACServer in over 10 minutes");
                     health = NodeHealth.MEH;
                 }

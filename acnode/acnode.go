@@ -25,6 +25,10 @@ func NodeTypeToString(t int) string {
 	return "Unknown"
 }
 
+func NodeTypeIsTool(t int) bool {
+	return t == NodeTypeTool || t == NodeTypePrinter
+}
+
 type ACNodeRec struct {
 	mtx sync.Mutex
 
@@ -35,6 +39,7 @@ type ACNodeRec struct {
 	MqttName string
 	NodeType int
 	InService bool
+	InUse bool
 
 	// last known status
 	LastSeen time.Time // old LastSeen field
@@ -86,6 +91,8 @@ type ACNode interface {
 	GetIsTransient() bool
 	SetIsTransient(transient bool)
 	SetCameraId(id *int)
+	GetInUse() bool
+	SetInUse(inuse bool)
 }
 
 func (node *ACNodeRec) GetId() int {
@@ -286,6 +293,9 @@ func (node *ACNodeRec) GetPrinterStatus() *PrinterStatus {
 }
 
 func (node *ACNodeRec) GetCameraId() *int {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
 	return node.CameraId
 }
 
@@ -299,6 +309,9 @@ func (node *ACNodeRec) SetCameraId(id *int) {
 }
 
 func (node *ACNodeRec) GetIsTransient() bool {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
 	return node.Transient
 }
 
@@ -307,6 +320,25 @@ func (node *ACNodeRec) SetIsTransient(transient bool) {
 	defer node.mtx.Unlock()
 
 	node.Transient = transient
+
+	node.updateTrigger.OnNodeUpdate(node)
+}
+
+func (node *ACNodeRec) GetInUse() bool {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
+	return node.InUse
+}
+
+func (node *ACNodeRec) SetInUse(inuse bool) {
+	node.mtx.Lock()
+	defer node.mtx.Unlock()
+
+	if inuse == node.InUse {
+		return
+	}
+	node.InUse = inuse
 
 	node.updateTrigger.OnNodeUpdate(node)
 }
@@ -358,5 +390,6 @@ func (node *ACNodeRec) GetAPIRecord() apitypes.ACNode {
 		PrinterStatus: printerStatus,
 		CameraId: node.CameraId,
 		IsTransient: node.Transient,
+		InUse: node.InUse,
 	}
 }

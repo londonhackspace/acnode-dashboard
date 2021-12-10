@@ -28,6 +28,7 @@ export interface NodeRecord {
     Version: string;
     CameraId : number | undefined;
     IsTransient: boolean;
+    InUse: boolean;
     SettingsVersion: number | undefined;
     EEPROMSettingsVersion: number | undefined;
     ResetCause: string | undefined;

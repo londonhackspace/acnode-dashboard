@@ -44,7 +44,7 @@ func (sw *StatusWatcher) calculateNodeState(node *apitypes.ACNode) (int, []strin
 					health = STATE_WARN
 				}
 			} else {
-				if node.LastSeenAPI == -1 || lastSeenApi > 610 {
+				if (node.LastSeenAPI == -1 || lastSeenApi > 610) && !node.InUse {
 					healthHints = append(healthHints, "Has not contacted ACServer in over 10 minutes")
 					health = STATE_WARN
 				}
