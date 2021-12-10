@@ -55,7 +55,7 @@ export default class NodeDetailPanel extends React.Component<NodeDetailPanelProp
             }
             addNodeProps("Reset Cause", node.ResetCause);
             
-            if(node.nodeType == "Printer") {
+            if(node.nodeType == "Printer" && node.PrinterStatus != undefined) {
                 if(node.PrinterStatus.firmwareVersion != "") {
                     addNodeProps("Printer Firmware Version", node.PrinterStatus.firmwareVersion);
                 }
