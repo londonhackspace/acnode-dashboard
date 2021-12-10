@@ -6,7 +6,7 @@ import (
 )
 
 type IRCCatClient struct {
-	server string
+	server  string
 	channel string
 }
 

@@ -13,7 +13,7 @@ func CreateMemorySessionStore() *MemorySessionStore {
 
 func (mss *MemorySessionStore) AddUser(u *User) string {
 	cstr := makeSessionCookieString()
-	for _,ok := mss.sessions[cstr]; ok; {
+	for _, ok := mss.sessions[cstr]; ok; {
 		cstr = makeSessionCookieString()
 	}
 

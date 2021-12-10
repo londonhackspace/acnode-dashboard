@@ -7,11 +7,12 @@ import (
 
 // Authenticator Right now at least, this is a singleton
 type Authenticator struct {
-	providers []Provider
+	providers    []Provider
 	sessionstore SessionStore
 }
 
 var authenticator *Authenticator = nil
+
 func GetAuthenticator() *Authenticator {
 	if authenticator == nil {
 		sessionStore := CreateMemorySessionStore()
@@ -31,18 +32,18 @@ func SetSessionStore(ss SessionStore) {
 
 func AddProvider(p Provider) {
 	auth := GetAuthenticator()
-	auth.providers =  append(auth.providers, p)
+	auth.providers = append(auth.providers, p)
 }
 
 // CheckAuthAPI Check for auth - either for a (human) user, or an API user
-func CheckAuthAPI(w http.ResponseWriter, r* http.Request) (bool, *User) {
+func CheckAuthAPI(w http.ResponseWriter, r *http.Request) (bool, *User) {
 	// first see if there is a valid user cookie
 	success, u := CheckAuthUser(w, r)
 	if success {
 		return true, u
 	}
 
-	return false,nil
+	return false, nil
 }
 
 func unsetAuthCookie(w http.ResponseWriter) {
@@ -64,11 +65,11 @@ func CheckAuthUser(w http.ResponseWriter, r *http.Request) (bool, *User) {
 		}
 	}
 
-	return apiAuth(r),nil
+	return apiAuth(r), nil
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
-	c,err := r.Cookie("ACNodeDashboardSession")
+	c, err := r.Cookie("ACNodeDashboardSession")
 
 	if err == nil {
 		GetAuthenticator().sessionstore.RemoveUser(c.Value)
@@ -88,9 +89,9 @@ func AuthenticateUser(w http.ResponseWriter, username string, password string) b
 			u.source = a.GetName()
 			cookieString := authenticator.sessionstore.AddUser(&u)
 			cookie := http.Cookie{
-				Name: "ACNodeDashboardSession",
-				Path: "/",
-				Value: cookieString,
+				Name:   "ACNodeDashboardSession",
+				Path:   "/",
+				Value:  cookieString,
 				MaxAge: 0,
 			}
 			http.SetCookie(w, &cookie)

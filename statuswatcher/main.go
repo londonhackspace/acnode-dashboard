@@ -53,7 +53,7 @@ func main() {
 	rtr.Handle("/metrics", promhttp.Handler())
 
 	ws := http.Server{
-		Addr: cfg.HTTPListen,
+		Addr:    cfg.HTTPListen,
 		Handler: rtr,
 	}
 
@@ -67,11 +67,11 @@ func main() {
 	}()
 
 	// wait for the context to be cancelled
-	<- ctx.Done()
+	<-ctx.Done()
 
 	// shutdown the server
 	log.Info().Msg("Shutting down server")
-	timeoutctx,_ := context.WithTimeout(context.Background(), time.Second*30)
+	timeoutctx, _ := context.WithTimeout(context.Background(), time.Second*30)
 	ws.Shutdown(timeoutctx)
 
 	log.Info().Msg("Exiting")

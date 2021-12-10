@@ -4,15 +4,15 @@ import "github.com/rs/zerolog/log"
 
 type HandlerListener struct {
 	handler *ACNodeHandler
-	name string
+	name    string
 
-	nodeAdded chan ACNode
+	nodeAdded   chan ACNode
 	nodeChanged chan ACNode
 
-	handlerChangeAdded chan func(node ACNode)
+	handlerChangeAdded   chan func(node ACNode)
 	handlerChangeChanged chan func(node ACNode)
 
-	onNodeAdded func(node ACNode)
+	onNodeAdded   func(node ACNode)
 	onNodeChanged func(node ACNode)
 }
 
@@ -45,24 +45,24 @@ func (sub *HandlerListener) runACNodeHandlerListener() {
 	log.Info().Str("Listener", sub.name).Msg("ACNode Listener running")
 	for {
 		select {
-			case node, ok := <- sub.nodeAdded:
-				if !ok {
-					break
-				}
-				if sub.onNodeAdded != nil {
-					sub.onNodeAdded(node)
-				}
-			case node, ok := <- sub.nodeChanged:
-				if !ok {
-					break
-				}
-				if sub.onNodeChanged != nil {
-					sub.onNodeChanged(node)
-				}
-			case f := <- sub.handlerChangeAdded:
-				sub.onNodeAdded = f
-			case f := <- sub.handlerChangeChanged:
-				sub.onNodeChanged = f
+		case node, ok := <-sub.nodeAdded:
+			if !ok {
+				break
+			}
+			if sub.onNodeAdded != nil {
+				sub.onNodeAdded(node)
+			}
+		case node, ok := <-sub.nodeChanged:
+			if !ok {
+				break
+			}
+			if sub.onNodeChanged != nil {
+				sub.onNodeChanged(node)
+			}
+		case f := <-sub.handlerChangeAdded:
+			sub.onNodeAdded = f
+		case f := <-sub.handlerChangeChanged:
+			sub.onNodeChanged = f
 		}
 	}
 	log.Info().Str("Listener", sub.name).Msg("ACNode Listener disconnected")

@@ -34,13 +34,14 @@ func checkAuth(w http.ResponseWriter, r *http.Request) bool {
 	ok, _ := auth.CheckAuthUser(w, r)
 
 	if !ok {
-		http.Redirect(w, r, "/login?next=" + r.URL.Path, 302)
+		http.Redirect(w, r, "/login?next="+r.URL.Path, 302)
 	}
 
 	return ok
 }
 
 var error404Template *template.Template = nil
+
 func handle404(w http.ResponseWriter, r *http.Request) {
 	if error404Template == nil {
 		error404Template = getTemplate("404.gohtml")
@@ -49,6 +50,7 @@ func handle404(w http.ResponseWriter, r *http.Request) {
 }
 
 var swaggerTemplate *template.Template = nil
+
 func handleSwagger(w http.ResponseWriter, r *http.Request) {
 
 	if swaggerTemplate == nil {
@@ -72,7 +74,7 @@ func main() {
 	}
 
 	if conf.SyslogServer != "" {
-		sls,err := syslog.Dial("tcp", conf.SyslogServer, syslog.LOG_WARNING | syslog.LOG_DAEMON, "")
+		sls, err := syslog.Dial("tcp", conf.SyslogServer, syslog.LOG_WARNING|syslog.LOG_DAEMON, "")
 		if err == nil {
 			logCombo := zerolog.MultiLevelWriter(consoleLogger, zerolog.SyslogLevelWriter(sls))
 			log.Logger = log.Output(logCombo)
@@ -91,9 +93,9 @@ func main() {
 
 	if conf.RedisEnable {
 		redisConn := redis.NewClient(&redis.Options{
-			Addr: conf.RedisServer,
+			Addr:     conf.RedisServer,
 			Password: "",
-			DB: 0,
+			DB:       0,
 		})
 
 		sessStore := auth.CreateRedisSessionStore(redisConn)
@@ -116,7 +118,7 @@ func main() {
 		auth.AddProvider(&ldapauth)
 	}
 
-	acsw := acserverwatcher.Watcher{ acserverapi, &acnodehandler }
+	acsw := acserverwatcher.Watcher{acserverapi, &acnodehandler}
 
 	apihandler := api.CreateApi(&conf, &acnodehandler, usageLogger)
 
@@ -135,7 +137,7 @@ func main() {
 
 	rtr.PathPrefix("/api/").Handler(http.StripPrefix("/api", apihandler.GetRouter()))
 	rtr.PathPrefix("/ws").Handler(websockerServer)
-	
+
 	// Cache the assets, unless there's no version, in which case
 	// it's most likely a development version
 	staticCachePolicy := CachePolicyAlways
@@ -184,5 +186,5 @@ func main() {
 
 	log.Info().Msg("Listening on " + listen)
 	handler := CreateCacheHeaderInserter(rtr, CachePolicyNever)
-	http.ListenAndServe(listen, handlers.ProxyHeaders(LoggingHandler{ next: handler }))
+	http.ListenAndServe(listen, handlers.ProxyHeaders(LoggingHandler{next: handler}))
 }

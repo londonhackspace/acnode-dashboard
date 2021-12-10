@@ -95,8 +95,8 @@ func (h *ACNodeHandler) GetNodeByMqttName(name string) ACNode {
 
 func (h *ACNodeHandler) GetNodes() []ACNode {
 	var ret []ACNode
-	nodes,_ := h.persistence.GetAllNodes()
-	for i,_ := range nodes {
+	nodes, _ := h.persistence.GetAllNodes()
+	for i, _ := range nodes {
 		nodes[i].updateTrigger = h
 		ret = append(ret, &nodes[i])
 	}

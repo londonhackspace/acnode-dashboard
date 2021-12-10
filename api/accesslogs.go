@@ -15,7 +15,7 @@ func (api *Api) handleAccessLogs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if api.usageLogger != nil {
-		data,_ := json.Marshal(api.usageLogger.GetUsageLogNodes())
+		data, _ := json.Marshal(api.usageLogger.GetUsageLogNodes())
 		w.Write(data)
 	} else {
 		w.Write([]byte("[]"))
@@ -41,13 +41,13 @@ func (api *Api) handleAccessLogsNode(w http.ResponseWriter, r *http.Request) {
 
 	entriesOut := []apitypes.AccessLogEntry{}
 
-	for _,i := range entries {
+	for _, i := range entries {
 		e := apitypes.AccessLogEntry{
-			Timestamp: i.Timestamp.Unix(),
-			UserId : i.UserId,
-			UserName: i.Name,
-			UserCard: i.Card,
-			Success: i.Success,
+			Timestamp:  i.Timestamp.Unix(),
+			UserId:     i.UserId,
+			UserName:   i.Name,
+			UserCard:   i.Card,
+			Success:    i.Success,
 			PictureKey: i.PictureKey,
 		}
 
@@ -55,12 +55,12 @@ func (api *Api) handleAccessLogsNode(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := apitypes.AccessLogsResponse{
-		Count: entryCount,
-		Page: page,
-		PageCount: int64(math.Ceil(float64(entryCount)/float64(entriesPerPage))),
+		Count:      entryCount,
+		Page:       page,
+		PageCount:  int64(math.Ceil(float64(entryCount) / float64(entriesPerPage))),
 		LogEntries: entriesOut,
 	}
 
-	data,_ := json.Marshal(result)
+	data, _ := json.Marshal(result)
 	w.Write(data)
 }

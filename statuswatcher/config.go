@@ -3,24 +3,24 @@ package main
 import "os"
 
 type Config struct {
-	ApiKey string
-	HTTPListen string
+	ApiKey        string
+	HTTPListen    string
 	ACNodeDashAPI string
-	SlackToken string
-	SlackChannel string
-	IRCCat string
-	IRCChannel string
+	SlackToken    string
+	SlackChannel  string
+	IRCCat        string
+	IRCChannel    string
 }
 
 func GetConfig() Config {
-	c:= Config{
-		ApiKey: os.Getenv("API_KEY"),
-		HTTPListen: os.Getenv("HTTP_LISTEN"),
+	c := Config{
+		ApiKey:        os.Getenv("API_KEY"),
+		HTTPListen:    os.Getenv("HTTP_LISTEN"),
 		ACNodeDashAPI: os.Getenv("ACNODE_DASH"),
-		SlackToken: os.Getenv("SLACK_TOKEN"),
-		SlackChannel: os.Getenv("SLACK_CHANNEL"),
-		IRCCat : os.Getenv("IRCCAT_SERVER"),
-		IRCChannel : os.Getenv("IRC_CHANNEL"),
+		SlackToken:    os.Getenv("SLACK_TOKEN"),
+		SlackChannel:  os.Getenv("SLACK_CHANNEL"),
+		IRCCat:        os.Getenv("IRCCAT_SERVER"),
+		IRCChannel:    os.Getenv("IRC_CHANNEL"),
 	}
 
 	if len(c.HTTPListen) == 0 {

@@ -20,9 +20,9 @@ func main() {
 	}
 
 	redisConn := redis.NewClient(&redis.Options{
-		Addr: conf.RedisServer,
+		Addr:     conf.RedisServer,
 		Password: "",
-		DB: 0,
+		DB:       0,
 	})
 
 	userStore := auth.CreateRedisProvider(redisConn)

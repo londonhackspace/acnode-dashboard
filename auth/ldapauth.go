@@ -35,7 +35,7 @@ func (ldap *LDAPAuthenticator) AddUserToGroup(username string, group string) err
 	return errors.New("not implemented")
 }
 
-func (ldap *LDAPAuthenticator) getConnection() (*ldapv3.Conn,error) {
+func (ldap *LDAPAuthenticator) getConnection() (*ldapv3.Conn, error) {
 	cfg := tls.Config{InsecureSkipVerify: ldap.conf.LdapSkipTLSVerify}
 	return ldapv3.DialURL(ldap.conf.LdapServer, ldapv3.DialWithTLSConfig(&cfg))
 }
@@ -68,7 +68,7 @@ func (ldap *LDAPAuthenticator) makeLDAPQuery(req *ldapv3.SearchRequest, c *ldapv
 }
 
 func (ldap *LDAPAuthenticator) getGroups(username string, c *ldapv3.Conn) []string {
-	query := ldapv3.NewSearchRequest(ldap.conf.LdapGroupOU + ","+ ldap.conf.LdapBaseDN,
+	query := ldapv3.NewSearchRequest(ldap.conf.LdapGroupOU+","+ldap.conf.LdapBaseDN,
 		ldapv3.ScopeWholeSubtree, ldapv3.NeverDerefAliases,
 		0, 0, false,
 		fmt.Sprintf("(&(objectClass=posixGroup)(memberUid=%s))", ldapv3.EscapeFilter(username)),
@@ -80,23 +80,23 @@ func (ldap *LDAPAuthenticator) getGroups(username string, c *ldapv3.Conn) []stri
 	}
 
 	var groups []string
-	for _,entry := range(res.Entries) {
+	for _, entry := range res.Entries {
 		groups = append(groups, entry.GetAttributeValue("cn"))
 	}
 	return groups
 }
 
-func (ldap *LDAPAuthenticator) LoginUser(username string, password string) (User,error) {
+func (ldap *LDAPAuthenticator) LoginUser(username string, password string) (User, error) {
 	c, err := ldap.getConnection()
 	if err != nil {
 		return User{}, errors.New("Error contacting LDAP server")
 	}
 	// search for the user
-	query := ldapv3.NewSearchRequest(ldap.conf.LdapUserOU + "," + ldap.conf.LdapBaseDN,
+	query := ldapv3.NewSearchRequest(ldap.conf.LdapUserOU+","+ldap.conf.LdapBaseDN,
 		ldapv3.ScopeSingleLevel, ldapv3.NeverDerefAliases,
 		0, 0, false,
 		fmt.Sprintf("(&(objectClass=organizationalPerson)(uid=%s))", ldapv3.EscapeFilter(username)),
-		[]string{"dn","givenName"}, nil)
+		[]string{"dn", "givenName"}, nil)
 
 	res, err := ldap.makeLDAPQuery(query, c)
 	if err != nil {
@@ -120,24 +120,24 @@ func (ldap *LDAPAuthenticator) LoginUser(username string, password string) (User
 	}
 
 	return User{
-		Name: res.Entries[0].GetAttributeValue("givenName"),
+		Name:     res.Entries[0].GetAttributeValue("givenName"),
 		UserName: username,
 		UserType: UserType_User,
-		Groups: ldap.getGroups(username, c),
+		Groups:   ldap.getGroups(username, c),
 	}, nil
 }
 
-func (ldap *LDAPAuthenticator) GetUser(username string) (User, error)  {
+func (ldap *LDAPAuthenticator) GetUser(username string) (User, error) {
 	c, err := ldap.getConnection()
 	if err != nil {
 		return User{}, errors.New("Error contacting LDAP server")
 	}
 	// search for the user
-	query := ldapv3.NewSearchRequest(ldap.conf.LdapUserOU + "," + ldap.conf.LdapBaseDN,
+	query := ldapv3.NewSearchRequest(ldap.conf.LdapUserOU+","+ldap.conf.LdapBaseDN,
 		ldapv3.ScopeSingleLevel, ldapv3.NeverDerefAliases,
 		0, 0, false,
 		fmt.Sprintf("(&(objectClass=organizationalPerson)(uid=%s))", ldapv3.EscapeFilter(username)),
-		[]string{"dn","givenName"}, nil)
+		[]string{"dn", "givenName"}, nil)
 
 	res, err := ldap.makeLDAPQuery(query, c)
 	if err != nil {
@@ -153,9 +153,9 @@ func (ldap *LDAPAuthenticator) GetUser(username string) (User, error)  {
 	}
 
 	return User{
-		Name: res.Entries[0].GetAttributeValue("givenName"),
+		Name:     res.Entries[0].GetAttributeValue("givenName"),
 		UserName: username,
 		UserType: UserType_User,
-		Groups: ldap.getGroups(username, c),
+		Groups:   ldap.getGroups(username, c),
 	}, nil
 }

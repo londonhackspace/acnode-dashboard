@@ -9,7 +9,7 @@ import (
 )
 
 type statusIntercepter struct {
-	next http.ResponseWriter
+	next       http.ResponseWriter
 	statuscode *int
 }
 
@@ -29,7 +29,7 @@ func (h statusIntercepter) WriteHeader(statusCode int) {
 }
 
 func (h statusIntercepter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
-	next,ok := h.next.(http.Hijacker)
+	next, ok := h.next.(http.Hijacker)
 	if !ok {
 		return nil, nil, errors.New("hijack not supported")
 	}
@@ -39,7 +39,7 @@ func (h statusIntercepter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 
 func createStatusIntercepter(next http.ResponseWriter, i *int) statusIntercepter {
 	return statusIntercepter{
-		next: next,
+		next:       next,
 		statuscode: i,
 	}
 }
@@ -62,16 +62,14 @@ func (h LoggingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 const (
-	CachePolicyNever = iota
+	CachePolicyNever  = iota
 	CachePolicyAlways = iota
 )
 
 type CacheHeaderInserter struct {
-	next http.Handler
+	next   http.Handler
 	policy int
 }
-
-
 
 func (h CacheHeaderInserter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch h.policy {
@@ -86,7 +84,7 @@ func (h CacheHeaderInserter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func CreateCacheHeaderInserter(next http.Handler, policy int) CacheHeaderInserter {
 	return CacheHeaderInserter{
-		next: next,
+		next:   next,
 		policy: policy,
 	}
 }

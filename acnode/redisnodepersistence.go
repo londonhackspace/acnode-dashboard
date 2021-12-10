@@ -17,14 +17,14 @@ func GetRedisNodePersistence(redis *redis.Client) NodePersistence {
 	}
 }
 
-func (np *RedisNodePersistence) GetNodeByMqttName(name string) (*ACNodeRec,error) {
+func (np *RedisNodePersistence) GetNodeByMqttName(name string) (*ACNodeRec, error) {
 	ctx := context.Background()
-	return np.getNodeFromRedis(ctx, "node:" + name)
+	return np.getNodeFromRedis(ctx, "node:"+name)
 }
 
 func (np *RedisNodePersistence) StoreNode(node *ACNodeRec) (*ACNodeRec, error) {
 	data, _ := json.Marshal(node)
-	res := np.redis.Set(context.Background(), "node:" + node.MqttName, string(data), 0)
+	res := np.redis.Set(context.Background(), "node:"+node.MqttName, string(data), 0)
 	if err := res.Err(); err != nil {
 		return nil, err
 	}
@@ -32,8 +32,8 @@ func (np *RedisNodePersistence) StoreNode(node *ACNodeRec) (*ACNodeRec, error) {
 	return node, nil
 }
 
-func (np *RedisNodePersistence) getNodeFromRedis(ctx context.Context,key string) (*ACNodeRec, error) {
-	item,err := np.redis.Get(ctx, key).Result()
+func (np *RedisNodePersistence) getNodeFromRedis(ctx context.Context, key string) (*ACNodeRec, error) {
+	item, err := np.redis.Get(ctx, key).Result()
 	if err != nil {
 		return nil, err
 	}
@@ -57,8 +57,8 @@ func (np *RedisNodePersistence) GetAllNodes() ([]ACNodeRec, error) {
 		var err error
 		keys, cursor, err = np.redis.Scan(ctx, cursor, "node:*", 0).Result()
 		if err == nil {
-			for _,key := range keys {
-				item,err := np.getNodeFromRedis(ctx, key)
+			for _, key := range keys {
+				item, err := np.getNodeFromRedis(ctx, key)
 				if err == nil {
 					res = append(res, *item)
 				} else {

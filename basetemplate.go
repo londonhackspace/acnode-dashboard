@@ -6,7 +6,6 @@ type BaseTemplateArgs struct {
 
 func GetBaseTemplateArgs() BaseTemplateArgs {
 
-
 	return BaseTemplateArgs{
 		Version: getVersion(),
 	}

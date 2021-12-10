@@ -29,20 +29,20 @@ var (
 )
 
 type MqttHandler struct {
-	config *config.Config
+	config        *config.Config
 	acnodehandler *acnode.ACNodeHandler
-	usageLogger usagelogs.UsageLogger
-	running bool
+	usageLogger   usagelogs.UsageLogger
+	running       bool
 
 	conn mqtt.Client
 }
 
 func CreateMQTTHandler(config *config.Config, acnodehandler *acnode.ACNodeHandler, usageLogger usagelogs.UsageLogger) MqttHandler {
 	return MqttHandler{
-		config: config,
+		config:        config,
 		acnodehandler: acnodehandler,
-		usageLogger: usageLogger,
-		running: true,
+		usageLogger:   usageLogger,
+		running:       true,
 	}
 }
 
@@ -59,14 +59,14 @@ func (handler *MqttHandler) cbMessage(client mqtt.Client, msg mqtt.Message) {
 	node := handler.acnodehandler.GetNodeByMqttName(topicParts[2])
 
 	// first, fix the type
-	if topicParts[1] == "tool"  && node.GetType() == acnode.NodeTypeDoor {
+	if topicParts[1] == "tool" && node.GetType() == acnode.NodeTypeDoor {
 		node.SetType(acnode.NodeTypeTool)
 	} else if topicParts[1] == "door" && node.GetType() != acnode.NodeTypeDoor {
 		node.SetType(acnode.NodeTypeDoor)
 	}
 
 	if isOctoprintTopic(msg.Topic()) &&
-			(node.GetType() != acnode.NodeTypePrinter) {
+		(node.GetType() != acnode.NodeTypePrinter) {
 		node.SetType(acnode.NodeTypePrinter)
 	}
 

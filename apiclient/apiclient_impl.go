@@ -22,8 +22,8 @@ func MakeAPIClient(apikey string, server string) APIClient {
 	}
 }
 
-func (apiclient *APIClientImpl) makeGetRequest(endpoint string) (*http.Request,error) {
-	req, err := http.NewRequest(http.MethodGet, apiclient.server + endpoint, nil)
+func (apiclient *APIClientImpl) makeGetRequest(endpoint string) (*http.Request, error) {
+	req, err := http.NewRequest(http.MethodGet, apiclient.server+endpoint, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -33,8 +33,8 @@ func (apiclient *APIClientImpl) makeGetRequest(endpoint string) (*http.Request,e
 	return req, nil
 }
 
-func (apiclient *APIClientImpl) makePostRequest(endpoint string, body []byte) (*http.Request,error) {
-	req, err := http.NewRequest(http.MethodPost, apiclient.server + endpoint, bytes.NewBuffer(body))
+func (apiclient *APIClientImpl) makePostRequest(endpoint string, body []byte) (*http.Request, error) {
+	req, err := http.NewRequest(http.MethodPost, apiclient.server+endpoint, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func (apiclient *APIClientImpl) GetNodes() ([]string, error) {
 	// filter some badly named nodes out
 	var filtered []string
 
-	for _,n := range res {
+	for _, n := range res {
 		if len(n) == 0 {
 			continue
 		}
@@ -90,7 +90,7 @@ func (apiclient *APIClientImpl) GetNodes() ([]string, error) {
 		filtered = append(filtered, n)
 	}
 
-	return filtered,nil
+	return filtered, nil
 }
 
 func (apiclient *APIClientImpl) GetNode(name string) (*apitypes.ACNode, error) {
@@ -102,7 +102,7 @@ func (apiclient *APIClientImpl) GetNode(name string) (*apitypes.ACNode, error) {
 		return nil, errors.New("Invalid node name")
 	}
 
-	req, err := apiclient.makeGetRequest("nodes/"+name)
+	req, err := apiclient.makeGetRequest("nodes/" + name)
 	if err != nil {
 		return nil, err
 	}

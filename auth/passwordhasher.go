@@ -7,14 +7,14 @@ import (
 )
 
 type passwordHasherCfg struct {
-	hash string
+	hash       string
 	workFactor int
-	salt string
+	salt       string
 }
 
 func getDefaultHasherConfig() passwordHasherCfg {
 	return passwordHasherCfg{
-		hash: "bcrypt",
+		hash:       "bcrypt",
 		workFactor: 15,
 		// TODO: use a better salt source
 		salt: makeSessionCookieString(),
@@ -29,7 +29,7 @@ func parseHasherConfigFromPwdField(field string) passwordHasherCfg {
 		return passwordHasherCfg{}
 	}
 
-	if parts[0] == "bcrypt"  && len(parts) == 3{
+	if parts[0] == "bcrypt" && len(parts) == 3 {
 		cfg := passwordHasherCfg{}
 		cfg.hash = parts[0]
 		cfg.salt = parts[1]
@@ -78,7 +78,7 @@ func checkPassword(given string, expected string) bool {
 
 	if parts[0] == "bcrypt" && len(parts) == 3 {
 		// this returns nil if the hash matched
-		return bcrypt.CompareHashAndPassword([]byte(parts[2]), []byte(given + parts[1])) == nil
+		return bcrypt.CompareHashAndPassword([]byte(parts[2]), []byte(given+parts[1])) == nil
 	}
 
 	return false

@@ -21,37 +21,37 @@ type Impl struct {
 
 func CreateSlackAPI(token string) SlackAPI {
 	return &Impl{
-		token: token,
+		token:      token,
 		channelMap: map[string]string{},
 	}
 }
 
-func (slack *Impl) makeGetRequest(endpoint string) (*http.Request,error) {
-	req, err := http.NewRequest(http.MethodGet, "https://slack.com/api/" + endpoint, nil)
+func (slack *Impl) makeGetRequest(endpoint string) (*http.Request, error) {
+	req, err := http.NewRequest(http.MethodGet, "https://slack.com/api/"+endpoint, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Add("Authorization", "Bearer " + slack.token)
+	req.Header.Add("Authorization", "Bearer "+slack.token)
 
 	return req, nil
 }
 
-func (slack *Impl) makePostRequest(endpoint string, body []byte) (*http.Request,error) {
-	req, err := http.NewRequest(http.MethodPost, "https://slack.com/api/" + endpoint, bytes.NewBuffer(body))
+func (slack *Impl) makePostRequest(endpoint string, body []byte) (*http.Request, error) {
+	req, err := http.NewRequest(http.MethodPost, "https://slack.com/api/"+endpoint, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Add("Authorization", "Bearer " + slack.token)
+	req.Header.Add("Authorization", "Bearer "+slack.token)
 
 	return req, nil
 }
 
 type getChannelsResponse struct {
-	Ok bool `json:"ok"`
-	Channels []Channel `json:"channels"`
-	Extra responseMetadata `json:"response_metadata"`
+	Ok       bool             `json:"ok"`
+	Channels []Channel        `json:"channels"`
+	Extra    responseMetadata `json:"response_metadata"`
 }
 
 func (slack *Impl) getChannels(cursor string) (getChannelsResponse, error) {
@@ -113,7 +113,7 @@ func (slack *Impl) getChannelKey(channel string) string {
 		return ""
 	}
 
-	for _,c := range channels {
+	for _, c := range channels {
 		slack.channelMap[c.Name] = c.Id
 	}
 
@@ -128,7 +128,7 @@ func (slack *Impl) getChannelKey(channel string) string {
 
 type postMessageBody struct {
 	Channel string `json:"channel"`
-	Text string `json:"text"`
+	Text    string `json:"text"`
 }
 
 func (slack *Impl) PostMessage(message string, channel string) error {
@@ -141,7 +141,7 @@ func (slack *Impl) PostMessage(message string, channel string) error {
 
 	bodyStruct := postMessageBody{
 		Channel: key,
-		Text: message,
+		Text:    message,
 	}
 	data, err := json.Marshal(bodyStruct)
 	if err != nil {

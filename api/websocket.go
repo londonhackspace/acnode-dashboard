@@ -18,7 +18,7 @@ const (
 	// Be fairly aggressive with the pings since we don't receive anything else
 	// and theoretically outoging messages might be occasional
 	pingPeriod = 10 * time.Second
-	pongWait = 30 * time.Second
+	pongWait   = 30 * time.Second
 )
 
 var (
@@ -46,7 +46,7 @@ var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool {
 }}
 
 type client struct {
-	ws *WebSocket
+	ws       *WebSocket
 	outgoing chan []byte
 
 	conn *websocket.Conn
@@ -62,29 +62,29 @@ func (cl *client) writer() {
 	ticker := time.NewTicker(pingPeriod)
 	for {
 		select {
-			case msg, ok := <- cl.outgoing:
-				cl.conn.SetWriteDeadline(time.Now().Add(writeTimeout))
-				if !ok {
-					// channel was closed
-					cl.conn.WriteMessage(websocket.CloseMessage, []byte{})
-					cl.ws.unregister(cl)
-					cl.conn.Close()
-					return
-				}
-				messageSentCounter.Inc()
-				err := cl.conn.WriteMessage(websocket.TextMessage, msg)
-				if err != nil {
-					log.Err(err).Msg("Error writing to websocket connection")
-					cl.ws.unregister(cl)
-					cl.conn.Close()
-					return
-				}
-			case <- ticker.C:
-				cl.conn.SetWriteDeadline(time.Now().Add(writeTimeout))
-				if err := cl.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-					log.Err(err).Msg("Error writing ping to websocket")
-					return
-				}
+		case msg, ok := <-cl.outgoing:
+			cl.conn.SetWriteDeadline(time.Now().Add(writeTimeout))
+			if !ok {
+				// channel was closed
+				cl.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				cl.ws.unregister(cl)
+				cl.conn.Close()
+				return
+			}
+			messageSentCounter.Inc()
+			err := cl.conn.WriteMessage(websocket.TextMessage, msg)
+			if err != nil {
+				log.Err(err).Msg("Error writing to websocket connection")
+				cl.ws.unregister(cl)
+				cl.conn.Close()
+				return
+			}
+		case <-ticker.C:
+			cl.conn.SetWriteDeadline(time.Now().Add(writeTimeout))
+			if err := cl.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				log.Err(err).Msg("Error writing ping to websocket")
+				return
+			}
 		}
 	}
 }
@@ -115,7 +115,7 @@ func (cl *client) reader() {
 type WebSocket struct {
 	clients map[*client]bool
 
-	addclient chan *client
+	addclient    chan *client
 	removeclient chan *client
 
 	acnodeListener *acnode.HandlerListener
@@ -123,11 +123,11 @@ type WebSocket struct {
 
 func CreateWebsockerHandler(handler *acnode.ACNodeHandler) *WebSocket {
 	ws := WebSocket{
-				clients: make(map[*client]bool),
-				addclient: make(chan *client),
-				removeclient: make(chan *client),
-				acnodeListener: acnode.CreateHandlerChangeListener(handler, "Websocket"),
-			}
+		clients:        make(map[*client]bool),
+		addclient:      make(chan *client),
+		removeclient:   make(chan *client),
+		acnodeListener: acnode.CreateHandlerChangeListener(handler, "Websocket"),
+	}
 	go ws.process()
 	ws.acnodeListener.SetOnNodeAddedHandler(ws.onACNodeUpdate)
 	ws.acnodeListener.SetOnNodeChangedHandler(ws.onACNodeUpdate)
@@ -143,23 +143,23 @@ func (ws *WebSocket) unregister(c *client) {
 }
 
 func (ws *WebSocket) onACNodeUpdate(node acnode.ACNode) {
-	data,_ := json.Marshal(node.GetAPIRecord())
+	data, _ := json.Marshal(node.GetAPIRecord())
 	go ws.Send(data)
 }
 
 func (ws *WebSocket) process() {
 	for {
 		select {
-			case c := <- ws.addclient:
-				ws.clients[c] = true
-				clientCounter.Inc()
-			case c := <- ws.removeclient:
-				if _, ok := ws.clients[c];ok {
-					clientCounter.Dec()
-					delete(ws.clients, c)
-					close(c.outgoing)
-					log.Info().Msg("Websocket Connection Removed")
-				}
+		case c := <-ws.addclient:
+			ws.clients[c] = true
+			clientCounter.Inc()
+		case c := <-ws.removeclient:
+			if _, ok := ws.clients[c]; ok {
+				clientCounter.Dec()
+				delete(ws.clients, c)
+				close(c.outgoing)
+				log.Info().Msg("Websocket Connection Removed")
+			}
 		}
 	}
 }
@@ -171,7 +171,7 @@ func (ws *WebSocket) Send(msg []byte) {
 }
 
 func (ws *WebSocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if ok,_ := auth.CheckAuthAPI(w, r); !ok {
+	if ok, _ := auth.CheckAuthAPI(w, r); !ok {
 		w.WriteHeader(401)
 		return
 	}
@@ -182,10 +182,10 @@ func (ws *WebSocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := client {
-		ws: ws,
+	c := client{
+		ws:       ws,
 		outgoing: make(chan []byte),
-		conn: conn,
+		conn:     conn,
 	}
 	ws.register(&c)
 	c.run()

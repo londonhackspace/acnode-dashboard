@@ -9,23 +9,23 @@ import (
 )
 
 type redisUser struct {
-	Username string `json:"username"`
-	Name string `json:"name"`
+	Username     string `json:"username"`
+	Name         string `json:"name"`
 	PasswordHash string `json:"passwordhash"`
 
 	UserGroups []string `json:"groups"`
-	Type int `json:"type"`
+	Type       int      `json:"type"`
 }
 
 type RedisProvider struct {
 	conn *redis.Client
-	ctx context.Context
+	ctx  context.Context
 }
 
 func CreateRedisProvider(conn *redis.Client) *RedisProvider {
 	return &RedisProvider{
 		conn: conn,
-		ctx: context.Background(),
+		ctx:  context.Background(),
 	}
 }
 
@@ -54,9 +54,9 @@ func (rp *RedisProvider) storeUser(u redisUser) error {
 func (rp *RedisProvider) AddUser(username string, password string, usertype int) error {
 	hash := hashPassword(password, getDefaultHasherConfig())
 	u := redisUser{
-		Username: username,
+		Username:     username,
 		PasswordHash: hash,
-		Type: usertype,
+		Type:         usertype,
 	}
 
 	return rp.storeUser(u)
@@ -74,13 +74,13 @@ func (rp *RedisProvider) getRedisUser(username string) (redisUser, error) {
 	err = json.Unmarshal([]byte(res), &u)
 	if err != nil {
 		log.Err(err).Str("username", username).Msg("Error unmarshalling user")
-		return redisUser{},err
+		return redisUser{}, err
 	}
 
 	return u, nil
 }
 
-func (rp *RedisProvider) LoginUser(username string, password string) (User,error) {
+func (rp *RedisProvider) LoginUser(username string, password string) (User, error) {
 	u, err := rp.getRedisUser(username)
 	if err != nil {
 		return User{}, errors.New("Error getting user from Redis")
@@ -88,10 +88,10 @@ func (rp *RedisProvider) LoginUser(username string, password string) (User,error
 
 	if checkPassword(password, u.PasswordHash) {
 		return User{
-			Name: u.Name,
+			Name:     u.Name,
 			UserName: u.Username,
 			UserType: u.Type,
-			Groups: u.UserGroups,
+			Groups:   u.UserGroups,
 		}, nil
 	}
 
@@ -105,10 +105,10 @@ func (rp *RedisProvider) GetUser(username string) (User, error) {
 	}
 
 	return User{
-		Name: u.Name,
+		Name:     u.Name,
 		UserName: u.Username,
 		UserType: u.Type,
-		Groups: u.UserGroups,
+		Groups:   u.UserGroups,
 	}, nil
 }
 

@@ -10,23 +10,23 @@ import (
 )
 
 type StatusWatcher struct {
-	client apiclient.APIClient
-	slack slackapi.SlackAPI
+	client       apiclient.APIClient
+	slack        slackapi.SlackAPI
 	slackChannel string
-	irccat *IRCCatClient
+	irccat       *IRCCatClient
 
 	previousStates map[string]int
 }
 
 const (
-	STATE_BAD = iota
+	STATE_BAD     = iota
 	STATE_UNKNOWN = iota
-	STATE_WARN = iota
-	STATE_GOOD = iota
+	STATE_WARN    = iota
+	STATE_GOOD    = iota
 )
 
 func getStringFromNodeState(state int) string {
-	switch(state) {
+	switch state {
 	case STATE_BAD:
 		return "BAD"
 	case STATE_UNKNOWN:
@@ -41,11 +41,11 @@ func getStringFromNodeState(state int) string {
 
 func CreateStatusWatcher(client apiclient.APIClient, slack slackapi.SlackAPI, slackChannel string, irccat *IRCCatClient) *StatusWatcher {
 	return &StatusWatcher{
-		client: client,
+		client:         client,
 		previousStates: map[string]int{},
-		slack: slack,
-		slackChannel: slackChannel,
-		irccat: irccat,
+		slack:          slack,
+		slackChannel:   slackChannel,
+		irccat:         irccat,
 	}
 }
 
@@ -72,7 +72,7 @@ func (sw *StatusWatcher) postIrcMessage(node *apitypes.ACNode, hints []string, o
 				getStringFromNodeState(newState)
 			if len(hints) > 0 {
 				msg += " ("
-				for i,h := range hints {
+				for i, h := range hints {
 					if i > 0 {
 						msg += ", "
 					}
@@ -86,7 +86,7 @@ func (sw *StatusWatcher) postIrcMessage(node *apitypes.ACNode, hints []string, o
 }
 
 func (sw *StatusWatcher) postSlackMessage(node *apitypes.ACNode, hints []string, oldState int, newState int) {
-	if sw.slack != nil{
+	if sw.slack != nil {
 		action := "healthier"
 
 		if oldState > newState {
@@ -120,7 +120,7 @@ func (sw *StatusWatcher) checkNode(name string) {
 		return
 	}
 
-	newState,hints := sw.calculateNodeState(status)
+	newState, hints := sw.calculateNodeState(status)
 
 	oldState, ok := sw.previousStates[status.MqttName]
 	if ok {
@@ -144,7 +144,7 @@ func (sw *StatusWatcher) checkNode(name string) {
 			Msg("New node has appeared")
 		if newState < STATE_GOOD {
 			combined := ""
-			for i,s := range hints {
+			for i, s := range hints {
 				if i > 0 {
 					combined += ", "
 				}
@@ -167,7 +167,7 @@ func (sw *StatusWatcher) runWatch(ctx context.Context) {
 		return
 	}
 
-	for _,node := range nodes {
+	for _, node := range nodes {
 		sw.checkNode(node)
 	}
 }

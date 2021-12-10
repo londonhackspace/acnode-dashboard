@@ -27,16 +27,16 @@ func main() {
 		if len(res) == 4 {
 			version := res[3]
 			nodeId := res[2]
-			date,_ := time.Parse("02/Jan/2006:15:04:05 -0700", res[1])
+			date, _ := time.Parse("02/Jan/2006:15:04:05 -0700", res[1])
 			var b apitypes.SetStatusBody
 			b.Version = version
 			b.Timestamp = date.Unix()
 
-			body,_ := json.Marshal(b)
+			body, _ := json.Marshal(b)
 
 			client := &http.Client{}
 			bodyreader := bytes.NewReader(body)
-			req, _ := http.NewRequest("POST", cfg.ACNodeDashApiUrl + "nodes/setStatus/"+nodeId, bodyreader)
+			req, _ := http.NewRequest("POST", cfg.ACNodeDashApiUrl+"nodes/setStatus/"+nodeId, bodyreader)
 			req.Header.Add("API-KEY", cfg.ACNodeDashApiKey)
 			client.Do(req)
 		}

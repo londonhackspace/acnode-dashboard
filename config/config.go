@@ -9,52 +9,52 @@ import (
 )
 
 type Config struct {
-	MqttServer string `json:"mqtt_server,omitempty"`
+	MqttServer   string `json:"mqtt_server,omitempty"`
 	MqttClientId string `json:"mqtt_clientid,omitempty"`
 
-	AcserverUrl string `json:"acserver_url,omitempty"`
+	AcserverUrl    string `json:"acserver_url,omitempty"`
 	AcserverApiKey string `json:"acserver_key,omitempty"`
 
-	LdapEnable bool `json:"ldap_enable,omitempty"`
-	LdapServer string `json:"ldap_server,omitempty"`
-	LdapBindDN string `json:"ldap_binddn,omitempty"`
-	LdapBindPW string `json:"ldap_bindpw,omitempty"`
-	LdapBaseDN string `json:"ldap_basedn,omitempty"`
-	LdapUserOU string `json:"ldap_userou,omitempty"`
-	LdapGroupOU string `json:"ldap_groupou,omitempty"`
-	LdapSkipTLSVerify bool `json:"ldap_skipverify,omitempty"`
+	LdapEnable        bool   `json:"ldap_enable,omitempty"`
+	LdapServer        string `json:"ldap_server,omitempty"`
+	LdapBindDN        string `json:"ldap_binddn,omitempty"`
+	LdapBindPW        string `json:"ldap_bindpw,omitempty"`
+	LdapBaseDN        string `json:"ldap_basedn,omitempty"`
+	LdapUserOU        string `json:"ldap_userou,omitempty"`
+	LdapGroupOU       string `json:"ldap_groupou,omitempty"`
+	LdapSkipTLSVerify bool   `json:"ldap_skipverify,omitempty"`
 
-	RedisEnable bool `json:"redis_enable,omitempty"`
+	RedisEnable bool   `json:"redis_enable,omitempty"`
 	RedisServer string `json:"redis_server,omitempty"`
 
 	SyslogServer string `json:"syslog_server,omitempty"`
 
 	ZoneminderUrl string `json:"zoneminder_url,omitempty"`
-	ImageStore string `json:"image_store,omitempty"`
+	ImageStore    string `json:"image_store,omitempty"`
 
 	AdminGroups []string `json:"admin_groups"`
 }
 
 func GetConfigurationFromEnvironment() Config {
 	return Config{
-		MqttServer: os.Getenv("MQTT_SERVER"),
-		MqttClientId: os.Getenv("MQTT_CLIENTID"),
-		AcserverUrl: os.Getenv("ACSERVER_URL"),
-		AcserverApiKey: os.Getenv("ACSERVER_APIKEY"),
-		LdapEnable: strings.ToLower(os.Getenv("LDAP_ENABLE")) == "true",
-		LdapServer: os.Getenv("LDAP_SERVER"),
-		LdapBindDN: os.Getenv("LDAP_BINDDN"),
-		LdapBindPW: os.Getenv("LDAP_BINDPW"),
-		LdapBaseDN: os.Getenv("LDAP_BASEDN"),
-		LdapUserOU: os.Getenv("LDAP_USEROU"),
-		LdapGroupOU: os.Getenv("LDAP_GROUPOU"),
+		MqttServer:        os.Getenv("MQTT_SERVER"),
+		MqttClientId:      os.Getenv("MQTT_CLIENTID"),
+		AcserverUrl:       os.Getenv("ACSERVER_URL"),
+		AcserverApiKey:    os.Getenv("ACSERVER_APIKEY"),
+		LdapEnable:        strings.ToLower(os.Getenv("LDAP_ENABLE")) == "true",
+		LdapServer:        os.Getenv("LDAP_SERVER"),
+		LdapBindDN:        os.Getenv("LDAP_BINDDN"),
+		LdapBindPW:        os.Getenv("LDAP_BINDPW"),
+		LdapBaseDN:        os.Getenv("LDAP_BASEDN"),
+		LdapUserOU:        os.Getenv("LDAP_USEROU"),
+		LdapGroupOU:       os.Getenv("LDAP_GROUPOU"),
 		LdapSkipTLSVerify: strings.ToLower(os.Getenv("LDAP_SKIPTLSVERIFY")) == "true",
-		RedisEnable: strings.ToLower(os.Getenv("REDIS_ENABLE")) == "true",
-		RedisServer: os.Getenv("REDIS_SERVER"),
-		AdminGroups: strings.Split(os.Getenv("ADMIN_GROUPS"), ","),
-		ZoneminderUrl: os.Getenv("ZONEMINDER_URL"),
-		ImageStore: os.Getenv("IMAGE_STORE"),
-		SyslogServer: os.Getenv("SYSLOG_SERVER"),
+		RedisEnable:       strings.ToLower(os.Getenv("REDIS_ENABLE")) == "true",
+		RedisServer:       os.Getenv("REDIS_SERVER"),
+		AdminGroups:       strings.Split(os.Getenv("ADMIN_GROUPS"), ","),
+		ZoneminderUrl:     os.Getenv("ZONEMINDER_URL"),
+		ImageStore:        os.Getenv("IMAGE_STORE"),
+		SyslogServer:      os.Getenv("SYSLOG_SERVER"),
 	}
 }
 
@@ -68,7 +68,7 @@ func GetConfigurationFromFile(filename string) Config {
 	}
 	defer f.Close()
 
-	data,err := ioutil.ReadAll(f)
+	data, err := ioutil.ReadAll(f)
 	if err != nil {
 		return Config{}
 	}
@@ -211,7 +211,7 @@ func GetCombinedConfig(filename string) Config {
 	return combined
 }
 
-func (c *Config) Validate()  bool {
+func (c *Config) Validate() bool {
 	if c.MqttServer == "" {
 		return false
 	}

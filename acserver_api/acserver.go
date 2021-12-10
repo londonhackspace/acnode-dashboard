@@ -20,7 +20,7 @@ func CreateACServer(config *config.Config) ACServer {
 
 func (svr *ACServer) makeRequest(path string) []byte {
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", svr.config.AcserverUrl + path, nil)
+	req, err := http.NewRequest("GET", svr.config.AcserverUrl+path, nil)
 	if err != nil {
 		log.Err(err).Str("path", path).Msg("Error making request")
 		return []byte{}
@@ -54,11 +54,11 @@ func (svr *ACServer) GetUserRecordForCard(card string) *UserCardResponse {
 	response := UserCardResponse{}
 	var rawResponse map[string]interface{}
 
-	data := svr.makeRequest("/api/get_user_name/"+card)
+	data := svr.makeRequest("/api/get_user_name/" + card)
 
 	// first unmarshall generically to check for errors, then try the actual struct
 	json.Unmarshal(data, rawResponse)
-	if _,ok := rawResponse["error"]; ok {
+	if _, ok := rawResponse["error"]; ok {
 		return nil
 	}
 

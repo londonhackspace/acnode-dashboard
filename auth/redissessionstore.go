@@ -10,13 +10,13 @@ import (
 
 type RedisSessionStore struct {
 	conn *redis.Client
-	ctx context.Context
+	ctx  context.Context
 }
 
 func CreateRedisSessionStore(conn *redis.Client) *RedisSessionStore {
 	rss := RedisSessionStore{
 		conn: conn,
-		ctx : context.Background(),
+		ctx:  context.Background(),
 	}
 	return &rss
 }

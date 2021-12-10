@@ -24,7 +24,7 @@ var (
 )
 
 type octoprintMessage struct {
-	Event string `json:"_event"`
+	Event     string `json:"_event"`
 	Timestamp uint64 `json:"_timestamp"`
 }
 
@@ -32,7 +32,7 @@ type octoprintPrinterStateChange struct {
 	octoprintMessage
 
 	StateString string `json:"state_string"`
-	StateId string `json:"state_id"`
+	StateId     string `json:"state_id"`
 }
 
 type firmwareVersion struct {
@@ -43,7 +43,7 @@ type octoprintFirmwareVersion struct {
 	octoprintMessage
 
 	Data firmwareVersion `json:"data"`
-	Name string `json:"name"`
+	Name string          `json:"name"`
 }
 
 type octoprintChangeMessage struct {
@@ -63,13 +63,13 @@ type octoprintTemperatureMessage struct {
 type octoprintThrottleStateMessage struct {
 	octoprintMessage
 
-	Overheat bool `json:"current_overheat"`
+	Overheat     bool `json:"current_overheat"`
 	Undervoltage bool `json:"current_undervoltage"`
 }
 
 // Is this an octoprint message we care about?
 func isOctoprintTopic(topic string) bool {
-	for _,suffix := range suffixes {
+	for _, suffix := range suffixes {
 		if strings.HasSuffix(topic, suffix) {
 			return true
 		}

@@ -3,7 +3,7 @@ package acnode
 import "errors"
 
 type NodePersistence interface {
-	GetNodeByMqttName(name string) (*ACNodeRec,error)
+	GetNodeByMqttName(name string) (*ACNodeRec, error)
 	StoreNode(node *ACNodeRec) (*ACNodeRec, error)
 	GetAllNodes() ([]ACNodeRec, error)
 }

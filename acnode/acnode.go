@@ -34,29 +34,29 @@ type ACNodeRec struct {
 
 	updateTrigger acnodeUpdateTrigger
 
-	Id       int
-	Name     string
-	MqttName string
-	NodeType int
+	Id        int
+	Name      string
+	MqttName  string
+	NodeType  int
 	InService bool
-	InUse bool
+	InUse     bool
 
 	// last known status
-	LastSeen time.Time // old LastSeen field
+	LastSeen     time.Time // old LastSeen field
 	LastSeenMQTT time.Time
-	LastSeenAPI time.Time
+	LastSeenAPI  time.Time
 
-	LastStarted time.Time
-	MemFree int
-	MemUsed int
+	LastStarted   time.Time
+	MemFree       int
+	MemUsed       int
 	StatusMessage string
-	Version string
+	Version       string
 
-	SettingsVersion int
+	SettingsVersion       int
 	EEPROMSettingsVersion int
-	ResetCause string
+	ResetCause            string
 
-	CameraId *int
+	CameraId  *int
 	Transient bool
 
 	PrinterStatus *PrinterStatus
@@ -117,14 +117,14 @@ func (node *ACNodeRec) GetType() int {
 	return node.NodeType
 }
 
-func (node* ACNodeRec) GetInService() bool {
+func (node *ACNodeRec) GetInService() bool {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
 	return node.InService
 }
 
-func (node* ACNodeRec) SetInService(inService bool) {
+func (node *ACNodeRec) SetInService(inService bool) {
 	node.mtx.Lock()
 	defer node.mtx.Unlock()
 
@@ -359,37 +359,37 @@ func (node *ACNodeRec) GetAPIRecord() apitypes.ACNode {
 
 	if node.NodeType == NodeTypePrinter && node.PrinterStatus != nil {
 		printerStatus = &apitypes.PrinterStatus{
-			MqttConnected: node.PrinterStatus.MqttConneced,
+			MqttConnected:      node.PrinterStatus.MqttConneced,
 			OctoprintConnected: node.PrinterStatus.OctoprintConnected,
-			FirmwareVersion: node.PrinterStatus.FirmwareVersion,
-			ZHeight: node.PrinterStatus.ZHeight,
-			PiUndervoltage: node.PrinterStatus.PiUndervoltage,
-			PiOverheat: node.PrinterStatus.PiOverheat,
-			HotendTemperature: node.PrinterStatus.HotendTemperature,
-			BedTemperature: node.PrinterStatus.BedTemperature,
+			FirmwareVersion:    node.PrinterStatus.FirmwareVersion,
+			ZHeight:            node.PrinterStatus.ZHeight,
+			PiUndervoltage:     node.PrinterStatus.PiUndervoltage,
+			PiOverheat:         node.PrinterStatus.PiOverheat,
+			HotendTemperature:  node.PrinterStatus.HotendTemperature,
+			BedTemperature:     node.PrinterStatus.BedTemperature,
 		}
 	}
 
 	return apitypes.ACNode{
-		Id:            node.Id,
-		Name:          node.Name,
-		MqttName: 	   node.MqttName,
-		Type:          NodeTypeToString(node.NodeType),
-		InService: 	   node.InService,
-		LastSeen:      lastSeen,
-		LastSeenAPI:   makeApiTimestamp(node.LastSeenAPI),
-		LastSeenMQTT:  makeApiTimestamp(node.LastSeenMQTT),
-		LastStarted:   makeApiTimestamp(node.LastStarted),
-		MemFree:       node.MemFree,
-		MemUsed:       node.MemUsed,
-		StatusMessage: node.StatusMessage,
-		Version:       node.Version,
-		SettingsVersion: node.SettingsVersion,
+		Id:                    node.Id,
+		Name:                  node.Name,
+		MqttName:              node.MqttName,
+		Type:                  NodeTypeToString(node.NodeType),
+		InService:             node.InService,
+		LastSeen:              lastSeen,
+		LastSeenAPI:           makeApiTimestamp(node.LastSeenAPI),
+		LastSeenMQTT:          makeApiTimestamp(node.LastSeenMQTT),
+		LastStarted:           makeApiTimestamp(node.LastStarted),
+		MemFree:               node.MemFree,
+		MemUsed:               node.MemUsed,
+		StatusMessage:         node.StatusMessage,
+		Version:               node.Version,
+		SettingsVersion:       node.SettingsVersion,
 		EEPROMSettingsVersion: node.EEPROMSettingsVersion,
-		ResetCause: node.ResetCause,
-		PrinterStatus: printerStatus,
-		CameraId: node.CameraId,
-		IsTransient: node.Transient,
-		InUse: node.InUse,
+		ResetCause:            node.ResetCause,
+		PrinterStatus:         printerStatus,
+		CameraId:              node.CameraId,
+		IsTransient:           node.Transient,
+		InUse:                 node.InUse,
 	}
 }

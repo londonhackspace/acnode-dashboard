@@ -12,17 +12,17 @@ import (
 )
 
 type RedisUsageLogger struct {
-	redis *redis.Client
-	ctx context.Context
-	acserver *acserver_api.ACServer
+	redis        *redis.Client
+	ctx          context.Context
+	acserver     *acserver_api.ACServer
 	pictureTaker PictureTaker
 }
 
 func CreateRedisUsageLogger(redis *redis.Client, acserver *acserver_api.ACServer, pictureTaker PictureTaker) UsageLogger {
 	return &RedisUsageLogger{
-		redis: redis,
-		ctx: context.Background(),
-		acserver: acserver,
+		redis:        redis,
+		ctx:          context.Background(),
+		acserver:     acserver,
 		pictureTaker: pictureTaker,
 	}
 }
@@ -44,7 +44,7 @@ func (rul *RedisUsageLogger) AddUsageLog(node *acnode.ACNode, msg acnode.Announc
 			var err error
 			pickey, err = rul.pictureTaker.TakePicture(*camId)
 			if err != nil {
-				log.Err(err).Int("CamId",*camId).Msg("Error getting picture")
+				log.Err(err).Int("CamId", *camId).Msg("Error getting picture")
 			}
 		}
 	}
@@ -56,16 +56,16 @@ func (rul *RedisUsageLogger) AddUsageLog(node *acnode.ACNode, msg acnode.Announc
 		Msg("Usage Log Added")
 
 	ulog := LogEntry{
-		Timestamp: time.Now(),
-		Card:      msg.Card,
-		Node:      (*node).GetMqttName(),
-		Success:   msg.Granted == 1,
-		Name: user_name,
-		UserId: user_id,
+		Timestamp:  time.Now(),
+		Card:       msg.Card,
+		Node:       (*node).GetMqttName(),
+		Success:    msg.Granted == 1,
+		Name:       user_name,
+		UserId:     user_id,
 		PictureKey: pickey,
 	}
 
-	data,_ := json.Marshal(ulog)
+	data, _ := json.Marshal(ulog)
 
 	rul.redis.LPush(rul.ctx, "nodeusage:"+(*node).GetMqttName(), string(data)).Result()
 	// maybe trim the list?
@@ -75,7 +75,7 @@ func (rul *RedisUsageLogger) AddUsageLog(node *acnode.ACNode, msg acnode.Announc
 func (rul *RedisUsageLogger) GetUsageLogNodes() []string {
 	result := []string{}
 
-	for _,key := range rul.redis.Keys(rul.ctx, "nodeusage:*").Val() {
+	for _, key := range rul.redis.Keys(rul.ctx, "nodeusage:*").Val() {
 		parts := strings.Split(key, ":")
 		result = append(result, parts[1])
 	}
@@ -84,7 +84,7 @@ func (rul *RedisUsageLogger) GetUsageLogNodes() []string {
 }
 
 func (rul *RedisUsageLogger) GetUsageLogCountForNode(node string) int64 {
-	res,err := rul.redis.LLen(rul.ctx, "nodeusage:"+node).Result()
+	res, err := rul.redis.LLen(rul.ctx, "nodeusage:"+node).Result()
 	if err != nil {
 		log.Err(err).Str("node", node).Msg("Error getting count of usage logger entries for node")
 	}
@@ -99,7 +99,7 @@ func (rul *RedisUsageLogger) GetUsageLogsForNode(node string, from int64, to int
 		log.Err(err).Str("node", node).Msg("Error getting logs")
 	}
 
-	for _,item := range res {
+	for _, item := range res {
 		le := LogEntry{}
 		json.Unmarshal([]byte(item), &le)
 		out = append(out, le)
