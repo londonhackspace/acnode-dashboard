@@ -1,6 +1,7 @@
 /frontend/dist/
 /acnode-dashboard
 /logwatcher/logwatcher
+/statuswatcher/statuswatcher
 /frontend/node_modules/
 
 # Exclude an API build that's been dropped in /static
@@ -9,6 +10,9 @@
 
 # these are generated
 *.css.d.ts
+
+# this file could be from local testing. It probably contains secrets so we don't ever want it in Git!
+/acserverdash.json
 
 .DS_Store
 
