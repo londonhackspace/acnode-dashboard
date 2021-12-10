@@ -73,7 +73,7 @@ export default class NodeDetailPanel extends React.Component<NodeDetailPanelProp
 
             if(node.healthHints.length > 0 || node.printerHealthHints.length > 0) {
                 let hintCounter = 0;
-                parts.push(<div className={styles.nodehealthints}>
+                parts.push(<div key="health_hints" className={styles.nodehealthints}>
                     <span className={styles.nodepropstitle}>Health Hints:</span>
                     <ul>
                         {node.healthHints.map(hh => <li key={hintCounter++}>{hh}</li>)}
@@ -86,7 +86,7 @@ export default class NodeDetailPanel extends React.Component<NodeDetailPanelProp
                 let data = new Map<string,number>();
                 data.set("Used Memory", node.MemUsed);
                 data.set("Free Memory", node.MemFree);
-                parts.push(<Chart type="doughnut" data={data} colors={chartColors}/>);
+                parts.push(<Chart key="chart" type="doughnut" data={data} colors={chartColors}/>);
             }
 
             return <div>

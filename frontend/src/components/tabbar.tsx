@@ -17,7 +17,7 @@ export default class TabBar extends React.Component<TabBarProps, TabBarState> {
         let tabs : React.ReactElement[] = []
         for(let i = 0; i < this.props.widgets.length; i++) {
             tabs.push(
-                <button className={i == this.props.active ? styles.activetab : styles.inactivetab}
+                <button key={this.props.widgets[i]} className={i == this.props.active ? styles.activetab : styles.inactivetab}
                     onClick={() => this.props.onTabChange(i)}>
                     {this.props.widgets[i]}
                 </button>);

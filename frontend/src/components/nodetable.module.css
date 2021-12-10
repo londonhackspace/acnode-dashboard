@@ -26,8 +26,12 @@
     background-color: #ffffff;
 }
 
-.NodeTable tr:hover {
+tr.InactiveRow:hover {
     background-color: #cccccc;
+}
+
+.NodeTable tr.InactiveRow:nth-child(even):hover {
+    background-color: #dfdfdf;
 }
 
 tr.ActiveRow:hover {

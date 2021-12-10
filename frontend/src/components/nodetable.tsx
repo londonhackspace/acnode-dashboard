@@ -163,22 +163,22 @@ export default class NodeTable extends React.Component<NodeTableProps, NodeTable
             let lastSeenNodes : ReactElement[] = []
 
             if(node.LastSeenMQTT >= 0 || node.LastSeenAPI >= 0) {
-                lastSeenNodes.push(<NodeLastSeen source="MQTT" lastseen={node.LastSeenMQTT}/>);
-                lastSeenNodes.push(<br/>);
-                lastSeenNodes.push(<NodeLastSeen  source="API" lastseen={node.LastSeenAPI}/>);
+                lastSeenNodes.push(<NodeLastSeen key={node.id+"_MQTT"} source="MQTT" lastseen={node.LastSeenMQTT}/>);
+                lastSeenNodes.push(<br key={node.id + "_br"} />);
+                lastSeenNodes.push(<NodeLastSeen key={node.id+"_API"} source="API" lastseen={node.LastSeenAPI}/>);
             } else {
-                lastSeenNodes.push(<NodeLastSeen lastseen={node.LastSeen}/>);
+                lastSeenNodes.push(<NodeLastSeen key={node.id+"_Overall"} lastseen={node.LastSeen}/>);
             }
 
             let statusBalls : ReactElement[] = []
-            statusBalls.push(<StatusBall state={nodeHealthMapping.get(node.objectHealth)} text="Node" />);
+            statusBalls.push(<StatusBall key={node.id + "_nodeball"} state={nodeHealthMapping.get(node.objectHealth)} text="Node" />);
 
             if(node.nodeType == "Tool" || node.nodeType == "Printer") {
-                statusBalls.push(<StatusBall state={node.inService ? "good" : "bad"} text="Tool"/>)
+                statusBalls.push(<StatusBall key={node.id + "_toolball"} state={node.inService ? "good" : "bad"} text="Tool"/>)
             }
 
             if(node.nodeType == "Printer") {
-                statusBalls.push(<StatusBall state={ nodeHealthMapping.get(node.printerHealth) } text="Octoprint" />);
+                statusBalls.push(<StatusBall key={node.id + "_printerball"} state={ nodeHealthMapping.get(node.printerHealth) } text="Octoprint" />);
             }
 
             let editButton : ReactElement = null;

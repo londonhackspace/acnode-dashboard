@@ -20,8 +20,10 @@ export default class Versions extends React.Component<VersionTableProps, Version
     render() {
         return <table className={styles.NodeTable}>
             <thead>
-            <th>Node</th><th>Settings Version</th><th>Firmware Version</th>
-            <th>Version Date</th><th>Message</th>
+            <tr>
+                <th>Node</th><th>Settings Version</th><th>Firmware Version</th>
+                <th>Version Date</th><th>Message</th>
+            </tr>
             </thead>
             <tbody>
             {this.props.nodes.map((node : ExtendedNodeRecord) => {
