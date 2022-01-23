@@ -127,37 +127,44 @@ export default class ExtendedNodeRecord implements NodeRecord {
         let lastSeenAPI = (Date.now()/1000) - this.LastSeenAPI;
         let lastStarted = (Date.now()/1000) - this.LastStarted;
 
+        var apiThreshold = 610;
+        var apiThresholdText = "over 10 minutes";
+
+        var mqttThreshold = 130;
+        var mqttThresholdText = "over 2 minutes";
+
+        // unrestricted doors don't check in nearly so often if they're not
+        // running firmware new enough to periodically revalidate the cache
+        // or aren't running a maintainer cache
+        if(this.nodeType == "Door") {
+            apiThreshold = (3600*12) + 10;
+            apiThresholdText = "over 12 hours"
+        }
+
         // use the newer LastSeen values?
         if(this.LastSeenMQTT > -1 || this.LastSeenAPI > -1) {
 
             // if we're seeing neither MQTT or ACServer log entries,
             // it's probably dead
-            if((lastSeenAPI > 600 || this.LastSeenAPI == -1)
-                && (lastSeenMQTT > 600 || this.LastSeenMQTT == -1)) {
-                this._healthHints.push("Has not been seen online in any form in over 10 minutes");
+            if((lastSeenAPI > apiThreshold || this.LastSeenAPI == -1)
+                && (lastSeenMQTT > mqttThreshold || this.LastSeenMQTT == -1)) {
+                var text  = apiThresholdText;
+                if(mqttThreshold > apiThreshold) {
+                    text = mqttThresholdText;
+                }
+                this._healthHints.push("Has not been seen online in any form in " + text);
                 return this.IsTransient ? NodeHealth.UNKNOWN : NodeHealth.BAD
             }
 
-            if(this.LastSeenMQTT == -1 || lastSeenMQTT > 120) {
-                this._healthHints.push("Has not sent a message via MQTT in over 2 minutes");
+            if(this.LastSeenMQTT == -1 || lastSeenMQTT > mqttThreshold) {
+                this._healthHints.push("Has not sent a message via MQTT in " + mqttThresholdText);
                 health = NodeHealth.MEH;
             }
 
-            // unrestricted doors don't check in nearly so often if they're not
-            // running firmware new enough to periodically revalidate the cache
-            if(this.nodeType == "Door") {
-                if(this.LastSeenAPI == -1 || lastSeenAPI > 3600*12) {
-                    this._healthHints.push("Has not contacted ACServer in over 12 hours");
-                    health = NodeHealth.MEH;
-                }
-            } else {
-                if((this.LastSeenAPI == -1 || lastSeenAPI > 600) && !this.InUse) {
-                    this._healthHints.push("Has not contacted ACServer in over 10 minutes");
-                    health = NodeHealth.MEH;
-                }
+            if((this.LastSeenAPI == -1 || lastSeenAPI > apiThreshold) && !this.InUse) {
+                this._healthHints.push("Has not contacted ACServer in " + apiThresholdText);
+                health = NodeHealth.MEH;
             }
-
-
 
         } else {
             if(this.LastSeen == -1) {
