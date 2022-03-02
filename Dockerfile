@@ -1,5 +1,5 @@
 # First container - does the build
-FROM golang:1.16-alpine AS builder
+FROM golang:1.17.7-alpine AS builder
 
 RUN apk update && apk upgrade && \
     apk add --no-cache git
@@ -18,7 +18,7 @@ RUN cd logwatcher && go build
 RUN cd statuswatcher && go build
 
 # Second container - build frontend
-FROM node:16.0-alpine as nodebuilder
+FROM node:17.6.0-alpine as nodebuilder
 RUN apk add --no-cache git
 
 WORKDIR /build/acnode-dashboard/frontend
