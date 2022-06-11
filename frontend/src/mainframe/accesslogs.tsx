@@ -75,12 +75,12 @@ export default class AccessLogs extends React.Component<AccessLogsProps, AccessL
                 let nameObject : ReactElement;
 
                 if(entry.user_id  && entry.user_id.length > 0) {
-                    let shortenedid = entry.user_id.substr(2);
+                    let shortenedid = entry.user_id.substring(2);
                     nameObject = <a href={"https://london.hackspace.org.uk/members/member.php?id="+shortenedid}>{entry.user_name}</a>
                 } else {
                     nameObject = <span>{entry.user_name}</span>
                 }
-                return <tr key={entry.timestamp}><td>{d.toDateString() + " " + d.toTimeString()}</td>
+                return <tr key={entry.timestamp+entry.user_id}><td>{d.toDateString() + " " + d.toTimeString()}</td>
                         <td>{nameObject}</td><td>{entry.user_card}</td>
                         <td>{entry.success ? "Granted" : "Denied"}</td>
                     </tr>;
