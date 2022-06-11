@@ -85,9 +85,9 @@ export default class AccessLogs extends React.Component<AccessLogsProps, AccessL
                         <td>{entry.success ? "Granted" : "Denied"}</td>
                     </tr>;
             });
-            logs = <table className={tablestyles.NodeTable}>
-                <thead><tr className={tablestyles.NodeTable}><td>When</td><td>Who</td><td>Card Id</td><td>Granted</td></tr></thead>
-                <tbody>{entries}</tbody>
+            logs = <table className={tablestyles.NodeTable} key="usagetable">
+                <thead key="usagetable-head"><tr className={tablestyles.NodeTable}><td>When</td><td>Who</td><td>Card Id</td><td>Granted</td></tr></thead>
+                <tbody key="usagetable-body">{entries}</tbody>
             </table>;
             let pagenumberparts : ReactElement[] = [];
             for(let i = 1; i <= this.state.data.pageCount; i++) {
