@@ -69,6 +69,7 @@ export default class AccessLogs extends React.Component<AccessLogsProps, AccessL
         let logs = null;
         let pagenumbers = null;
         if(this.state.data != null) {
+            let idx = 0;
             let entries = this.state.data.entries.map((entry : AccessControlEntry) => {
                 console.log("Entry: " + entry.user_name);
                 let d = new Date(entry.timestamp*1000);
@@ -80,7 +81,9 @@ export default class AccessLogs extends React.Component<AccessLogsProps, AccessL
                 } else {
                     nameObject = <span>{entry.user_name}</span>
                 }
-                return <tr key={entry.timestamp+entry.user_id}><td>{d.toDateString() + " " + d.toTimeString()}</td>
+                let key = entry.timestamp + idx.toString();
+                idx++;
+                return <tr key={key}><td>{d.toDateString() + " " + d.toTimeString()}</td>
                         <td>{nameObject}</td><td>{entry.user_card}</td>
                         <td>{entry.success ? "Granted" : "Denied"}</td>
                     </tr>;
